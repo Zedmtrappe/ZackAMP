@@ -8,9 +8,8 @@ a zero-latency cabinet IR engine with dual-cab blending and third-party IR impor
 studio-quality effects, presets and live MIDI control.
 
 > **Status: version 0.1 (first complete build).** Everything listed under *Features* is
-> implemented and covered by automated tests. It has been built and tested on **Linux only**
-> (the development environment had no Mac and no audio interface). The macOS build is
-> configured but **not yet verified** — see [Building on macOS](#building-on-macos) and
+> implemented and covered by automated tests, which pass on macOS (GitHub's build machines) and
+> Linux. It has **not yet been played through a real audio interface** — see
 > [Known limitations](#known-limitations). No listening tests have been carried out by a
 > human yet; the DSP has been calibrated by measurement only.
 
@@ -74,11 +73,9 @@ open "build/macos/ZackAMP_artefacts/Release/ZackAMP.app"
 Faster Apple-Silicon-only build: `ARCHS=arm64 Scripts/build_macos.sh`.
 Xcode project: `cmake --preset xcode && open build/xcode/ZackAMP.xcodeproj`.
 
-**Unverified on macOS.** The CMake configuration, bundle settings (microphone-permission text,
-hardened-runtime audio-input entitlement, universal architectures) follow JUCE's documented macOS
-setup, and the identical code builds and runs on Linux, but nobody has compiled it on a Mac yet.
-If the macOS build fails, the error output is the first thing to look at; the CI workflow
-(`.github/workflows/ci.yml`) also builds on a GitHub macOS runner when the repository is pushed to GitHub.
+**macOS build status:** builds and passes all automated tests on GitHub's macOS runners
+(Intel `macos-15-intel`, cross-compiled universal arm64 + x86_64) and launches/quits cleanly there.
+Not yet tested with a real audio interface, guitar or MIDI controller.
 
 ## Building on Linux (development / CI)
 
@@ -159,8 +156,9 @@ switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LAT
 
 ## Known limitations
 
-* **Not yet built or run on macOS** (see above). Core Audio device behaviour, the microphone
-  permission flow, Retina rendering and the macOS menu bar are therefore untested.
+* **Not yet used on a real Mac with an audio interface.** The macOS build passes its tests and
+  launches on GitHub's build machines, but Core Audio device behaviour, the microphone permission
+  flow, Retina rendering and the macOS menu bar have not been checked by a person.
 * **No human listening tests yet.** The amp models are calibrated by measurement (THD/level vs gain,
   aliasing, loudness); they need ears, guitars and iteration. Expect voicing changes.
 * **Factory IRs are synthetic** (procedurally generated, original, freely redistributable). They are
