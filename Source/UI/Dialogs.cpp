@@ -562,12 +562,12 @@ AudioSettings::AudioSettings (AppController& a)
     guitarInput.onChange = [this] { app.setGuitarInputChannel (guitarInput.getSelectedId() - 1); };
     guitarInput.setTooltip ("Which active input channel carries your guitar.");
     oversampling.addItem ("Oversampling: Automatic (recommended)", 1);
-    oversampling.addItem ("Oversampling: 2x (lowest CPU)", 2);
-    oversampling.addItem ("Oversampling: 4x", 3);
-    oversampling.addItem ("Oversampling: 8x (highest quality, most CPU)", 4);
+    oversampling.addItem ("Oversampling: 2x (lowest CPU, more aliasing on high gain)", 2);
+    oversampling.addItem ("Oversampling: 4x (lower CPU)", 3);
+    oversampling.addItem ("Oversampling: 8x", 4);
     oversampling.setSelectedId ((int) app.getOversampling() + 1, juce::dontSendNotification);
     oversampling.onChange = [this] { app.setOversampling ((OversamplingMode) (oversampling.getSelectedId() - 1)); };
-    oversampling.setTooltip ("Automatic uses 4x at 44.1/48 kHz, 2x at 88.2/96 kHz and 1x above. Restarts audio briefly.");
+    oversampling.setTooltip ("Automatic uses 8x at 44.1/48 kHz, 4x at 88.2/96 kHz and 2x above. Lower settings save CPU at the cost of more aliasing on high-gain sounds. Restarts audio briefly.");
     guidance.setFont (ForgeLookAndFeel::labelFont (12.5f, false));
     guidance.setColour (juce::Label::textColourId, Colours::textDim);
     guidance.setJustificationType (juce::Justification::topLeft);

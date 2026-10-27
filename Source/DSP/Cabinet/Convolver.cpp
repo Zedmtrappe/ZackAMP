@@ -147,6 +147,7 @@ Convolver::Convolver (const std::vector<std::vector<float>>& impulse, double sam
     numTail = std::max (0, (irLength - 1) / P); // partitions beyond the head
 
     std::vector<float> seg ((size_t) 2 * P);
+    specBuf.assign ((size_t) kBins, Complex {});
     for (int c = 0; c < numOut; ++c)
     {
         const auto& h = impulse[(size_t) c];
@@ -154,22 +155,30 @@ Convolver::Convolver (const std::vector<std::vector<float>>& impulse, double sam
         for (int t = 0; t < P && t < (int) h.size(); ++t)
             headRev[c][(size_t) (P - 1 - t)] = h[(size_t) t];
 
-        tailSpectra[c].assign ((size_t) std::max (1, numTail) * kBins, Complex {});
+        tailRe[c].assign ((size_t) std::max (1, numTail) * kBins, 0.0f);
+        tailIm[c].assign ((size_t) std::max (1, numTail) * kBins, 0.0f);
         for (int part = 0; part < numTail; ++part)
         {
             std::fill (seg.begin(), seg.end(), 0.0f);
             const int start = (part + 1) * P;
             for (int t = 0; t < P && start + t < (int) h.size(); ++t)
                 seg[(size_t) t] = h[(size_t) (start + t)];
-            fft.forward (seg.data(), &tailSpectra[c][(size_t) part * kBins]);
+            fft.forward (seg.data(), specBuf.data());
+            for (int k = 0; k < kBins; ++k)
+            {
+                tailRe[c][(size_t) (part * kBins + k)] = specBuf[(size_t) k].real();
+                tailIm[c][(size_t) (part * kBins + k)] = specBuf[(size_t) k].imag();
+            }
         }
         tailOut[c].assign ((size_t) P, 0.0f);
     }
 
     history.assign ((size_t) 2 * P, 0.0f);
     frame.assign ((size_t) 2 * P, 0.0f);
-    fdl.assign ((size_t) std::max (1, numTail) * kBins, Complex {});
-    accum.assign ((size_t) kBins, Complex {});
+    fdlRe.assign ((size_t) std::max (1, numTail) * kBins, 0.0f);
+    fdlIm.assign ((size_t) std::max (1, numTail) * kBins, 0.0f);
+    accRe.assign ((size_t) kBins, 0.0f);
+    accIm.assign ((size_t) kBins, 0.0f);
     timeBuf.assign ((size_t) 2 * P, 0.0f);
     reset();
 }
@@ -178,7 +187,8 @@ void Convolver::reset() noexcept
 {
     std::fill (history.begin(), history.end(), 0.0f);
     std::fill (frame.begin(), frame.end(), 0.0f);
-    std::fill (fdl.begin(), fdl.end(), Complex {});
+    std::fill (fdlRe.begin(), fdlRe.end(), 0.0f);
+    std::fill (fdlIm.begin(), fdlIm.end(), 0.0f);
     for (auto& t : tailOut)
         std::fill (t.begin(), t.end(), 0.0f);
     histPos = blockPos = fdlPos = 0;
@@ -187,26 +197,38 @@ void Convolver::reset() noexcept
 void Convolver::computeTail() noexcept
 {
     // frame = [previous block | current block]; transform into the FDL slot.
-    fft.forward (frame.data(), &fdl[(size_t) fdlPos * kBins]);
+    fft.forward (frame.data(), specBuf.data());
+    float* __restrict xr0 = &fdlRe[(size_t) fdlPos * kBins];
+    float* __restrict xi0 = &fdlIm[(size_t) fdlPos * kBins];
+    for (int k = 0; k < kBins; ++k)
+    {
+        xr0[k] = specBuf[(size_t) k].real();
+        xi0[k] = specBuf[(size_t) k].imag();
+    }
 
     for (int c = 0; c < numOut; ++c)
     {
-        std::fill (accum.begin(), accum.end(), Complex {});
-        const Complex* H = tailSpectra[c].data();
+        float* __restrict ar = accRe.data();
+        float* __restrict ai = accIm.data();
+        std::fill (accRe.begin(), accRe.end(), 0.0f);
+        std::fill (accIm.begin(), accIm.end(), 0.0f);
         int slot = fdlPos;
         for (int part = 0; part < numTail; ++part)
         {
-            const Complex* X = &fdl[(size_t) slot * kBins];
-            const Complex* Hp = H + (size_t) part * kBins;
+            const float* __restrict xr = &fdlRe[(size_t) slot * kBins];
+            const float* __restrict xi = &fdlIm[(size_t) slot * kBins];
+            const float* __restrict hr = &tailRe[c][(size_t) part * kBins];
+            const float* __restrict hi = &tailIm[c][(size_t) part * kBins];
             for (int k = 0; k < kBins; ++k)
             {
-                const float xr = X[k].real(), xi = X[k].imag();
-                const float hr = Hp[k].real(), hi = Hp[k].imag();
-                accum[(size_t) k] += Complex (xr * hr - xi * hi, xr * hi + xi * hr);
+                ar[k] += xr[k] * hr[k] - xi[k] * hi[k];
+                ai[k] += xr[k] * hi[k] + xi[k] * hr[k];
             }
             slot = (slot == 0) ? numTail - 1 : slot - 1;
         }
-        fft.inverse (accum.data(), timeBuf.data());
+        for (int k = 0; k < kBins; ++k)
+            specBuf[(size_t) k] = Complex (ar[k], ai[k]);
+        fft.inverse (specBuf.data(), timeBuf.data());
         std::memcpy (tailOut[c].data(), timeBuf.data() + P, sizeof (float) * P);
     }
 

@@ -76,7 +76,8 @@ public:
     OversamplingMode getOversamplingMode() const noexcept { return osMode; }
 
     // ---- audio thread ----
-    /** Mono guitar input -> stereo output. `in` may alias neither output. */
+    /** Mono guitar input -> stereo output. `in` may alias outL (in-place processing is
+        supported and tested); outR may be null for mono output. */
     void process (const float* in, float* outL, float* outR, int numSamples) noexcept;
 
     // ---- parameters (any thread) ----

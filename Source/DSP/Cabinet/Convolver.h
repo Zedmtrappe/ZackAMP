@@ -75,15 +75,18 @@ private:
     RealFFT fft { 2 * P };
 
     std::vector<float> headRev[2];          // reversed head taps
-    std::vector<Complex> tailSpectra[2];    // numTail * kBins
+    // Spectra are stored split (separate real / imaginary arrays) so the frequency-domain
+    // multiply-accumulate — the dominant cost for long IRs — vectorises well (SSE/AVX/NEON).
+    std::vector<float> tailRe[2], tailIm[2]; // numTail * kBins
 
     std::vector<float> history;             // 2P mirrored ring of inputs
     int histPos = 0;
     std::vector<float> frame;               // 2P: previous block + current block
     int blockPos = 0;
-    std::vector<Complex> fdl;               // numTail * kBins, ring of input spectra
+    std::vector<float> fdlRe, fdlIm;        // numTail * kBins, ring of input spectra
     int fdlPos = 0;
-    std::vector<Complex> accum;
+    std::vector<float> accRe, accIm;
+    std::vector<Complex> specBuf;
     std::vector<float> timeBuf;
     std::vector<float> tailOut[2];          // P samples of precomputed tail output
 };

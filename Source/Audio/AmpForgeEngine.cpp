@@ -36,7 +36,10 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
 
     int factorLog2 = 0;
     if (osMode == OversamplingMode::automatic)
-        factorLog2 = sampleRate <= 50000.0 ? 2 : (sampleRate <= 100000.0 ? 1 : 0);
+        // Chosen from measurements (Tests/Audio/AudioQualityTests.cpp, docs/DSP_DESIGN.md):
+        // the processing rate is kept at >= ~350 kHz so high-gain alias products stay below
+        // roughly -60 dB for lead-range fundamentals.
+        factorLog2 = sampleRate <= 50000.0 ? 3 : (sampleRate <= 100000.0 ? 2 : 1);
     else
         factorLog2 = (int) osMode;
     oversampler.prepare (factorLog2, kControlBlock);
