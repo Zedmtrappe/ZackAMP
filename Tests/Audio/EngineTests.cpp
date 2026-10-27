@@ -241,6 +241,14 @@ TEST_CASE ("Concurrent IR publishing and parameter changes while audio runs")
     e.prepare (48000, 128);
     e.setCabinetIR (0, testIR (44100, 2000, 1));
     std::atomic<bool> stop { false };
+    // A second non-RT thread collecting garbage concurrently (as the UI timer does in the app).
+    std::thread collector ([&] {
+        while (! stop)
+        {
+            e.collectGarbage();
+            std::this_thread::sleep_for (std::chrono::microseconds (300));
+        }
+    });
     std::thread loader ([&] {
         unsigned seed = 10;
         while (! stop)
@@ -263,6 +271,7 @@ TEST_CASE ("Concurrent IR publishing and parameter changes while audio runs")
     }
     stop = true;
     loader.join();
+    collector.join();
     e.collectGarbage();
     CHECK (finite);
 }

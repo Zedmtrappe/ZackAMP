@@ -16,6 +16,7 @@
 #include <atomic>
 #include <cstddef>
 #include <memory>
+#include <mutex>
 
 namespace af::dsp
 {
@@ -91,9 +92,12 @@ public:
         leaks.fetch_add (1, std::memory_order_relaxed);
     }
 
-    /** Non-RT thread: deletes everything retired so far. */
+    /** Non-RT threads: deletes everything retired so far. Several non-RT threads may call
+        this (UI timer, IR loader, device thread), so the consumer side is serialised with a
+        mutex; the audio-thread producer side stays lock-free. */
     void collect()
     {
+        std::lock_guard<std::mutex> lock (consumerLock);
         Retirable* obj = nullptr;
         while (queue.pop (obj))
             delete obj;
@@ -110,6 +114,7 @@ private:
     }
 
     SPSCQueue<Retirable*, 64> queue;
+    std::mutex consumerLock; // never taken by the audio thread
     std::array<Retirable*, 16> overflow {}; // audio-thread only
     std::atomic<int> leaks { 0 };
 };

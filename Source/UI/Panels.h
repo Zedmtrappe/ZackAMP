@@ -123,6 +123,8 @@ private:
     EffectModule gate, drive, chorus, delay, reverb, output;
     ParamToggle delaySync;
     ParamChoice delayDivision;
+    juce::TextButton tapTempo { "TAP" };
+    std::vector<double> taps;
     juce::Rectangle<int> flowArea;
 };
 

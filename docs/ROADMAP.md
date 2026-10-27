@@ -1,0 +1,65 @@
+# Roadmap
+
+## Next (highest priority first)
+
+1. **Build and verify on macOS** (Apple Silicon first): `Scripts/build_macos.sh`, fix any
+   platform-specific compile issues, run the tests, smoke-launch, check the microphone permission
+   flow and Core Audio device handling.
+2. **Listening sessions with real guitars** (TEST_PLAN.md manual section) and iterate the voicings:
+   gain taper, breakup points, presence/depth ranges, tone-stack values, power-amp sag, gate defaults.
+   Use `ampforge_measure` / `ampforge_render` to keep changes measurable.
+3. **Measure latency and CPU on the target Mac**; set performance budgets; if long IRs are needed at
+   96 kHz, implement non-uniform partitioning (64-sample head, larger partitions for the tail computed
+   across several blocks).
+4. **Captured cabinet IRs:** license or record a real IR set (with documented rights) to complement the
+   synthetic factory IRs.
+5. Workflow: MIDI clock for delay sync, effect re-ordering, undo for IR changes,
+   per-preset MIDI program assignment, preset import/export, IR folders.
+6. Code signing and notarisation (Developer ID), installer/DMG, update mechanism.
+
+## AU and VST3 plugins
+
+The engine was built for this from the start; what exists today and what is still needed:
+
+**Already in place**
+* `AmpForgeEngine` is free of JUCE, device, file and UI code; it processes host blocks of any size,
+  supports mono input/stereo output and in-place buffers, and has a non-RT `prepare()`.
+* Stable string parameter IDs with ranges, defaults and normalised mappings (`Parameters.h`) — usable
+  directly as plugin parameter IDs.
+* Complete state serialisation (`PresetCodec` JSON + IR references), versioned.
+* Click-free state changes (`beginTransition`), IR preparation off the audio thread, MIDI handling
+  through `MidiController` (raw bytes, no device code).
+
+**Steps to create the plugin targets**
+1. In `CMakeLists.txt`, add `juce_add_plugin(AmpForgePlugin FORMATS AU VST3 IS_SYNTH FALSE
+   NEEDS_MIDI_INPUT TRUE PLUGIN_MANUFACTURER_CODE … PLUGIN_CODE … COPY_PLUGIN_AFTER_BUILD TRUE …)`
+   and link `ampforge_dsp`, the core sources and `juce_audio_processors`.
+2. Write `Source/Plugin/PluginProcessor` (`juce::AudioProcessor`):
+   * create one `juce::AudioParameterFloat/Bool/Choice` per `ParamDef`, **same IDs**, using
+     `normalisedToPlain`/`plainToNormalised` via a `NormalisableRange` with custom conversion lambdas;
+     group them like the UI;
+   * in `processBlock`: copy host parameter values into the engine's `ParameterStore` (or have the
+     parameters write to it via listeners — it is lock-free), feed MIDI bytes to `MidiController`
+     (CC/PC), call `engine.process(in, outL, outR, n)` with input channel 0 (or a mono sum) and the
+     host's output buffers;
+   * `prepareToPlay` → `engine.prepare(sampleRate, maxBlock)`; `releaseResources` → `releaseResources()`;
+   * `getStateInformation` / `setStateInformation` → `PresetCodec::toJson(captureState(engine))` /
+     `fromJson` + `applyState` (IR loading on a background thread; never in `processBlock`);
+   * report `getLatencySamples() = 0` (the engine adds no buffering; IIR phase delay is not latency
+     a host can compensate meaningfully);
+   * buses: mono→stereo (default), stereo→stereo (use left or sum), mono→mono (sum output).
+3. Editor: reuse the panels (they talk to `AppController`). Factor an `EngineContext` interface out of
+   `AppController` (params, undo, presets, IR library, MIDI) so the plugin editor can implement it
+   without standalone device code; drop the audio/MIDI device dialogs in the plugin.
+4. Host automation: notify the host when the UI changes a parameter
+   (`beginChangeGesture/setValueNotifyingHost/endChangeGesture`) instead of writing the store directly.
+5. Garbage collection: call `engine.collectGarbage()` from a message-thread timer in the editor *and*
+   from `setStateInformation`/a background timer so it runs without an editor.
+6. Validate: `auval -v aufx Afge Afge` (AU), Steinberg VST3 validator, pluginval; test in Logic Pro,
+   Ableton Live, Reaper, Cubase; automation, state recall, sample-rate changes, offline bounce,
+   variable block sizes, mono/stereo tracks.
+7. Licensing: VST3 SDK is bundled with JUCE under its own terms (GPLv3 or Steinberg's proprietary
+   licence — sign the Steinberg VST3 licence agreement for closed-source distribution); AU needs no
+   extra licence.
+
+Nothing above has been built yet; plugin support should not be claimed until step 6 passes.

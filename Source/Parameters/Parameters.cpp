@@ -12,7 +12,7 @@ namespace
     const char* const kAmpModels[] = { "Lacquer Clean", "Lacquer Tweed", "Albion Plexi",
                                        "Albion Lead", "Cascade Lead", "Cascade Heavy" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
-    const char* const kDivisions[] = { "1/2", "1/4", "1/4 dotted", "1/4 triplet", "1/8", "1/8 dotted", "1/8 triplet", "1/16" };
+    const char* const kDivisions[] = { "1/2", "1/4", "1/4 D", "1/4 T", "1/8", "1/8 D", "1/8 T", "1/16" }; // D = dotted, T = triplet
     constexpr float kDivisionBeats[] = { 2.0f, 1.0f, 1.5f, 2.0f / 3.0f, 0.5f, 0.75f, 1.0f / 3.0f, 0.25f };
 
     constexpr auto LIN = ParamScale::linear;
@@ -151,7 +151,9 @@ std::string formatParamValue (int index, float v)
         default:
             break;
     }
-    const float shown = v * d.displayScale;
+    float shown = v * d.displayScale;
+    if (std::abs (shown) < 0.05f)
+        shown = 0.0f; // never display "-0.0"
     if (std::strcmp (d.unit, "Hz") == 0 && v >= 1000.0f)
         std::snprintf (buf, sizeof (buf), "%.1f kHz", v / 1000.0f);
     else if (std::strcmp (d.unit, "ms") == 0 && v >= 1000.0f)

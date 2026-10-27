@@ -543,13 +543,31 @@ EffectsPanel::EffectsPanel (AppController& a)
       chorus (a, "Chorus", pChorusOn, { pChorusRate, pChorusDepth, pChorusMix }),
       delay (a, "Delay", pDelayOn, { pDelayTime, pDelayFeedback, pDelayMix, pDelayTone }),
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
-      output (a, "Output", -1, { pOutLevel, pInTrim }),
+      output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
       delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision)
 {
     for (auto* m : { &gate, &drive, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
     delay.addExtra (&delaySync);
     delay.addExtra (&delayDivision);
+    delay.addExtra (&tapTempo);
+    tapTempo.setTooltip ("Tap tempo: tap at least twice in time. Sets the tempo used by synced delay.");
+    tapTempo.onClick = [this]
+    {
+        const double now = juce::Time::getMillisecondCounterHiRes();
+        if (! taps.empty() && now - taps.back() > 2000.0)
+            taps.clear(); // a long pause starts a new measurement
+        taps.push_back (now);
+        if (taps.size() > 5)
+            taps.erase (taps.begin());
+        if (taps.size() >= 2)
+        {
+            const double avgMs = (taps.back() - taps.front()) / (double) (taps.size() - 1);
+            app.setParamWithUndo (pTempo, (float) (60000.0 / avgMs));
+            if (! app.params().getBool (pDelaySync))
+                app.setParamWithUndo (pDelaySync, 1.0f);
+        }
+    };
 }
 
 void EffectsPanel::refresh()
@@ -561,6 +579,9 @@ void EffectsPanel::refresh()
     const bool sync = app.params().getBool (pDelaySync);
     delay.knob (0)->setEnabled (! sync);
     delayDivision.setEnabled (sync);
+    const auto tapText = juce::String (juce::roundToInt (app.params().get (pTempo))) + " BPM";
+    if (tapTempo.getButtonText() != tapText)
+        tapTempo.setButtonText (tapText);
     repaint (flowArea);
 }
 
@@ -570,7 +591,7 @@ void EffectsPanel::resized()
     flowArea = r.removeFromTop (22);
     r.removeFromTop (4);
     // Width weights by module complexity.
-    const float weights[] = { 1.0f, 1.35f, 1.35f, 1.5f, 1.35f, 1.0f };
+    const float weights[] = { 1.0f, 1.3f, 1.3f, 1.55f, 1.3f, 1.3f };
     float total = 0;
     for (float w : weights) total += w;
     const int gap = 8;
