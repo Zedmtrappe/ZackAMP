@@ -1,0 +1,31 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Cranked Plexi",
+  "category": "Classic Rock",
+  "description": "Everything on the stack turned up: thick, compressed and singing.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 2,
+    "amp.gain": 0.92,
+    "amp.bass": 0.4,
+    "amp.mid": 0.65,
+    "amp.treble": 0.55,
+    "amp.presence": 0.5,
+    "amp.master": 0.75,
+    "amp.bright": 1,
+    "gate.enabled": 1,
+    "gate.threshold": -66,
+    "out.level": -5.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:br-4x12-v25-cap",
+      "irName": "UK 4x12 Vintage 25W \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

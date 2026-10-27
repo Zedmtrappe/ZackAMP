@@ -1,0 +1,28 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "British Crunch",
+  "category": "British Crunch",
+  "description": "Hot-rodded British amp at a moderate gain: tight, punchy rhythm.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 3,
+    "amp.gain": 0.42,
+    "amp.bass": 0.45,
+    "amp.mid": 0.55,
+    "amp.treble": 0.6,
+    "amp.presence": 0.5,
+    "amp.master": 0.6,
+    "out.level": -2.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:br-4x12-h75-cap",
+      "irName": "UK 4x12 Heritage 75W \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

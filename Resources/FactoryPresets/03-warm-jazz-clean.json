@@ -1,0 +1,31 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Warm Jazz Clean",
+  "category": "Clean",
+  "description": "Round, dark clean for neck pickups and chord melodies.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 0,
+    "amp.gain": 0.3,
+    "amp.bass": 0.55,
+    "amp.mid": 0.6,
+    "amp.treble": 0.32,
+    "amp.master": 0.55,
+    "reverb.enabled": 1,
+    "reverb.mix": 0.16,
+    "reverb.decay": 1.4,
+    "reverb.tone": 0.3,
+    "out.level": 10.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-1x12-open-edge",
+      "irName": "US 1x12 Open \u2014 Edge"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

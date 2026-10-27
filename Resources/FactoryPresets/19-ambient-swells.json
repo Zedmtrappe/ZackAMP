@@ -1,0 +1,39 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Ambient Swells",
+  "category": "Ambient",
+  "description": "Clean pads: long delay and lush reverb for volume swells.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 0,
+    "amp.gain": 0.32,
+    "amp.bass": 0.5,
+    "amp.treble": 0.5,
+    "amp.master": 0.55,
+    "chorus.enabled": 1,
+    "chorus.rate": 0.25,
+    "chorus.depth": 0.6,
+    "chorus.mix": 0.4,
+    "delay.enabled": 1,
+    "delay.time": 520,
+    "delay.feedback": 0.55,
+    "delay.mix": 0.35,
+    "delay.tone": 3000,
+    "reverb.enabled": 1,
+    "reverb.mix": 0.45,
+    "reverb.decay": 6.0,
+    "reverb.tone": 0.45,
+    "out.level": 4.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-2x12-open-room",
+      "irName": "US 2x12 Open \u2014 Room"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

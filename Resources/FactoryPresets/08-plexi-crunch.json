@@ -1,0 +1,29 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Plexi Crunch",
+  "category": "Classic Rock",
+  "description": "Vintage British crunch: chords ring, single notes bite.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 2,
+    "amp.gain": 0.66,
+    "amp.bass": 0.45,
+    "amp.mid": 0.6,
+    "amp.treble": 0.6,
+    "amp.presence": 0.55,
+    "amp.master": 0.6,
+    "amp.bright": 1,
+    "out.level": -2.0
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:br-4x12-v25-cap",
+      "irName": "UK 4x12 Vintage 25W \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

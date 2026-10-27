@@ -1,0 +1,42 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Modern Metal",
+  "category": "Modern Metal",
+  "description": "Boosted modern high gain: tight palm mutes, clear chords.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 5,
+    "amp.gain": 0.68,
+    "amp.bass": 0.5,
+    "amp.mid": 0.45,
+    "amp.treble": 0.6,
+    "amp.presence": 0.55,
+    "amp.depth": 0.6,
+    "amp.master": 0.55,
+    "drive.enabled": 1,
+    "drive.drive": 0.0,
+    "drive.tone": 0.6,
+    "drive.level": 6.0,
+    "eq.enabled": 1,
+    "eq.b80": 1,
+    "eq.b240": -2,
+    "eq.b750": 0,
+    "eq.b2200": 1,
+    "eq.b6600": 0,
+    "gate.enabled": 1,
+    "gate.threshold": -56,
+    "gate.release": 80,
+    "out.level": -3.0
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:md-4x12-heavy-cap",
+      "irName": "Modern 4x12 Heavy \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

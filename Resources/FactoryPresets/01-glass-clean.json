@@ -1,0 +1,31 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Glass Clean",
+  "category": "Clean",
+  "description": "Sparkling American clean with the bright switch on and a touch of room.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 0,
+    "amp.gain": 0.38,
+    "amp.bass": 0.45,
+    "amp.mid": 0.5,
+    "amp.treble": 0.62,
+    "amp.master": 0.6,
+    "amp.bright": 1,
+    "reverb.enabled": 1,
+    "reverb.mix": 0.22,
+    "reverb.decay": 2.2,
+    "out.level": 3.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-2x12-open-cap",
+      "irName": "US 2x12 Open \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

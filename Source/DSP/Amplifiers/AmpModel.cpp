@@ -54,7 +54,7 @@ namespace
             a.bright = { true, 1800.0f, 8.0f };
             a.power = { 0.22f, 3.0f, 0.03f, 0.30f, 150.0f, 4000.0f, 5.0f, 90.0f, 0.0f, 0.35f, 40.0f, 11000.0f, 0.30f };
             a.powerDriveDb = -2.0f;
-            a.outputTrimDb = 4.0f;
+            a.outputTrimDb = -3.0f;
             a.defaultIrId = "factory:am-2x12-open-cap";
         }
         {
@@ -197,7 +197,10 @@ void AmpModel::prepare (double oversampledRate, const AmpVoicing& v)
     follower.prepare (v.cathodeFollower);
     power.prepare (fs, v.power);
     powerDrive = dbToGain (v.powerDriveDb);
-    outputTrim = dbToGain (v.outputTrimDb);
+    // A saturated power stage peaks near +/-1; keep 12 dB of headroom for the cabinet
+    // resonances and effects so the output limiter stays a safety device, not a tone stage.
+    constexpr float kAmpOutputHeadroomDb = -12.0f;
+    outputTrim = dbToGain (v.outputTrimDb + kAmpOutputHeadroomDb);
     lastToneB = lastToneM = lastToneT = lastBrightGain = -1.0f;
     current = AmpControls {};
     setControls (current);

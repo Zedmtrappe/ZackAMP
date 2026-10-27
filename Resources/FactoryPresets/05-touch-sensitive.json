@@ -1,0 +1,30 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Touch Sensitive",
+  "category": "Edge of Breakup",
+  "description": "Cranked American clean amp with power-amp bloom. Very dynamic.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 0,
+    "amp.gain": 0.72,
+    "amp.bass": 0.4,
+    "amp.mid": 0.55,
+    "amp.treble": 0.55,
+    "amp.master": 0.8,
+    "amp.bright": 1,
+    "reverb.enabled": 1,
+    "reverb.mix": 0.18,
+    "out.level": -2.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-2x12-open-cap",
+      "irName": "US 2x12 Open \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

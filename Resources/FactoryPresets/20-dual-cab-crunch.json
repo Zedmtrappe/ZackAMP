@@ -1,0 +1,32 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Dual Cab Crunch",
+  "category": "Classic Rock",
+  "description": "British crunch through a 4x12 and an open 2x12, panned wide.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 2,
+    "amp.gain": 0.62,
+    "amp.bass": 0.45,
+    "amp.mid": 0.6,
+    "amp.treble": 0.55,
+    "amp.presence": 0.5,
+    "amp.master": 0.6,
+    "cab.dual": 1,
+    "cab.a.pan": -0.6,
+    "cab.b.pan": 0.6,
+    "cab.b.level": -2,
+    "out.level": -4.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:br-4x12-v25-cap",
+      "irName": "UK 4x12 Vintage 25W \u2014 Cap"
+    },
+    "b": {
+      "irId": "factory:am-2x12-open-cap",
+      "irName": "US 2x12 Open \u2014 Cap"
+    }
+  }
+}

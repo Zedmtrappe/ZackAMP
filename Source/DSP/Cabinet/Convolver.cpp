@@ -33,8 +33,18 @@ std::vector<float> resampleOffline (const std::vector<float>& in, double fromRat
     const double ratio = toRate / fromRate;
     const double cutoff = std::min (1.0, ratio) * 0.97; // relative to the source Nyquist
     const int halfWidth = (int) std::ceil (32.0 / std::min (1.0, ratio));
-    const double beta = 9.0;
-    const double i0beta = besselI0 (beta);
+    // Kaiser window (beta = 9) tabulated over |r| in [0, 1] for speed.
+    constexpr int kTable = 4096;
+    std::vector<double> window ((size_t) kTable + 2);
+    {
+        const double beta = 9.0;
+        const double i0beta = besselI0 (beta);
+        for (int i = 0; i <= kTable + 1; ++i)
+        {
+            const double r = std::min (1.0, (double) i / kTable);
+            window[(size_t) i] = besselI0 (beta * std::sqrt (1.0 - r * r)) / i0beta;
+        }
+    }
     const int outLen = std::max (1, (int) std::floor ((double) in.size() * ratio));
 
     std::vector<float> out ((size_t) outLen);
@@ -52,7 +62,9 @@ std::vector<float> resampleOffline (const std::vector<float>& in, double fromRat
             const double r = d / halfWidth;
             if (std::abs (r) >= 1.0)
                 continue;
-            const double w = besselI0 (beta * std::sqrt (1.0 - r * r)) / i0beta;
+            const double tp = std::abs (r) * kTable;
+            const int ti = (int) tp;
+            const double w = window[(size_t) ti] + (tp - ti) * (window[(size_t) ti + 1] - window[(size_t) ti]);
             const double xx = kPi * d * cutoff;
             const double sinc = std::abs (xx) < 1e-9 ? 1.0 : std::sin (xx) / xx;
             acc += in[(size_t) k] * cutoff * sinc * w;

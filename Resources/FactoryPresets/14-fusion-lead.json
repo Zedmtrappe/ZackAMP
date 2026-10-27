@@ -1,0 +1,38 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 1,
+  "name": "Fusion Lead",
+  "category": "Lead",
+  "description": "Articulate, slightly compressed lead with light chorus.",
+  "author": "AMP FORGE Factory",
+  "parameters": {
+    "amp.model": 4,
+    "amp.gain": 0.48,
+    "amp.bass": 0.45,
+    "amp.mid": 0.55,
+    "amp.treble": 0.55,
+    "amp.presence": 0.5,
+    "amp.master": 0.55,
+    "chorus.enabled": 1,
+    "chorus.rate": 0.4,
+    "chorus.depth": 0.3,
+    "chorus.mix": 0.3,
+    "delay.enabled": 1,
+    "delay.time": 360,
+    "delay.feedback": 0.25,
+    "delay.mix": 0.18,
+    "reverb.enabled": 1,
+    "reverb.mix": 0.16,
+    "out.level": -1.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:md-2x12-closed-cap",
+      "irName": "Modern 2x12 Closed \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

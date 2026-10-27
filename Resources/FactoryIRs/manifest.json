@@ -1,0 +1,15 @@
+[
+  { "id": "factory:am-1x12-open-cap", "file": "am-1x12-open-cap.wav", "name": "US 1x12 Open — Cap", "description": "Open-back 1x12 combo, mic at the dust cap: bright, airy, light low end." },
+  { "id": "factory:am-1x12-open-edge", "file": "am-1x12-open-edge.wav", "name": "US 1x12 Open — Edge", "description": "Same combo with the mic toward the cone edge: rounder and warmer." },
+  { "id": "factory:am-2x12-open-cap", "file": "am-2x12-open-cap.wav", "name": "US 2x12 Open — Cap", "description": "Open-back 2x12: glassy clean voice, scooped low mids, extended top." },
+  { "id": "factory:am-2x12-open-room", "file": "am-2x12-open-room.wav", "name": "US 2x12 Open — Room", "description": "Open-back 2x12 with a distant mic and early reflections: spacious cleans." },
+  { "id": "factory:br-4x12-v25-cap", "file": "br-4x12-v25-cap.wav", "name": "UK 4x12 Vintage 25W — Cap", "description": "Closed-back 4x12 with vintage low-power speakers: warm lows, vocal 2 kHz mids." },
+  { "id": "factory:br-4x12-v25-edge", "file": "br-4x12-v25-edge.wav", "name": "UK 4x12 Vintage 25W — Edge", "description": "Vintage 4x12, mic toward the edge: thicker and smoother for crunch." },
+  { "id": "factory:br-4x12-h75-cap", "file": "br-4x12-h75-cap.wav", "name": "UK 4x12 Heritage 75W — Cap", "description": "Closed-back 4x12 with higher-power speakers: tight, forward upper mids for rock." },
+  { "id": "factory:br-4x12-h75-offaxis", "file": "br-4x12-h75-offaxis.wav", "name": "UK 4x12 Heritage 75W — Off-axis", "description": "75 W 4x12 with an angled mic: tames fizz on high-gain tones." },
+  { "id": "factory:md-2x12-closed-cap", "file": "md-2x12-closed-cap.wav", "name": "Modern 2x12 Closed — Cap", "description": "Closed-back 2x12: focused mids, firm low end, smooth top for leads." },
+  { "id": "factory:md-4x12-heavy-cap", "file": "md-4x12-heavy-cap.wav", "name": "Modern 4x12 Heavy — Cap", "description": "Large closed 4x12 tuned for high gain: deep resonance, tight lows, scooped 500 Hz." },
+  { "id": "factory:md-4x12-heavy-edge", "file": "md-4x12-heavy-edge.wav", "name": "Modern 4x12 Heavy — Edge", "description": "Heavy 4x12, edge position: darker and thicker for rhythm." },
+  { "id": "factory:bt-1x12-closed-cap", "file": "bt-1x12-closed-cap.wav", "name": "Boutique 1x12 Closed — Cap", "description": "Compact closed-back 1x12: punchy mids and controlled lows, great for lead." },
+  { "id": "factory:util-flat", "file": "util-flat.wav", "name": "Utility — Flat (test IR)", "description": "Unit impulse: no cabinet colouration. For testing and A/B comparison." }
+]
