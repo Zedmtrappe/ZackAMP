@@ -23,7 +23,7 @@
     "delay.mix": 0.18,
     "reverb.enabled": 1,
     "reverb.mix": 0.16,
-    "out.level": -1.5
+    "out.level": -1.0
   },
   "cabinet": {
     "a": {

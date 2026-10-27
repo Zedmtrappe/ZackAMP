@@ -5,3 +5,4 @@
 *.swp
 /.cache/
 compile_commands.json
+/demo/

@@ -54,7 +54,7 @@ namespace
             a.bright = { true, 1800.0f, 8.0f };
             a.power = { 0.22f, 3.0f, 0.03f, 0.30f, 150.0f, 4000.0f, 5.0f, 90.0f, 0.0f, 0.35f, 40.0f, 11000.0f, 0.30f };
             a.powerDriveDb = -2.0f;
-            a.outputTrimDb = -3.0f;
+            a.outputTrimDb = 3.0f;
             a.defaultIrId = "factory:am-2x12-open-cap";
         }
         {

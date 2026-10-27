@@ -16,11 +16,11 @@ P = [
   {"amp.model":0,"amp.gain":0.38,"amp.bass":0.45,"amp.mid":0.5,"amp.treble":0.62,"amp.master":0.6,"amp.bright":1,
    "reverb.enabled":1,"reverb.mix":0.22,"reverb.decay":2.2}),
  ("Studio Clean Chorus", "Clean", "Polished clean rhythm with stereo chorus and a subtle slap.", "factory:am-2x12-open-cap", None,
-  {"amp.model":0,"amp.gain":0.33,"amp.bass":0.5,"amp.treble":0.55,"amp.master":0.55,
+  {"amp.model":0,"amp.gain":0.4,"amp.bass":0.5,"amp.treble":0.55,"amp.master":0.62,
    "chorus.enabled":1,"chorus.rate":0.7,"chorus.depth":0.45,"chorus.mix":0.45,
    "delay.enabled":1,"delay.time":110,"delay.feedback":0.1,"delay.mix":0.12,"reverb.enabled":1,"reverb.mix":0.15}),
  ("Warm Jazz Clean", "Clean", "Round, dark clean for neck pickups and chord melodies.", "factory:am-1x12-open-edge", None,
-  {"amp.model":0,"amp.gain":0.3,"amp.bass":0.55,"amp.mid":0.6,"amp.treble":0.32,"amp.master":0.55,
+  {"amp.model":0,"amp.gain":0.4,"amp.bass":0.55,"amp.mid":0.6,"amp.treble":0.32,"amp.master":0.65,
    "reverb.enabled":1,"reverb.mix":0.16,"reverb.decay":1.4,"reverb.tone":0.3}),
  ("Edge of Breakup", "Edge of Breakup", "Clean when you pick lightly, hair and grit when you dig in. Roll back the guitar volume to clean up.", "factory:am-1x12-open-cap", None,
   {"amp.model":1,"amp.gain":0.52,"amp.bass":0.45,"amp.mid":0.55,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.65}),
@@ -73,7 +73,7 @@ P = [
    "eq.enabled":1,"eq.b80":-2,"eq.b240":-1,"eq.b750":2,"eq.b2200":1,"eq.b6600":-1,
    "gate.enabled":1,"gate.threshold":-54,"gate.release":60}),
  ("Ambient Swells", "Ambient", "Clean pads: long delay and lush reverb for volume swells.", "factory:am-2x12-open-room", None,
-  {"amp.model":0,"amp.gain":0.32,"amp.bass":0.5,"amp.treble":0.5,"amp.master":0.55,
+  {"amp.model":0,"amp.gain":0.4,"amp.bass":0.5,"amp.treble":0.5,"amp.master":0.62,
    "chorus.enabled":1,"chorus.rate":0.25,"chorus.depth":0.6,"chorus.mix":0.4,
    "delay.enabled":1,"delay.time":520,"delay.feedback":0.55,"delay.mix":0.35,"delay.tone":3000,
    "reverb.enabled":1,"reverb.mix":0.45,"reverb.decay":6.0,"reverb.tone":0.45}),
@@ -83,7 +83,7 @@ P = [
 ]
 
 # Output level per preset (dB), calibrated with `ampforge_render --calibrate`.
-LEVELS = {'Glass Clean': 3.5, 'Studio Clean Chorus': 4.5, 'Warm Jazz Clean': 10.5, 'Edge of Breakup': 0.5, 'Touch Sensitive': -2.5, 'Tweed Blues': -2.5, 'Texas Drive': -4.0, 'Plexi Crunch': -2.0, 'Cranked Plexi': -5.5, 'British Crunch': -2.5, 'Boosted Brit': -4.5, 'Hot Rod Lead': -4.5, 'Singing Lead': -4.5, 'Fusion Lead': -1.5, 'Classic V Rhythm': -3.0, 'High Gain Rhythm': -2.0, 'Modern Metal': -3.0, 'Tight Extended Range': -2.0, 'Ambient Swells': 4.5, 'Dual Cab Crunch': -4.5}
+LEVELS = {'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 3.0, 'Edge of Breakup': 1.5, 'Touch Sensitive': -7.5, 'Tweed Blues': -1.0, 'Texas Drive': -9.5, 'Plexi Crunch': -0.5, 'Cranked Plexi': -5.0, 'British Crunch': -1.0, 'Boosted Brit': -4.0, 'Hot Rod Lead': -4.0, 'Singing Lead': -4.0, 'Fusion Lead': -1.0, 'Classic V Rhythm': -2.5, 'High Gain Rhythm': -1.5, 'Modern Metal': -3.0, 'Tight Extended Range': -2.0, 'Ambient Swells': -1.5, 'Dual Cab Crunch': -2.5}
 
 def main():
     os.makedirs(OUT, exist_ok=True)

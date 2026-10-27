@@ -14,7 +14,7 @@
     "amp.presence": 0.55,
     "amp.master": 0.6,
     "amp.bright": 1,
-    "out.level": -2.0
+    "out.level": -0.5
   },
   "cabinet": {
     "a": {

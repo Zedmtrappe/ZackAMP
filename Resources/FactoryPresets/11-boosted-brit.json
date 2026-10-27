@@ -19,7 +19,7 @@
     "drive.level": 8.0,
     "gate.enabled": 1,
     "gate.threshold": -64,
-    "out.level": -4.5
+    "out.level": -4.0
   },
   "cabinet": {
     "a": {

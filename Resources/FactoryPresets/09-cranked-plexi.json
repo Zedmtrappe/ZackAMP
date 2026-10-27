@@ -16,7 +16,7 @@
     "amp.bright": 1,
     "gate.enabled": 1,
     "gate.threshold": -66,
-    "out.level": -5.5
+    "out.level": -5.0
   },
   "cabinet": {
     "a": {

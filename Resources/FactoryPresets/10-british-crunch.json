@@ -13,7 +13,7 @@
     "amp.treble": 0.6,
     "amp.presence": 0.5,
     "amp.master": 0.6,
-    "out.level": -2.5
+    "out.level": -1.0
   },
   "cabinet": {
     "a": {

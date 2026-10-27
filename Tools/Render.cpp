@@ -84,7 +84,7 @@ public:
                 const size_t r1 = (r0 + 1) % L;
                 const float frac = (float) (readPos - std::floor (readPos));
                 const float y = line[r0] + frac * (line[r1] - line[r0]);
-                const double release = (t > n.length) ? 0.9 : 1.0;
+                const double release = (t > n.length) ? 0.985 : 1.0; // gentle string damping (no click)
                 const float filtered = (float) (damp * release * ((1.0 - lpCoef) * y + lpCoef * prev));
                 prev = y;
                 line[w % L] = filtered;
@@ -111,9 +111,22 @@ struct TestClip
     const char* name;
     std::vector<GuitarSynth::Note> notes;
     double seconds;
-    float gain;        // pickup output level
+    float peakDb;      // peak level at the interface input (realistic gain staging)
     double brightness; // 1 = single coil, 0.3 = humbucker
 };
+
+/** Renders a clip and scales it to its target interface peak level. */
+std::vector<float> renderClip (GuitarSynth& gs, const TestClip& c)
+{
+    auto v = gs.render (c.notes, c.seconds, 1.0f, c.brightness);
+    float pk = 1.0e-9f;
+    for (float x : v)
+        pk = std::max (pk, std::abs (x));
+    const float g = std::pow (10.0f, c.peakDb / 20.0f) / pk;
+    for (auto& x : v)
+        x *= g;
+    return v;
+}
 
 std::vector<TestClip> testClips()
 {
@@ -123,27 +136,27 @@ std::vector<TestClip> testClips()
     std::vector<N> chord;
     const int eMaj[] = { 40, 47, 52, 56, 59, 64 };
     for (int i = 0; i < 6; ++i) chord.push_back ({ 0.2 + i * 0.012, noteHz (eMaj[i]), 0.8, 3.0 });
-    clips.push_back ({ "open-chord-singlecoil", chord, 4.0, 0.25f, 1.0 });
-    clips.push_back ({ "open-chord-humbucker", chord, 4.0, 0.5f, 0.35 });
+    clips.push_back ({ "open-chord-singlecoil", chord, 4.0, -12.0f, 1.0 });
+    clips.push_back ({ "open-chord-humbucker", chord, 4.0, -6.0f, 0.35 });
 
     std::vector<N> singles;
     const int line[] = { 52, 55, 57, 59, 62, 64, 62, 59 };
     for (int i = 0; i < 8; ++i) singles.push_back ({ 0.2 + i * 0.4, noteHz (line[i]), 0.7, 0.35 });
-    clips.push_back ({ "single-notes-clean", singles, 4.0, 0.25f, 1.0 });
+    clips.push_back ({ "single-notes-clean", singles, 4.0, -14.0f, 1.0 });
 
     std::vector<N> dyn;
     for (int i = 0; i < 8; ++i) dyn.push_back ({ 0.2 + i * 0.5, noteHz (45), 0.15 + 0.12 * i, 0.45 });
-    clips.push_back ({ "soft-to-hard-picking", dyn, 4.5, 0.35f, 0.6 });
+    clips.push_back ({ "soft-to-hard-picking", dyn, 4.5, -8.0f, 0.6 });
 
     std::vector<N> chug;
     for (int i = 0; i < 16; ++i) chug.push_back ({ 0.2 + i * 0.15, noteHz (40), 0.85, 0.12, true });
     for (int i = 0; i < 2; ++i) { chug.push_back ({ 2.6 + i * 0.8, noteHz (40), 0.9, 0.7 }); chug.push_back ({ 2.6 + i * 0.8, noteHz (47), 0.9, 0.7 }); chug.push_back ({ 2.6 + i * 0.8, noteHz (52), 0.9, 0.7 }); }
-    clips.push_back ({ "palm-mutes-power-chords-humbucker", chug, 4.5, 0.55f, 0.35 });
+    clips.push_back ({ "palm-mutes-power-chords-humbucker", chug, 4.5, -6.0f, 0.35 });
 
     std::vector<N> lead { { 0.2, noteHz (69), 0.8, 2.5, false, 2.0, 0.6 }, { 3.0, noteHz (72), 0.8, 1.2 } };
-    clips.push_back ({ "lead-bend-humbucker", lead, 4.5, 0.5f, 0.4 });
+    clips.push_back ({ "lead-bend-humbucker", lead, 4.5, -8.0f, 0.4 });
 
-    clips.push_back ({ "volume-rolled-back", chord, 4.0, 0.08f, 0.8 });
+    clips.push_back ({ "volume-rolled-back", chord, 4.0, -24.0f, 0.8 });
     return clips;
 }
 
@@ -218,7 +231,7 @@ std::vector<float> concatClips (double fs)
     {
         if (juce::String (c.name) == "volume-rolled-back")
             continue;
-        auto v = gs.render (c.notes, c.seconds, c.gain, c.brightness);
+        auto v = renderClip (gs, c);
         all.insert (all.end(), v.begin(), v.end());
     }
     return all;
@@ -239,7 +252,7 @@ int main (int argc, char** argv)
         GuitarSynth gs (fs);
         for (const auto& c : testClips())
         {
-            auto v = gs.render (c.notes, c.seconds, c.gain, c.brightness);
+            auto v = renderClip (gs, c);
             float pk = 0; for (float x : v) pk = std::max (pk, std::abs (x));
             writeWav (dir.getChildFile (juce::String (c.name) + ".wav"), { v }, fs);
             std::printf ("%-36s peak %6.1f dBFS\n", c.name, 20 * std::log10 (std::max (pk, 1e-9f)));

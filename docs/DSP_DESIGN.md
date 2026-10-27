@@ -207,16 +207,21 @@ second-difference "click" than the steady signal after it.
 ## Performance (`ampforge_bench`)
 
 Measured on the development machine: **Intel Xeon @ 2.1 GHz cloud VM, single thread, -O3 SSE2,
-Linux**. Mean % of the real-time block budget at 48 kHz, 64-sample blocks (lower is better):
+Linux**, final configuration (automatic oversampling: 8x at 48 kHz, 4x at 96 kHz), 64-sample blocks.
+% of the real-time block budget (lower is better):
 
-| Case | mean | p99 |
-|---|---|---|
-| Clean / Plexi, 85 ms IR, no FX (4x run) | ~2.7 % | ~4–5 % |
-| Heavy, 85 ms IR, all FX + gate + drive + EQ, **8x** | ~7 % | ~12 % |
-| Heavy, same, 2x | ~2.9 % | ~5 % |
-| Heavy, dual **stereo** 500 ms IRs, all FX | ~10 % | ~16 % |
-| Heavy, 1 s IR (max), all FX | ~7–8 % | ~9–14 % |
-| 96 kHz, dual stereo 500 ms IRs, all FX | ~25 % | ~39 % |
+| Case | 48 kHz mean | 48 kHz p99 | 96 kHz mean | 96 kHz p99 |
+|---|---|---|---|---|
+| Clean, 85 ms IR, no FX | 4.3 % | 7.7 % | 7.1 % | 12.6 % |
+| Plexi, 85 ms IR, no FX | 4.7 % | 7.4 % | 6.1 % | 9.2 % |
+| Heavy, 85 ms IR, no FX | 5.4 % | 7.5 % | 7.5 % | 15.2 % |
+| Heavy, 85 ms IR, all FX + gate + drive + EQ | 6.6 % | 8.3 % | 8.4 % | 12.3 % |
+| Heavy, same, forced 2x | 3.0 % | 6.6 % | — | — |
+| Heavy, dual **stereo** 500 ms IRs, all FX | 11.0 % | 15.4 % | 28.6 % | 47.8 % |
+| Heavy, 1 s IR (max), all FX | 10.2 % | 17.9 % | 17.8 % | 29.4 % |
+
+Typical use (one ≤ 200 ms cab IR) is therefore well under 10 % of one core on this VM; an Apple
+Silicon core is expected to be faster, but this has not been measured.
 
 Worst-case spikes on a shared VM (tens to hundreds of %) were dominated by scheduler noise and are
 not meaningful; structural burstiness exists because the FFT tail work for each 64-sample partition

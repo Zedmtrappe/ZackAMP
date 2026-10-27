@@ -22,7 +22,7 @@
     "eq.b6600": 3,
     "gate.enabled": 1,
     "gate.threshold": -60,
-    "out.level": -3.0
+    "out.level": -2.5
   },
   "cabinet": {
     "a": {

@@ -16,7 +16,7 @@
     "reverb.enabled": 1,
     "reverb.mix": 0.2,
     "reverb.decay": 1.6,
-    "out.level": -2.5
+    "out.level": -1.0
   },
   "cabinet": {
     "a": {

@@ -16,7 +16,7 @@
     "amp.master": 0.55,
     "gate.enabled": 1,
     "gate.threshold": -60,
-    "out.level": -2.0
+    "out.level": -1.5
   },
   "cabinet": {
     "a": {

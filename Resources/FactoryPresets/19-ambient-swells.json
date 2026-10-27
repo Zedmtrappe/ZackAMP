@@ -7,10 +7,10 @@
   "author": "AMP FORGE Factory",
   "parameters": {
     "amp.model": 0,
-    "amp.gain": 0.32,
+    "amp.gain": 0.4,
     "amp.bass": 0.5,
     "amp.treble": 0.5,
-    "amp.master": 0.55,
+    "amp.master": 0.62,
     "chorus.enabled": 1,
     "chorus.rate": 0.25,
     "chorus.depth": 0.6,
@@ -24,7 +24,7 @@
     "reverb.mix": 0.45,
     "reverb.decay": 6.0,
     "reverb.tone": 0.45,
-    "out.level": 4.5
+    "out.level": -1.5
   },
   "cabinet": {
     "a": {
