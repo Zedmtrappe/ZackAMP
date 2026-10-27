@@ -22,7 +22,9 @@ concurrency:
 
 jobs:
   macos:
-    runs-on: macos-14
+    # Intel runner: the Apple Silicon (arm64) pool repeatedly failed to allocate a machine.
+    # The build is still universal (arm64 + x86_64), cross-compiled by Xcode.
+    runs-on: macos-15-intel
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
