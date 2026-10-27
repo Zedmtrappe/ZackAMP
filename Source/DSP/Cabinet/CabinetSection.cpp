@@ -33,6 +33,8 @@ void CabinetSection::prepare (double sampleRate, int maxBlockSize)
     // Convolvers built for another sample rate are useless now; the engine re-installs.
     for (auto& s : slots)
     {
+        delete s.pending.take(); // built for the old configuration
+        s.clearRequest = false;
         delete s.fading;
         s.fading = nullptr;
         s.fadePos = 0;
