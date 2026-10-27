@@ -1,4 +1,4 @@
-// AMP FORGE — output safety stage. This is a protection device for ears and speakers,
+// ZackAMP — output safety stage. This is a protection device for ears and speakers,
 // not a tone tool: factory presets are levelled well below its ceiling so it should
 // rarely act. Instant-attack peak gain computer (no look-ahead, to add no latency),
 // smooth release, then a hard clamp as a last line of defence.

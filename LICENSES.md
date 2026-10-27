@@ -1,16 +1,16 @@
 # Licences
 
-## AMP FORGE source code and content
+## ZackAMP source code and content
 
-Copyright © 2026 the AMP FORGE authors. All rights reserved.
+Copyright © 2026 the ZackAMP authors. All rights reserved.
 
-**A licence for AMP FORGE itself has not been chosen yet.** That decision belongs to the project
+**A licence for ZackAMP itself has not been chosen yet.** That decision belongs to the project
 owner and is constrained by JUCE's licensing (below):
 
-* To distribute AMP FORGE (app or plugins) **as closed source**, you need a commercial JUCE licence
+* To distribute ZackAMP (app or plugins) **as closed source**, you need a commercial JUCE licence
   appropriate to your revenue (see https://juce.com/get-juce), and for VST3 the Steinberg VST3
   licence agreement.
-* Without a commercial JUCE licence, distributed builds must comply with the **AGPLv3**, i.e. AMP FORGE
+* Without a commercial JUCE licence, distributed builds must comply with the **AGPLv3**, i.e. ZackAMP
   would have to be released under the AGPLv3 with its complete source.
 * Building and using it privately on your own machine is fine under either option.
 

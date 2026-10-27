@@ -1,4 +1,4 @@
-// AMP FORGE — procedural cabinet impulse response generator.
+// ZackAMP — procedural cabinet impulse response generator.
 //
 // Builds the factory IR set from scratch (no recorded or third-party material), so it can
 // be redistributed freely. Each IR is designed as a magnitude response from physically

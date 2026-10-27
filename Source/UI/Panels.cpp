@@ -451,7 +451,7 @@ void CabinetPanel::filesDropped (const juce::StringArray& files, int, int y)
             list.add (juce::File (f));
     auto options = juce::MessageBoxOptions::makeOptionsYesNoCancel (
         juce::MessageBoxIconType::QuestionIcon, "Import impulse response",
-        "Copy into the AMP FORGE IR library (recommended: presets keep working if you move the original), "
+        "Copy into the ZackAMP IR library (recommended: presets keep working if you move the original), "
         "or reference the file where it is?",
         "Copy", "Reference", "Cancel", this);
     juce::Component::SafePointer<CabinetPanel> safe (this);

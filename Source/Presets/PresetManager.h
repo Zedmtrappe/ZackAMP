@@ -1,4 +1,4 @@
-// AMP FORGE — presets: versioned JSON schema, factory + user presets, safe file handling.
+// ZackAMP — presets: versioned JSON schema, factory + user presets, safe file handling.
 //
 // A preset stores every parameter by its stable ID plus references (IDs, not audio) to the
 // cabinet IRs. Unknown parameters are ignored, missing ones take their defaults, and the

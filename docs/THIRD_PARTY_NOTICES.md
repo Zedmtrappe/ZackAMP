@@ -12,5 +12,5 @@ re-implemented from the published mathematics. Biquad formulas follow the public
 Audio EQ Cookbook. The UI uses the system fonts provided by JUCE/the OS.
 
 **Trademarks:** Fender, Marshall, Mesa/Boogie, Celestion and other names mentioned in the project
-brief are trademarks of their owners. AMP FORGE's models, names, artwork and presets are original,
+brief are trademarks of their owners. ZackAMP's models, names, artwork and presets are original,
 avoid those names in the product, and do not imply affiliation or endorsement.

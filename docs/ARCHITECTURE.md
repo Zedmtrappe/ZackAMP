@@ -30,7 +30,7 @@
   into a JUCE static library, which avoids JUCE module duplication issues.
 * Factory IRs and presets are embedded in the binary (`juce_add_binary_data`), so the app has no
   resource-path dependencies and works offline. Mutable user data lives in
-  `~/Library/Application Support/AMP FORGE/` (`~/.config/AMP FORGE/` on Linux), never in the bundle.
+  `~/Library/Application Support/ZackAMP/` (`~/.config/ZackAMP/` on Linux), never in the bundle.
 
 ## Engine API (`Source/Audio/AmpForgeEngine.h`)
 

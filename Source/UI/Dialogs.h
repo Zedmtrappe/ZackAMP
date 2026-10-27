@@ -1,4 +1,4 @@
-// AMP FORGE — dialogs: preset browser, save-as, IR browser, MIDI settings, audio settings,
+// ZackAMP — dialogs: preset browser, save-as, IR browser, MIDI settings, audio settings,
 // first-launch setup guide.
 #pragma once
 

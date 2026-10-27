@@ -1,4 +1,4 @@
-// AMP FORGE — amp-model measurement tool: THD, harmonic balance and output level versus
+// ZackAMP — amp-model measurement tool: THD, harmonic balance and output level versus
 // gain for each model at typical pickup levels. Used to calibrate gain staging.
 #include "Audio/AmpForgeEngine.h"
 

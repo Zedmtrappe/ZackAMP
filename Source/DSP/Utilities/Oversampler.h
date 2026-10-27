@@ -1,4 +1,4 @@
-// AMP FORGE — low-latency polyphase IIR half-band oversampling.
+// ZackAMP — low-latency polyphase IIR half-band oversampling.
 //
 // Each 2x stage is a pair of all-pass chains (elliptic half-band design, after the
 // classic polyphase IIR method used e.g. in Laurent de Soras' HIIR). Compared with

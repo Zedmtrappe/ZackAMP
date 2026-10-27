@@ -1,4 +1,4 @@
-// AMP FORGE — moving complete sound states between presets and the engine (non-RT only).
+// ZackAMP — moving complete sound states between presets and the engine (non-RT only).
 #pragma once
 
 #include "PresetManager.h"

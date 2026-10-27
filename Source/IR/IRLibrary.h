@@ -1,10 +1,10 @@
-// AMP FORGE — impulse-response library: factory IRs (embedded in the app binary) and a
+// ZackAMP — impulse-response library: factory IRs (embedded in the app binary) and a
 // user library of imported WAV/AIFF files.
 //
 // Import either *references* the original file (it must stay where it is) or *copies* it
 // into the application-managed library folder (recommended: presets keep working even if
 // the original is moved). Removing a library entry never deletes the user's original file;
-// only a copy that AMP FORGE itself made is removed. All file access happens on non-real-time
+// only a copy that ZackAMP itself made is removed. All file access happens on non-real-time
 // threads; decoded IRs are handed to the engine, which prepares them off the audio thread.
 #pragma once
 
@@ -69,7 +69,7 @@ public:
     /** Validates and adds a file. copyIntoLibrary = copy to the managed folder. */
     ImportResult importFile (const juce::File& file, bool copyIntoLibrary);
 
-    /** Removes a user entry. Deletes the file only if it is AMP FORGE's own managed copy. */
+    /** Removes a user entry. Deletes the file only if it is ZackAMP's own managed copy. */
     bool removeEntry (const juce::String& id, juce::String* error = nullptr);
     bool renameEntry (const juce::String& id, const juce::String& newName);
 

@@ -4,7 +4,7 @@
   "name": "Classic V Rhythm",
   "category": "High Gain",
   "description": "The famous V-shaped graphic EQ curve on a mid-focused high-gain amp.",
-  "author": "AMP FORGE Factory",
+  "author": "ZackAMP Factory",
   "parameters": {
     "amp.model": 4,
     "amp.gain": 0.6,

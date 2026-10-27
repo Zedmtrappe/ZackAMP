@@ -59,7 +59,7 @@ Scripts/run_sanitizers.sh                         # ASan+UBSan and TSan builds o
 * `ampforge_render --calibrate` — loudness of every factory preset over the synthetic DI set; factory
   levels were set so presets read ≈ -20 dB on this loudness proxy and peak ≤ -4 dBFS (no limiting).
 * `ampforge_bench` — mean / p99 / worst processing time per block size, model, IR length, oversampling.
-* Application smoke test — `AMP FORGE --smoke-test 5` launches the full GUI app, runs, and quits; run
+* Application smoke test — `ZackAMP --smoke-test 5` launches the full GUI app, runs, and quits; run
   headless on Linux with Xvfb, including with no audio device present.
 
 ### What the automated tests do **not** prove

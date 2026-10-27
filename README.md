@@ -1,4 +1,4 @@
-# AMP FORGE
+# ZackAMP
 
 A standalone guitar amplifier application for macOS, built around a shared, framework-independent
 real-time engine that is designed to become AU and VST3 plugins later.
@@ -38,31 +38,47 @@ studio-quality effects, presets and live MIDI control.
 * To build: Xcode Command Line Tools (or Xcode), CMake ≥ 3.22, Git. Ninja optional (`brew install ninja`).
 * Dependencies (fetched automatically, pinned): **JUCE 8.0.9** (`f72bad6`). doctest 2.4.11 is vendored.
 
-## Building on macOS
+## Installing / updating (no Xcode needed)
+
+Every change pushed to `main` is built automatically by GitHub (universal app, tests run first)
+and published as the **latest** release.
+
+1. Open https://github.com/Zedmtrappe/ZackAMP/releases (signed in to GitHub) and download
+   **ZackAMP-macOS.zip** from "ZackAMP - latest build".
+2. Unzip it (double-click). You get a `ZackAMP` folder with the app, an installer script and
+   `READ ME FIRST.txt`.
+3. Open **Terminal**, type `bash ` (with a space), drag **Install ZackAMP.command** into the
+   window and press Return. It quits a running ZackAMP, replaces `/Applications/ZackAMP.app`,
+   removes macOS's "downloaded from the internet" block and starts the new version.
+
+Updating is the same three steps. Presets, imported IRs, MIDI mappings and audio settings live in
+`~/Library/Application Support/ZackAMP` and are kept.
+
+**Why the Terminal step:** the app is ad-hoc signed, not signed/notarised with an Apple Developer ID
+(that costs $99/year). Without the installer, macOS would refuse to open the downloaded app until
+you approve it under *System Settings → Privacy & Security → Open Anyway*.
+
+**Microphone permission:** macOS treats any audio input (including an interface) as "microphone".
+Approve the prompt; because each unsigned build looks new to macOS it may ask again after an
+update. If you declined, enable ZackAMP under *System Settings → Privacy & Security → Microphone*.
+
+## Building on macOS yourself (optional)
 
 ```bash
-git clone <this repository> AMP-FORGE
-cd AMP-FORGE
+git clone https://github.com/Zedmtrappe/ZackAMP.git
+cd ZackAMP
 Scripts/build_macos.sh            # fetches JUCE, builds a universal Release app, runs the tests
-open "build/macos/AmpForge_artefacts/Release/AMP FORGE.app"
+open "build/macos/ZackAMP_artefacts/Release/ZackAMP.app"
 ```
 
 Faster Apple-Silicon-only build: `ARCHS=arm64 Scripts/build_macos.sh`.
-Xcode project: `cmake --preset xcode && open build/xcode/AmpForge.xcodeproj`.
+Xcode project: `cmake --preset xcode && open build/xcode/ZackAMP.xcodeproj`.
 
 **Unverified on macOS.** The CMake configuration, bundle settings (microphone-permission text,
 hardened-runtime audio-input entitlement, universal architectures) follow JUCE's documented macOS
 setup, and the identical code builds and runs on Linux, but nobody has compiled it on a Mac yet.
 If the macOS build fails, the error output is the first thing to look at; the CI workflow
 (`.github/workflows/ci.yml`) also builds on a GitHub macOS runner when the repository is pushed to GitHub.
-
-**Gatekeeper:** local builds are ad-hoc signed, not notarised. Running your own build on your own
-Mac works; if you copy the app to another Mac, macOS may block it — right-click → *Open*, or sign
-and notarise with your Developer ID (not done in this project).
-
-**Microphone permission:** macOS treats any audio input (including an interface) as "microphone".
-Approve the prompt on first launch; if you declined it, enable AMP FORGE under
-*System Settings → Privacy & Security → Microphone*.
 
 ## Building on Linux (development / CI)
 
@@ -97,9 +113,9 @@ listening checklist.
 4. Start with monitors low. Presets are levelled to similar loudness, peaking around -4 to -10 dBFS.
 5. **Bypass** passes your dry signal, useful for checking routing and latency.
 
-On first launch AMP FORGE only opens audio outputs: inputs stay off until you choose the
+On first launch ZackAMP only opens audio outputs: inputs stay off until you choose the
 interface, so a laptop's built-in microphone and speakers can never start howling at you.
-If the saved interface is missing, AMP FORGE waits for it (and reconnects automatically) rather than
+If the saved interface is missing, ZackAMP waits for it (and reconnects automatically) rather than
 switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LATENCY.md).
 
 ## Impulse responses
@@ -107,11 +123,11 @@ switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LAT
 * Click the IR name in the cabinet panel to open the browser. Clicking an IR loads it
   immediately so you can audition while playing; **Revert** goes back, **Keep** keeps it.
 * **Import IR…** or drag WAV/AIFF files onto the cabinet panel. Choose:
-  * **Copy** (recommended): the file is copied into AMP FORGE's library, so presets keep working
+  * **Copy** (recommended): the file is copied into ZackAMP's library, so presets keep working
     if you move or delete the original.
-  * **Reference**: AMP FORGE remembers where the file is. If you move it, the entry shows as
+  * **Reference**: ZackAMP remembers where the file is. If you move it, the entry shows as
     *missing* and presets that use it fall back to the amp's default cabinet with a warning.
-* Removing an IR from the library never deletes your original file (only AMP FORGE's own copy).
+* Removing an IR from the library never deletes your original file (only ZackAMP's own copy).
 * Limits and formats: [docs/IR_FORMATS.md](docs/IR_FORMATS.md).
 * **Dual Cab**: enable it to blend cabinets A and B with independent level and pan.
 * **CABINET off** bypasses the cab simulation for a real cabinet / external cab sim.
@@ -123,7 +139,7 @@ switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LAT
   read-only, so Save becomes **Save As**. Name collisions are refused, never silently overwritten.
 * Rename / Duplicate / Delete are in the browser (delete moves the file to the Trash where available).
 * Undo/Redo (⌘Z / ⇧⌘Z) cover knob, switch and EQ edits; loading a preset clears the history.
-* User presets live in `~/Library/Application Support/AMP FORGE/Presets` (*File → Show User Data Folder*).
+* User presets live in `~/Library/Application Support/ZackAMP/Presets` (*File → Show User Data Folder*).
   Format: [docs/PRESET_FORMAT.md](docs/PRESET_FORMAT.md).
 * Keyboard: ⌘S save, ⇧⌘S save as, ⌘P presets, ⌘← / ⌘→ previous/next preset, ⌘, audio settings.
 
@@ -168,6 +184,6 @@ switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LAT
 [Roadmap](docs/ROADMAP.md) · [Third-party notices](docs/THIRD_PARTY_NOTICES.md) · [Licences](LICENSES.md) ·
 [Changelog](CHANGELOG.md)
 
-AMP FORGE's amplifier models are original designs that take inspiration from the general design
+ZackAMP's amplifier models are original designs that take inspiration from the general design
 principles of classic American, British and modern high-gain amplifiers. They are not affiliated
 with, endorsed by, or claimed to reproduce any manufacturer's products.

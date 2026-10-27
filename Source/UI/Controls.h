@@ -1,4 +1,4 @@
-// AMP FORGE — UI controls bound to engine parameters.
+// ZackAMP — UI controls bound to engine parameters.
 //
 // Each control is bound to exactly one parameter index. User edits go through the
 // AppController (with undo); refresh() pulls the current value from the ParameterStore,

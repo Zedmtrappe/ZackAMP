@@ -1,4 +1,4 @@
-// AMP FORGE — standalone application entry point.
+// ZackAMP — standalone application entry point.
 #include "AppController.h"
 #include "../UI/MainComponent.h"
 

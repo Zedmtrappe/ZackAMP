@@ -4,7 +4,7 @@
   "name": "Dual Cab Crunch",
   "category": "Classic Rock",
   "description": "British crunch through a 4x12 and an open 2x12, panned wide.",
-  "author": "AMP FORGE Factory",
+  "author": "ZackAMP Factory",
   "parameters": {
     "amp.model": 2,
     "amp.gain": 0.62,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates AMP FORGE factory presets (original settings, schema v1).
+"""Generates ZackAMP factory presets (original settings, schema v1).
 
 Each preset only lists parameters that differ from the parameter defaults; everything else
 is filled in with defaults so the files stay readable. Output levels ("out.level") are
@@ -98,7 +98,7 @@ def main():
         params = dict(params)
         params["out.level"] = LEVELS.get(name, 0.0)
         doc = {"format": "ampforge.preset", "schemaVersion": 1, "name": name, "category": cat,
-               "description": desc, "author": "AMP FORGE Factory", "parameters": params,
+               "description": desc, "author": "ZackAMP Factory", "parameters": params,
                "cabinet": {"a": {"irId": ira, "irName": ir_names.get(ira, "")},
                            "b": {"irId": irb or "", "irName": ir_names.get(irb, "") if irb else ""}}}
         slug = "".join(c.lower() if c.isalnum() else "-" for c in name).strip("-")

@@ -33,7 +33,7 @@ AppController::AppController()
     opts.filenameSuffix = ".settings";
     opts.storageFormat = juce::PropertiesFile::storeAsXML;
     opts.millisecondsBeforeSaving = 1000;
-    settings = std::make_unique<juce::PropertiesFile> (getAppDataDirectory().getChildFile ("AMP FORGE.settings"), opts);
+    settings = std::make_unique<juce::PropertiesFile> (getAppDataDirectory().getChildFile ("ZackAMP.settings"), opts);
 }
 
 AppController::~AppController() { shutdown(); }
@@ -150,7 +150,7 @@ void AppController::changeListenerCallback (juce::ChangeBroadcaster*)
     else if (hadDevice)
     {
         hadDevice = false;
-        postMessage ("Audio device disconnected. AMP FORGE will reconnect when it returns, or choose another device in Audio Settings.", true);
+        postMessage ("Audio device disconnected. ZackAMP will reconnect when it returns, or choose another device in Audio Settings.", true);
         reconnectCountdown = 40;
     }
     sendChangeMessage();

@@ -1,4 +1,4 @@
-// AMP FORGE — noise gate.
+// ZackAMP — noise gate.
 //
 // The detector listens to the clean guitar input (where note decays are still clearly
 // above the noise), while the gain is applied after the amp (where high-gain hiss is

@@ -1,4 +1,4 @@
-// AMP FORGE — real-time performance benchmark.
+// ZackAMP — real-time performance benchmark.
 //
 // Measures the engine's processing time per host block across sample rates, block sizes,
 // amp models, IR lengths and effect loads. Reports mean, 99th percentile and worst case as
@@ -74,7 +74,7 @@ Result run (AmpForgeEngine& e, double fs, int block, double seconds)
 int main (int argc, char** argv)
 {
     const double seconds = argc > 1 ? std::atof (argv[1]) : 2.0;
-    std::printf ("AMP FORGE benchmark — %% of real-time block budget (lower is better)\n");
+    std::printf ("ZackAMP benchmark — %% of real-time block budget (lower is better)\n");
     std::printf ("%-48s %6s %6s | %7s %7s %7s\n", "case", "rate", "block", "mean%", "p99%", "worst%");
 
     struct Case { const char* name; int model; double irSeconds; int irChannels; bool dual; bool effects; int os; };

@@ -229,7 +229,7 @@ void MainComponent::importIRs (int slot)
         juce::Component::SafePointer<MainComponent> safe (this);
         juce::AlertWindow::showAsync (juce::MessageBoxOptions::makeOptionsYesNoCancel (
                                           juce::MessageBoxIconType::QuestionIcon, "Import impulse responses",
-                                          "Copy the files into the AMP FORGE IR library (recommended: presets keep working if you move or delete the originals), "
+                                          "Copy the files into the ZackAMP IR library (recommended: presets keep working if you move or delete the originals), "
                                           "or reference them where they are?", "Copy", "Reference", "Cancel", this),
                                       [safe, files, slot] (int result)
         {

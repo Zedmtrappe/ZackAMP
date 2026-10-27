@@ -1,4 +1,4 @@
-// AMP FORGE — five-band guitar graphic EQ (80 / 240 / 750 / 2200 / 6600 Hz).
+// ZackAMP — five-band guitar graphic EQ (80 / 240 / 750 / 2200 / 6600 Hz).
 //
 // Five broad peaking sections in series. Because neighbouring bands overlap, simply
 // setting each section's gain to the slider value would over- or under-shoot at the

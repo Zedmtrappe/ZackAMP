@@ -1,4 +1,4 @@
-// AMP FORGE — visual identity: a dark, machined-hardware look with per-family faceplates.
+// ZackAMP — visual identity: a dark, machined-hardware look with per-family faceplates.
 // All artwork is drawn in code (no third-party or manufacturer assets).
 #pragma once
 

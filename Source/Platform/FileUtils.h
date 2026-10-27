@@ -1,11 +1,11 @@
-// AMP FORGE — file-system helpers: standard data locations and atomic writes.
+// ZackAMP — file-system helpers: standard data locations and atomic writes.
 #pragma once
 
 #include <juce_core/juce_core.h>
 
 namespace af
 {
-/** ~/Library/Application Support/AMP FORGE on macOS (~/.config/AMP FORGE on Linux).
+/** ~/Library/Application Support/ZackAMP on macOS (~/.config/ZackAMP on Linux).
     Mutable user content never goes into the application bundle. */
 juce::File getAppDataDirectory();
 juce::File getUserPresetDirectory();

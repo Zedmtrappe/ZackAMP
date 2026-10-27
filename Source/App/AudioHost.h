@@ -1,4 +1,4 @@
-// AMP FORGE — standalone audio-device integration. Standalone-only: plugin wrappers will
+// ZackAMP — standalone audio-device integration. Standalone-only: plugin wrappers will
 // feed the engine from the host's process callback instead.
 #pragma once
 

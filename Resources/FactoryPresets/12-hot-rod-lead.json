@@ -4,7 +4,7 @@
   "name": "Hot Rod Lead",
   "category": "Lead",
   "description": "Saturated British lead with delay and room.",
-  "author": "AMP FORGE Factory",
+  "author": "ZackAMP Factory",
   "parameters": {
     "amp.model": 3,
     "amp.gain": 0.78,

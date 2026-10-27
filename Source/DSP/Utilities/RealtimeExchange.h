@@ -1,4 +1,4 @@
-// AMP FORGE — lock-free primitives for handing objects between non-real-time threads
+// ZackAMP — lock-free primitives for handing objects between non-real-time threads
 // and the audio thread.
 //
 // Ownership model:

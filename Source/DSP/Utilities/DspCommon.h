@@ -1,4 +1,4 @@
-// AMP FORGE — shared DSP utilities (framework independent, real-time safe).
+// ZackAMP — shared DSP utilities (framework independent, real-time safe).
 #pragma once
 
 #include <algorithm>

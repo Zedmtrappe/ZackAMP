@@ -41,15 +41,15 @@ The limits are defined in `IRImportLimits` (`Source/IR/IRLibrary.h`) and can be 
 
 ## User library
 
-* Location: `~/Library/Application Support/AMP FORGE/IR Library/` — `library.json` (index) and
-  `Files/` (copies made by AMP FORGE).
+* Location: `~/Library/Application Support/ZackAMP/IR Library/` — `library.json` (index) and
+  `Files/` (copies made by ZackAMP).
 * **Copy** (recommended): the file is duplicated into `Files/` (never overwriting: name collisions get a
   numbered name). Presets keep working even if you move or delete the original.
 * **Reference:** only the path is stored. If the file is moved or deleted the entry is shown as
   *MISSING*; presets using it fall back to the amp model's default cabinet with a warning.
 * Each entry stores: display name, original filename, path, copy/reference status, channel count,
   original sample rate and duration.
-* **Remove from Library** deletes only AMP FORGE's own copy (and only if it really is inside the
+* **Remove from Library** deletes only ZackAMP's own copy (and only if it really is inside the
   managed `Files/` folder); referenced originals are never touched.
 * The index is written atomically. If it is damaged it is preserved as `library.damaged.json` and the
   library starts empty (your files are untouched); re-import to rebuild it.
@@ -77,7 +77,7 @@ The limits are defined in `IRImportLimits` (`Source/IR/IRLibrary.h`) and can be 
 
 **Provenance and licence:** all are original works generated procedurally by `Tools/IRGenerator.cpp`
 (`ampforge_irgen Resources/FactoryIRs`), deterministic (fixed seeds), with no recorded or third-party
-audio. They are distributed under the same terms as the rest of AMP FORGE (see LICENSES.md).
+audio. They are distributed under the same terms as the rest of ZackAMP (see LICENSES.md).
 They are designed approximations of cabinet/microphone character (speaker resonance, open/closed
 back, cone break-up, mic position, early reflections) — **not** captures of real cabinets, and their
 names describe generic cabinet types, not specific products. For the most realistic sound, load

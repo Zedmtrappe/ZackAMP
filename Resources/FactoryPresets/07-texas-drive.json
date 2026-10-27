@@ -4,7 +4,7 @@
   "name": "Texas Drive",
   "category": "Blues",
   "description": "Mid-hump overdrive pedal into a clean amp on the edge.",
-  "author": "AMP FORGE Factory",
+  "author": "ZackAMP Factory",
   "parameters": {
     "amp.model": 0,
     "amp.gain": 0.55,

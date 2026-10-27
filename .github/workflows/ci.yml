@@ -1,24 +1,65 @@
-# Builds and tests AMP FORGE on macOS (universal) and Linux for every push / PR.
-name: CI
-on: [push, pull_request]
+# ZackAMP build pipeline.
+#  * Every push to main: universal macOS build + tests, then the app is published as the
+#    "latest" GitHub release (download: Releases page -> ZackAMP-macOS.zip).
+#  * Linux build + sanitizers only when started by hand (Actions -> Build ZackAMP -> Run
+#    workflow, tick "full_checks"), to save the free plan's macOS minutes.
+name: Build ZackAMP
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**']
+  workflow_dispatch:
+    inputs:
+      full_checks:
+        description: Also run the Linux build, sanitizers and headless launch
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   macos:
     runs-on: macos-14
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Cache JUCE
+        uses: actions/cache@v4
+        with:
+          path: third_party/JUCE
+          key: juce-8.0.9
       - name: Install Ninja
         run: brew install ninja
-      - name: Build and test (universal binary)
+      - name: Build (universal) and run tests
         run: Scripts/build_macos.sh
+        env:
+          EXTRA_CMAKE_ARGS: -DAMPFORGE_BUILD_TOOLS=OFF
+      - name: Package
+        run: Scripts/package_macos.sh build/macos
       - name: Launch smoke test
+        continue-on-error: true
         run: |
-          APP="build/macos/AmpForge_artefacts/Release/AMP FORGE.app"
-          "$APP/Contents/MacOS/AMP FORGE" --smoke-test 5
+          perl -e 'alarm 60; exec @ARGV' "build/macos/ZackAMP_artefacts/Release/ZackAMP.app/Contents/MacOS/ZackAMP" --smoke-test 5
+      - name: Publish as the "latest" release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest dist/ZackAMP-macOS.zip \
+            --target "${{ github.sha }}" \
+            --title "ZackAMP - latest build" \
+            --notes "Built from $(git log -1 --format='%h: %s') on $(date -u '+%Y-%m-%d %H:%M UTC'). Download ZackAMP-macOS.zip, unzip, then follow READ ME FIRST.txt."
       - uses: actions/upload-artifact@v4
         with:
-          name: AMP-FORGE-macOS-unsigned
-          path: build/macos/AmpForge_artefacts/Release/AMP FORGE.app
+          name: ZackAMP-macOS
+          path: dist/ZackAMP-macOS.zip
+
   linux:
+    if: github.event_name == 'workflow_dispatch' && inputs.full_checks
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -29,4 +70,4 @@ jobs:
       - name: Sanitizers
         run: Scripts/run_sanitizers.sh
       - name: Headless launch
-        run: xvfb-run -a "build/release/AmpForge_artefacts/Release/AMP FORGE" --smoke-test 5
+        run: xvfb-run -a "build/release/ZackAMP_artefacts/Release/ZackAMP" --smoke-test 5

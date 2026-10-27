@@ -1,4 +1,4 @@
-// AMP FORGE — compact real FFT (radix-2, precomputed tables, allocation-free after construction).
+// ZackAMP — compact real FFT (radix-2, precomputed tables, allocation-free after construction).
 #pragma once
 
 #include <complex>

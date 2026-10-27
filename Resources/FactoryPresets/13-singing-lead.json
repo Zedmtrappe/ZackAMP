@@ -4,7 +4,7 @@
   "name": "Singing Lead",
   "category": "Lead",
   "description": "Smooth, vocal high-gain lead with mid push from the graphic EQ.",
-  "author": "AMP FORGE Factory",
+  "author": "ZackAMP Factory",
   "parameters": {
     "amp.model": 4,
     "amp.gain": 0.62,

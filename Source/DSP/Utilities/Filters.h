@@ -1,4 +1,4 @@
-// AMP FORGE — biquad and first-order filters (double precision state for low-frequency
+// ZackAMP — biquad and first-order filters (double precision state for low-frequency
 // stability at oversampled rates). Coefficient design follows the RBJ Audio EQ Cookbook.
 #pragma once
 

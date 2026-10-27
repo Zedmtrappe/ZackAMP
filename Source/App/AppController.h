@@ -1,4 +1,4 @@
-// AMP FORGE — application controller: owns the engine and every non-UI service, and is the
+// ZackAMP — application controller: owns the engine and every non-UI service, and is the
 // single place where UI actions become engine/preset/IR/MIDI operations.
 //
 // Threads:

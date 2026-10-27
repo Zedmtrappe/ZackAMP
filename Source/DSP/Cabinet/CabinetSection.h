@@ -1,4 +1,4 @@
-// AMP FORGE — cabinet section: one or two IR slots, crossfaded IR switching,
+// ZackAMP — cabinet section: one or two IR slots, crossfaded IR switching,
 // level / pan per slot and a deliberate cabinet bypass.
 #pragma once
 

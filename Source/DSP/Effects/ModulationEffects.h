@@ -1,4 +1,4 @@
-// AMP FORGE — post-cabinet time-based effects: chorus and delay (stereo).
+// ZackAMP — post-cabinet time-based effects: chorus and delay (stereo).
 #pragma once
 
 #include "../Utilities/DspCommon.h"

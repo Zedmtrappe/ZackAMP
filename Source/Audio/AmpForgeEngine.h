@@ -1,4 +1,4 @@
-// AMP FORGE — the shared, framework-independent audio engine.
+// ZackAMP — the shared, framework-independent audio engine.
 //
 // This is the only object a host integration (standalone app today, AU/VST3 later) needs:
 //

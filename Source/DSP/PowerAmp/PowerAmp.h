@@ -1,4 +1,4 @@
-// AMP FORGE — power amplifier / output stage (run at the oversampled rate).
+// ZackAMP — power amplifier / output stage (run at the oversampled rate).
 //
 // Phase inverter saturation -> push-pull output stage with supply sag -> output
 // transformer band limits -> speaker-load interaction. Presence and depth/resonance

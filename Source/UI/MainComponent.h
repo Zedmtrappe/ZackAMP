@@ -1,4 +1,4 @@
-// AMP FORGE — main window content.
+// ZackAMP — main window content.
 #pragma once
 
 #include "Dialogs.h"

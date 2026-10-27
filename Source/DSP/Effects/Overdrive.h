@@ -1,4 +1,4 @@
-// AMP FORGE — "Forge Drive" overdrive / boost pedal (run at the oversampled rate, before the amp).
+// ZackAMP — "Forge Drive" overdrive / boost pedal (run at the oversampled rate, before the amp).
 //
 // Classic mid-hump overdrive topology: the clipping path only sees frequencies above a
 // few hundred Hz (so the low end stays clean and tight in front of a gainy amp), the

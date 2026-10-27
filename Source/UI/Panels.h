@@ -1,4 +1,4 @@
-// AMP FORGE — main window sections: amp, graphic EQ, cabinet, effects, top bar, status bar.
+// ZackAMP — main window sections: amp, graphic EQ, cabinet, effects, top bar, status bar.
 #pragma once
 
 #include "Controls.h"

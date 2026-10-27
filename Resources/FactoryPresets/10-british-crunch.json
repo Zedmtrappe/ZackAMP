@@ -4,7 +4,7 @@
   "name": "British Crunch",
   "category": "British Crunch",
   "description": "Hot-rodded British amp at a moderate gain: tight, punchy rhythm.",
-  "author": "AMP FORGE Factory",
+  "author": "ZackAMP Factory",
   "parameters": {
     "amp.model": 3,
     "amp.gain": 0.42,

@@ -1,4 +1,4 @@
-// AMP FORGE — offline renderer, test-signal generator and preset level calibration.
+// ZackAMP — offline renderer, test-signal generator and preset level calibration.
 //
 //   ampforge_render --generate <dir>              write the synthetic DI test set (WAV)
 //   ampforge_render --preset "<name>" --in <di.wav> --out <out.wav> [--rate 48000]

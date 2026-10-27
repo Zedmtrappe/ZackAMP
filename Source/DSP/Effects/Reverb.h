@@ -1,4 +1,4 @@
-// AMP FORGE — stereo algorithmic reverb (8-line feedback delay network).
+// ZackAMP — stereo algorithmic reverb (8-line feedback delay network).
 //
 // Input diffusion (4 series all-passes) -> 8-line FDN with an orthogonal Hadamard
 // feedback matrix (energy preserving, so stability depends only on the per-line decay

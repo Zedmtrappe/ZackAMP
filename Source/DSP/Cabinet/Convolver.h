@@ -1,4 +1,4 @@
-// AMP FORGE — zero-latency partitioned convolution for cabinet impulse responses.
+// ZackAMP — zero-latency partitioned convolution for cabinet impulse responses.
 //
 // Scheme: the first P taps of the IR ("head") are convolved directly in the time domain,
 // sample by sample, so there is no added latency. The remainder ("tail") is split into

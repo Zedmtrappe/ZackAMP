@@ -1,4 +1,4 @@
-// AMP FORGE — amplifier models.
+// ZackAMP — amplifier models.
 //
 // Each model ("voicing") is a short chain of circuit-inspired blocks — triode stages,
 // gain pots, cathode followers, the passive tone stack at its model-specific position —

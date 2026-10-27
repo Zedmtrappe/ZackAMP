@@ -1,4 +1,4 @@
-// AMP FORGE — passive treble/bass/middle ("TMB") tone stack.
+// ZackAMP — passive treble/bass/middle ("TMB") tone stack.
 //
 // The classic passive guitar-amp tone network has a closed-form third-order transfer
 // function in terms of its component values and pot positions (see D. T. Yeh and

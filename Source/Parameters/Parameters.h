@@ -1,4 +1,4 @@
-// AMP FORGE — central parameter model (framework independent).
+// ZackAMP — central parameter model (framework independent).
 //
 // Every user-facing control maps to exactly one parameter here. IDs are stable strings
 // that appear in presets, MIDI mappings and (later) plugin automation; never rename

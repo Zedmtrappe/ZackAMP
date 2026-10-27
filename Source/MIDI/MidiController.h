@@ -1,4 +1,4 @@
-// AMP FORGE — MIDI live control: CC -> parameter mapping, Learn mode, Program Change.
+// ZackAMP — MIDI live control: CC -> parameter mapping, Learn mode, Program Change.
 //
 // Thread model: handleMessage() is called on the MIDI input thread. It only touches
 // atomics: mapping slots, the ParameterStore (atomic values, smoothed later by the audio

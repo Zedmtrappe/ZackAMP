@@ -1,4 +1,4 @@
-// AMP FORGE — circuit-inspired preamp building blocks (run at the oversampled rate).
+// ZackAMP — circuit-inspired preamp building blocks (run at the oversampled rate).
 //
 // Units: signals inside the amp are "grid-normalised": 1.0 is roughly the input swing at
 // which a small-signal triode stage starts to conduct grid current (~1.5 V in a real amp).
