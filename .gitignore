@@ -1,0 +1,7 @@
+/build*/
+/third_party/JUCE/
+/out/
+.DS_Store
+*.swp
+/.cache/
+compile_commands.json
