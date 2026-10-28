@@ -1,5 +1,6 @@
 #include "PresetManager.h"
 #include "../Platform/FileUtils.h"
+#include "../DSP/Amplifiers/AmpModel.h"
 
 #include <AmpForgeData.h>
 
@@ -103,6 +104,17 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
     else
     {
         warnings.add ("The preset contains no parameters; defaults were used.");
+    }
+
+    // Presets made before the valve selectors existed: use the model's usual valves, which is
+    // exactly how they sounded.
+    if (const auto* params2 = root["parameters"].getDynamicObject())
+    {
+        const auto& voicing = dsp::getAmpVoicing ((int) s.values[(size_t) pAmpModel]);
+        if (! params2->hasProperty (paramDef (pAmpPreampValve).id))
+            s.values[(size_t) pAmpPreampValve] = (float) voicing.defaultPreampValve;
+        if (! params2->hasProperty (paramDef (pAmpPowerValve).id))
+            s.values[(size_t) pAmpPowerValve] = (float) voicing.defaultPowerValve;
     }
 
     const auto cab = root["cabinet"];

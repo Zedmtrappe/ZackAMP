@@ -191,6 +191,8 @@ void AppController::changeListenerCallback (juce::ChangeBroadcaster*)
 
 void AppController::timerCallback()
 {
+    followModelChange();
+
     const int program = midi.takePendingProgram();
     if (program >= 0)
     {
@@ -254,12 +256,26 @@ void AppController::setParamsWithUndo (const std::vector<std::pair<int, float>>&
 
 void AppController::selectAmpModel (int model)
 {
-    const int old = engine.params().getInt (pAmpModel);
-    if (old == model)
+    if (engine.params().getInt (pAmpModel) != model)
+        setParamWithUndo (pAmpModel, (float) model); // follow-ups happen in followModelChange()
+}
+
+void AppController::followModelChange()
+{
+    // A model change made by the user (knob, MIDI, undo...) resets the valves to the new
+    // model's usual pair and moves a default cabinet along. Preset loads set their own
+    // valves and cabinet, so they are excluded via expectedModel / busy jobs.
+    const int model = engine.params().getInt (pAmpModel);
+    if (model == lastSeenModel)
         return;
-    const bool cabIsDefault = getCabinetIrId (0) == defaultIrForModel (old);
-    setParamWithUndo (pAmpModel, (float) model);
-    if (cabIsDefault)
+    const int old = lastSeenModel;
+    lastSeenModel = model;
+    if (old < 0 || busyJobs.load() > 0 || expectedModel.exchange (-1) == model)
+        return;
+    const auto& v = dsp::getAmpVoicing (model);
+    engine.params().set (pAmpPreampValve, (float) v.defaultPreampValve);
+    engine.params().set (pAmpPowerValve, (float) v.defaultPowerValve);
+    if (getCabinetIrId (0) == defaultIrForModel (old))
         setCabinetIR (0, defaultIrForModel (model));
 }
 
@@ -303,6 +319,8 @@ bool AppController::isModified()
 
 void AppController::markLoaded (int index, const PresetState& state)
 {
+    lastSeenModel = (int) state.values[(size_t) pAmpModel];
+    expectedModel = -1;
     currentPreset = index;
     loadedState = state;
     lastChangeCounter = 0;
@@ -330,6 +348,7 @@ void AppController::loadPreset (int index)
     juce::WeakReference<AppController> weak (this);
     runOnWorker ([this, weak, state, index] {
         juce::StringArray warnings;
+        expectedModel = (int) state.values[(size_t) pAmpModel];
         applyState (engine, irLibrary, state, warnings);
         juce::MessageManager::callAsync ([weak, state, index, warnings] {
             if (auto* self = weak.get())
@@ -443,6 +462,7 @@ void AppController::resetToSafeSettings()
     juce::WeakReference<AppController> weak (this);
     runOnWorker ([this, weak, s] {
         juce::StringArray warnings;
+        expectedModel = (int) s.values[(size_t) pAmpModel];
         applyState (engine, irLibrary, s, warnings);
         juce::MessageManager::callAsync ([weak, s] {
             if (auto* self = weak.get())

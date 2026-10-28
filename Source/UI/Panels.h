@@ -22,14 +22,14 @@ public:
     void resized() override;
 
 private:
-    void rebuildForModel (int model);
+    void applyStyle (int model);
     AppController& app;
-    juce::OwnedArray<juce::TextButton> modelButtons;
-    std::unique_ptr<ParamKnob> gain, bass, mid, treble, presence, depth, master;
-    std::unique_ptr<ParamToggle> bright;
-    std::vector<ParamKnob*> visibleKnobs;
+    // One fixed row: every control is always visible and works on every model.
+    ParamKnob model, gain, bass, mid, treble, presence, depth, master, sag, variac;
+    ParamToggle pull, bright;
+    ParamChoice preampValve, powerValve;
     int shownModel = -1;
-    juce::Rectangle<int> plateArea, selectorArea;
+    juce::Rectangle<int> plateArea, titleArea, powerArea, preampLabel, powerLabel;
 };
 
 //==============================================================================

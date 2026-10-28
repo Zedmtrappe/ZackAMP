@@ -41,6 +41,8 @@ namespace
         {
             auto& a = v[0];
             a.id = "american.clean";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 0;
             a.name = "Lacquer Clean";
             a.shortDescription = "American clean: big headroom, glassy top, scooped and articulate.";
             a.family = AmpFamily::american;
@@ -60,6 +62,8 @@ namespace
         {
             auto& a = v[1];
             a.id = "american.tweed";
+            a.defaultPreampValve = 2; // 12AY7
+            a.defaultPowerValve = 2;
             a.name = "Lacquer Tweed";
             a.shortDescription = "Vintage American drive: touch-sensitive breakup, loose and warm.";
             a.family = AmpFamily::american;
@@ -80,6 +84,8 @@ namespace
         {
             auto& a = v[2];
             a.id = "british.plexi";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 1;
             a.name = "Albion Plexi";
             a.shortDescription = "Vintage British: chewy upper mids, crunch that grows with the volume.";
             a.family = AmpFamily::british;
@@ -99,6 +105,8 @@ namespace
         {
             auto& a = v[3];
             a.id = "british.lead";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 1;
             a.name = "Albion Lead";
             a.shortDescription = "Hot-rodded British: cascaded gain, tight lows, aggressive classic rock.";
             a.family = AmpFamily::british;
@@ -120,6 +128,8 @@ namespace
         {
             auto& a = v[4];
             a.id = "modern.lead";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 0;
             a.name = "Cascade Lead";
             a.shortDescription = "Focused singing lead: tone stack before the gain, vocal mids, graphic EQ.";
             a.family = AmpFamily::modern;
@@ -140,6 +150,8 @@ namespace
         {
             auto& a = v[5];
             a.id = "modern.heavy";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 0;
             a.name = "Cascade Heavy";
             a.shortDescription = "Tight modern high gain: firm low end, defined chords, deep resonance.";
             a.family = AmpFamily::modern;
@@ -159,6 +171,20 @@ namespace
             a.outputTrimDb = 2.0f;
             a.prePowerEQDefault = true;
             a.defaultIrId = "factory:md-4x12-heavy-cap";
+        }
+        // Every control works on every model (owner's request): give voicings that had no
+        // bright cap or depth/resonance control sensible ones. Defaults (bright off) keep the
+        // calibrated sound; depth now also adds low-end resonance on the vintage models.
+        for (auto& a : v)
+        {
+            a.controls = ctlGain | ctlBass | ctlMid | ctlTreble | ctlPresence | ctlDepth | ctlMaster | ctlBright;
+            if (! a.bright.available)
+                a.bright = { true, 2000.0f, 6.0f };
+            if (a.power.depthMaxDb <= 0.0f)
+            {
+                a.power.depthMaxDb = 6.0f;
+                a.power.depthHz = 100.0f;
+            }
         }
         return v;
     }
@@ -195,7 +221,7 @@ void AmpModel::prepare (double oversampledRate, const AmpVoicing& v)
     toneStack.setComponents (v.toneStack);
     toneStack.prepare (fs);
     follower.prepare (v.cathodeFollower);
-    power.prepare (fs, v.power);
+    power.prepare (fs, v.power, v.defaultPowerValve);
     powerDrive = dbToGain (v.powerDriveDb);
     // A saturated power stage peaks near +/-1; keep 12 dB of headroom for the cabinet
     // resonances and effects so the output limiter stays a safety device, not a tone stage.
@@ -203,10 +229,32 @@ void AmpModel::prepare (double oversampledRate, const AmpVoicing& v)
     outputTrim = dbToGain (v.outputTrimDb + kAmpOutputHeadroomDb);
     lastToneB = lastToneM = lastToneT = lastBrightGain = -1.0f;
     current = AmpControls {};
+    setValves (v.defaultPreampValve, v.defaultPowerValve);
     setControls (current);
     gainPotFrom = gainPotTo;
     masterFrom = masterTo;
     reset();
+}
+
+void AmpModel::setValves (int preampValve, int powerValve) noexcept
+{
+    const auto& v = *voicing;
+    preValve = clampv (preampValve, 0, kNumPreampValves - 1);
+    powValve = clampv (powerValve, 0, kNumPowerValves - 1);
+
+    // Preamp valve: applied to V1 relative to the valve the voicing was calibrated with.
+    const auto& def = kPreampValves[(size_t) v.defaultPreampValve];
+    const auto& sel = kPreampValves[(size_t) preValve];
+    TriodeSpec t = v.triodes[0];
+    const float gainRatio = sel.gain / def.gain;
+    t.swing *= gainRatio;
+    t.headroom *= sel.headroom / def.headroom;
+    t.negLimit *= sel.softness / def.softness;
+    triodes[0].prepare (fs, t);
+    // Partial level compensation: in clean settings V1 gain changes the level directly.
+    valveLevel = 1.0f / std::sqrt (gainRatio);
+
+    power.setValve (powValve);
 }
 
 void AmpModel::reset() noexcept
@@ -234,7 +282,9 @@ void AmpModel::setControls (const AmpControls& c)
     }
 
     gainPotFrom = gainPotTo;
-    gainPotTo = potTaper (c.gain, v.gainFloorDb);
+    // "Pull for saturation": up to +10 dB more preamp gain, blended smoothly.
+    constexpr float kPullBoost = 3.1623f; // +10 dB
+    gainPotTo = potTaper (c.gain, v.gainFloorDb) * (1.0f + c.pull * (kPullBoost - 1.0f));
     masterFrom = masterTo;
     masterTo = (v.controls & ctlMaster) ? potTaper (c.master, -60.0f) : 1.0f;
 
@@ -254,6 +304,7 @@ void AmpModel::setControls (const AmpControls& c)
 
     power.setControls ((v.controls & ctlPresence) ? c.presence : v.power.fixedPresence,
                        (v.controls & ctlDepth) ? c.depth : 0.0f);
+    power.setSupply (c.sag, c.variac);
 }
 
 void AmpModel::processPreamp (float* buf, int n) noexcept
@@ -316,7 +367,7 @@ void AmpModel::processPower (float* buf, int n) noexcept
     for (int i = 0; i < n; ++i)
     {
         m += step;
-        buf[i] = power.process (buf[i] * m * powerDrive) * outputTrim;
+        buf[i] = power.process (buf[i] * m * powerDrive) * outputTrim * valveLevel;
     }
     masterFrom = masterTo;
 }

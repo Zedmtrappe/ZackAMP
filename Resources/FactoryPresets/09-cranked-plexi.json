@@ -16,6 +16,9 @@
     "amp.bright": 1,
     "gate.enabled": 1,
     "gate.threshold": -66,
+    "amp.preampValve": 0,
+    "amp.powerValve": 1,
+    "amp.depth": 0.0,
     "out.level": -5.0
   },
   "cabinet": {

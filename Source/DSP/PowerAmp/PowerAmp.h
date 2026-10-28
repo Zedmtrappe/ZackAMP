@@ -9,6 +9,9 @@
 
 #include "../Utilities/DspCommon.h"
 #include "../Utilities/Filters.h"
+#include "../Amplifiers/Valves.h"
+
+#include <array>
 
 #include <vector>
 
@@ -61,11 +64,20 @@ private:
 class PowerAmp
 {
 public:
-    void prepare (double sampleRate, const PowerAmpSpec& s);
+    /** Allocates (one knee table per power valve): call off the audio thread. */
+    void prepare (double sampleRate, const PowerAmpSpec& s, int defaultValve);
     void reset() noexcept;
 
     /** Knobs 0..1, call at control rate. */
     void setControls (float presence, float depth);
+
+    /** Selects the power valve relative to the voicing's default. Real-time safe (no allocation);
+        changes the transfer curve, so call it while the output is faded out. */
+    void setValve (int valveIndex) noexcept;
+
+    /** sagKnob 0..1 (0.5 = the voicing's own sag), variac = supply voltage ratio (1 = nominal).
+        Call at control rate with smoothed values. */
+    void setSupply (float sagKnob, float variac) noexcept;
 
     float process (float x) noexcept
     {
@@ -75,27 +87,38 @@ public:
         // Long-tailed-pair phase inverter: gentle symmetric saturation.
         x = tanhRational (x * spec.piDrive) / spec.piDrive;
 
-        // Supply sag lowers headroom while the stage works hard.
-        const float g = 1.0f / (1.0f + spec.sag * env);
+        // Supply sag lowers headroom while the stage works hard; a lower variac voltage
+        // lowers headroom all the time.
+        const float g = inputDrive / (1.0f + sag * env);
         const float v = x * g;
-        float y = knee (v + spec.asymmetry) - kneeRest;
+        const auto& k = knees[(size_t) valve];
+        float y = k (v + asymmetry) - kneeRest;
 
         const float rect = std::abs (y);
         env = rect > env ? rect + sagAttack * (env - rect) : rect + sagRelease * (env - rect);
 
+        y = tiltLow.process (y);
+        y = tiltMid.process (y);
+        y = tiltHigh.process (y);
         y = otHigh.process (y);
         y = otLow.process (y);
         y = speakerLow.process (y);
         y = speakerHigh.process (y);
-        return y;
+        return y * outputLevel;
     }
 
 private:
+    void updateSupply() noexcept;
+
     PowerAmpSpec spec;
     double fs = 48000.0;
-    KneeTable knee;
-    float kneeRest = 0.0f;
-    Biquad presenceShelf, depthShelf, otLow, speakerLow, speakerHigh;
+    int defaultValve = 0, valve = 0;
+    std::array<KneeTable, kNumPowerValves> knees;
+    float kneeRest = 0.0f, asymmetry = 0.0f;
+    float valveDrive = 1.0f, valveSag = 1.0f, valveLevel = 1.0f;
+    float sagKnob = 0.5f, variac = 1.0f;
+    float sag = 0.0f, inputDrive = 1.0f, outputLevel = 1.0f;
+    Biquad presenceShelf, depthShelf, otLow, speakerLow, speakerHigh, tiltLow, tiltMid, tiltHigh;
     OnePole otHigh;
     float env = 0.0f, sagAttack = 0.0f, sagRelease = 0.0f;
     float lastPresence = -1.0f, lastDepth = -1.0f;

@@ -192,3 +192,17 @@ TEST_CASE ("Atomic writes never leave partial files")
     CHECK (f.loadFileAsString() == "world");
     CHECK (t.dir.getChildFile ("a/b").findChildFiles (juce::File::findFiles, false).size() == 1);
 }
+
+TEST_CASE ("Presets without valve settings get the model's usual valves")
+{
+    PresetState out;
+    juce::String err;
+    juce::StringArray w;
+    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":1,"name":"Old Tweed",
+        "parameters":{"amp.model":1,"amp.gain":0.7}})", out, err, w));
+    CHECK ((int) out.values[(size_t) pAmpPreampValve] == dsp::getAmpVoicing (1).defaultPreampValve);
+    CHECK ((int) out.values[(size_t) pAmpPowerValve] == dsp::getAmpVoicing (1).defaultPowerValve);
+    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":1,"name":"Swapped",
+        "parameters":{"amp.model":1,"amp.preampValve":0,"amp.powerValve":4}})", out, err, w));
+    CHECK ((int) out.values[(size_t) pAmpPowerValve] == 4);
+}

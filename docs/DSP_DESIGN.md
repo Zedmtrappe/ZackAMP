@@ -82,6 +82,30 @@ depth peak (≈ 80–90 Hz) → presence high shelf (≈ 3.5–4.5 kHz)      // 
 The knee hardness stands in for negative feedback (more NFB → harder, later clipping). Tube-rectifier
 voicings sag more and recover more slowly than silicon ones.
 
+**Sag and Variac (POWER section).** Sag scales the voicing's sag depth (`power.sag` 0.5 = calibrated,
+0 = stiff supply, 1 = twice the sag). Variac `v` (0.6–1.1) models the supply voltage: the output
+stage's clipping level follows the supply, so the input is scaled by `1/v^1.3` (earlier breakup),
+the output swing by `v^1.3`, partly level-compensated by `v^-0.7`; a lower supply also sags more
+(`sag / sqrt(v)`).
+
+### Valve selection (`Valves.h`)
+
+Every voicing has "usual" valves (Clean 12AX7/6L6, Tweed 12AY7/6V6, Plexi and Lead 12AX7/EL34,
+Cascade Lead and Heavy 12AX7/6L6). A different choice is applied *relative* to those, so the default
+selection is bit-identical to the calibrated amp (tested):
+* **Preamp valve (V1):** scales the first triode's swing (gain ratio), grid headroom and cutoff
+  softness; level compensated by `1/sqrt(gain ratio)`.
+* **Power valve:** knee hardness ratio, drive ratio (earlier/later breakup), push-pull asymmetry,
+  sag sensitivity and a gentle tilt (120 Hz shelf, 800 Hz peak, 3 kHz shelf, differences in dB);
+  level compensated by `1/sqrt(drive ratio)`. All knee tables are built in `prepare()`, so switching
+  is real-time safe; the engine still fades out/in around a valve change to avoid clicks.
+
+**PULL:** multiplies the gain pot by up to ×3.16 (+10 dB), smoothed over 30 ms.
+
+**Controls on every model:** each voicing has Presence, Resonance (Depth) and Bright. Voicings that
+did not have them get a 100 Hz resonance peak up to +6 dB and a 2 kHz/+6 dB bright cap; their
+factory presets keep them at neutral settings, so the calibrated sound is unchanged.
+
 ### Voicings
 
 | Model | Family | Preamp chain | Character / controls |
@@ -93,7 +117,7 @@ voicings sag more and recover more slowly than silicon ones.
 | Cascade Lead | Modern | V1 → TMB (*before the gain*) → Drive → cold V2 → V3 → divider → V4 → [EQ] | Treble/bass shape what distorts (a hallmark of this design family); vocal mids; Presence, Depth |
 | Cascade Heavy | Modern | V1 (tight) → Gain → cold V2 → divider → V3 → divider → V4 → CF → TMB → [EQ] | Modern high gain with firm lows, deep resonance (Depth up to +9 dB) |
 
-The default cabinet differs per model; switching models moves the cab with it unless you chose a different IR.
+The default cabinet differs per model; switching models moves the cab with it unless you chose a different IR, and resets the valve selectors to the new model's usual valves (loading a preset does not).
 
 ### Measured behaviour (220 Hz sine, cab off, `ampforge_measure`, 48 kHz, 8x)
 

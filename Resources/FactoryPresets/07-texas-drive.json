@@ -18,6 +18,10 @@
     "drive.level": 5.0,
     "reverb.enabled": 1,
     "reverb.mix": 0.15,
+    "amp.preampValve": 0,
+    "amp.powerValve": 0,
+    "amp.presence": 0.35,
+    "amp.depth": 0.0,
     "out.level": -9.5
   },
   "cabinet": {

@@ -43,6 +43,7 @@ enum ParamIndex : int
     pGateOn, pGateThreshold, pGateRelease,
     pDriveOn, pDriveDrive, pDriveTone, pDriveLevel,
     pAmpModel, pAmpGain, pAmpBass, pAmpMid, pAmpTreble, pAmpPresence, pAmpDepth, pAmpMaster, pAmpBright,
+    pAmpPull, pAmpPreampValve, pAmpPowerValve, pPowerSag, pPowerVariac,
     pEqOn, pEqPosition, pEq80, pEq240, pEq750, pEq2200, pEq6600,
     pCabOn, pCabDual, pCabALevel, pCabAPan, pCabBLevel, pCabBPan,
     pPitchOn, pPitchMix,

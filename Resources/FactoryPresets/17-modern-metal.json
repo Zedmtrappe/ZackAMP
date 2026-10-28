@@ -27,6 +27,8 @@
     "gate.enabled": 1,
     "gate.threshold": -56,
     "gate.release": 80,
+    "amp.preampValve": 0,
+    "amp.powerValve": 0,
     "out.level": -3.0
   },
   "cabinet": {

@@ -15,6 +15,10 @@
     "amp.bright": 1,
     "reverb.enabled": 1,
     "reverb.mix": 0.18,
+    "amp.preampValve": 0,
+    "amp.powerValve": 0,
+    "amp.presence": 0.35,
+    "amp.depth": 0.0,
     "out.level": -7.5
   },
   "cabinet": {

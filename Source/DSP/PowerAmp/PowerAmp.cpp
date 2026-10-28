@@ -2,12 +2,14 @@
 
 namespace af::dsp
 {
-void PowerAmp::prepare (double sampleRate, const PowerAmpSpec& s)
+void PowerAmp::prepare (double sampleRate, const PowerAmpSpec& s, int defaultValveIndex)
 {
     fs = sampleRate;
     spec = s;
-    knee.build (spec.hardness);
-    kneeRest = knee (spec.asymmetry);
+    defaultValve = clampv (defaultValveIndex, 0, kNumPowerValves - 1);
+    const auto& def = kPowerValves[(size_t) defaultValve];
+    for (int i = 0; i < kNumPowerValves; ++i)
+        knees[(size_t) i].build (spec.hardness * kPowerValves[(size_t) i].hardness / def.hardness);
     otHigh.prepare (fs, OnePole::Type::highPass, spec.otHpHz);
     otLow.setCoeffs (BiquadCoeffs::lowPass (fs, spec.otLpHz, 0.6));
     // Speaker impedance: resonance bump (~100 Hz) and rising voice-coil inductance.
@@ -17,7 +19,46 @@ void PowerAmp::prepare (double sampleRate, const PowerAmpSpec& s)
     sagRelease = onePoleCoeff (spec.sagReleaseMs * 0.001, fs);
     lastPresence = lastDepth = -1.0f;
     setControls (spec.fixedPresence, 0.5f);
+    setValve (defaultValve);
+    setSupply (0.5f, 1.0f);
     reset();
+}
+
+void PowerAmp::setValve (int index) noexcept
+{
+    valve = clampv (index, 0, kNumPowerValves - 1);
+    const auto& def = kPowerValves[(size_t) defaultValve];
+    const auto& sel = kPowerValves[(size_t) valve];
+    asymmetry = spec.asymmetry + (sel.asymmetry - def.asymmetry);
+    kneeRest = knees[(size_t) valve] (asymmetry);
+    valveDrive = sel.drive / def.drive;
+    valveSag = sel.sag / def.sag;
+    // Partial level compensation: a valve that breaks up earlier is not simply louder.
+    valveLevel = 1.0f / std::sqrt (valveDrive);
+    tiltLow.setCoeffs (BiquadCoeffs::lowShelf (fs, 120.0, 0.7, sel.lowDb - def.lowDb));
+    tiltMid.setCoeffs (BiquadCoeffs::peaking (fs, 800.0, 0.8, sel.midDb - def.midDb));
+    tiltHigh.setCoeffs (BiquadCoeffs::highShelf (fs, 3000.0, 0.7, sel.highDb - def.highDb));
+    updateSupply();
+}
+
+void PowerAmp::setSupply (float newSagKnob, float newVariac) noexcept
+{
+    if (newSagKnob == sagKnob && newVariac == variac)
+        return;
+    sagKnob = clampv (newSagKnob, 0.0f, 1.0f);
+    variac = clampv (newVariac, 0.5f, 1.2f);
+    updateSupply();
+}
+
+void PowerAmp::updateSupply() noexcept
+{
+    // Variac: the output stage's clipping level follows the supply voltage, so the same drive
+    // clips earlier (input scaled up) while the maximum output swing drops; a starved supply
+    // also sags more. Output is partly compensated so it is a character control, not a volume knob.
+    const float headroom = std::pow (variac, 1.3f);
+    inputDrive = valveDrive / headroom;
+    outputLevel = valveLevel * headroom * std::pow (variac, -0.7f);
+    sag = spec.sag * valveSag * (2.0f * sagKnob) / std::sqrt (variac);
 }
 
 void PowerAmp::reset() noexcept
@@ -28,6 +69,9 @@ void PowerAmp::reset() noexcept
     otHigh.reset();
     speakerLow.reset();
     speakerHigh.reset();
+    tiltLow.reset();
+    tiltMid.reset();
+    tiltHigh.reset();
     env = 0.0f;
 }
 

@@ -44,12 +44,13 @@ Scripts/run_sanitizers.sh                         # ASan+UBSan and TSan builds o
 | Aliasing | inharmonic energy of a 3.1 kHz tone into high gain decreases 2x → 4x → 8x; 8x < -60 dB; automatic mode < -60 dB for a 1 kHz lead note |
 | DC | |mean| < 2·10⁻³ for every model with half-wave input at full gain |
 | Smoothing | 10 %→90 % jumps of gain, master, bass, output, EQ band produce no click (second difference) |
+| Valves / Pull / Sag / Variac | each changes the audio measurably and stays finite; default valves reproduce the calibrated amp bit-exactly |
 | I/O layouts | mono output (null right channel); in-place processing (input aliases left output) |
 
 ### Presets, IR library, MIDI (`Tests/Presets`, `Tests/IR`, `Tests/Integration`)
 | Area | Checks |
 |---|---|
-| Presets | JSON round trip of all parameters + IR refs; invalid JSON / wrong format / empty rejected; partial presets use defaults, unknown params and bad values warned, clamping; newer schema warning; all factory presets parse, have descriptions, valid categories, existing IRs, ≥ 8 categories |
+| Presets | JSON round trip of all parameters + IR refs; invalid JSON / wrong format / empty rejected; partial presets use defaults, unknown params and bad values warned, clamping; newer schema warning; presets without valve settings get the model's usual valves; every parameter enum index matches its ID; all factory presets parse, have descriptions, valid categories, existing IRs, ≥ 8 categories |
 | Preset files | save / collision refused / explicit overwrite / factory names reserved / rescan from disk / rename / duplicate / delete; corrupt files skipped and reported; filters; atomic writes leave no temp files |
 | Applying | `applyState` + `captureState` round trip is exact; missing IR falls back to the model default with a warning naming the IR |
 | IR library | all factory IRs decode and load at 44.1 kHz (resampled); import 16/24/32-bit × mono/stereo × 44.1/48/96 kHz with copy; copy never overwrites; rejects garbage, empty, silent, 4-channel, too long, too large, nonexistent files with specific messages; reference imports persist, deduplicate, survive restart; removal never deletes referenced originals; deleted managed copy → flagged missing, load fails with message; damaged index preserved and reported |
@@ -98,6 +99,8 @@ Record: date, Mac model, macOS version, interface, sample rate, buffer size, gui
 - [ ] Tone stack: knobs interact musically; no knob dead over most of its travel
 - [ ] Bright switch strongest at low volume settings
 - [ ] Presence/Depth useful, not exaggerated
+- [ ] Valve swaps: audible character change without a big level jump; model change resets valves
+- [ ] PULL adds saturation; Sag gives "bloom" at high settings; Variac below 100 % browns out
 - [ ] Graphic EQ: classic V-curve on Cascade Lead sounds as expected; pre vs post position difference
 - [ ] Noise gate on high gain: silent between phrases, notes not chopped, sustain intact
 

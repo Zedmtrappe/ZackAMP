@@ -11,6 +11,8 @@ namespace
 {
     const char* const kAmpModels[] = { "Lacquer Clean", "Lacquer Tweed", "Albion Plexi",
                                        "Albion Lead", "Cascade Lead", "Cascade Heavy" };
+    const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
+    const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
     const char* const kDivisions[] = { "1/2", "1/4", "1/4 D", "1/4 T", "1/8", "1/8 D", "1/8 T", "1/16" }; // D = dotted, T = triplet
@@ -43,6 +45,11 @@ namespace
         { "amp.depth", "Depth", "", 0.f, 1.f, 0.4f, LIN, 10.f, "Amp", "Power-amp low-frequency resonance." },
         { "amp.master", "Master", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Master volume: how hard the power amp is driven." },
         { "amp.bright", "Bright", "", 0.f, 1.f, 0.f, TOG, 1.f, "Amp", "Bright cap across the volume pot: more sparkle at low volume settings." },
+        { "amp.pull", "Pull", "", 0.f, 1.f, 0.f, TOG, 1.f, "Amp", "Pull for saturation: about +10 dB more preamp gain for a thicker, more saturated sound." },
+        { "amp.preampValve", "Preamp Valve", "", 0.f, 3.f, 0.f, CHO, 1.f, "Amp", "Input (V1) preamp valve. 12AX7 most gain; 5751 a little less; 12AY7 vintage, softer; 12AT7 most headroom. Resets to the model's usual valve when the model changes.", kPreampValveNames, 4 },
+        { "amp.powerValve", "Power Valves", "", 0.f, 4.f, 0.f, CHO, 1.f, "Amp", "Power valves. 6L6 clean and tight; EL34 mid-forward, earlier breakup; 6V6 sweet, early breakup; EL84 chimey, compressed; KT88 huge headroom. Resets to the model's usual valves when the model changes.", kPowerValveNames, 5 },
+        { "power.sag", "Sag", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Power", "Power-supply sag: how much the amp compresses and 'breathes' when played hard. 5 = the model's own amount." },
+        { "power.variac", "Variac", "%", 60.f, 110.f, 100.f, LIN, 1.f, "Power", "Mains voltage, like a variac: lower voltage gives less headroom, earlier and softer breakup and a browner tone." },
 
         { "eq.enabled", "Graphic EQ", "", 0.f, 1.f, 0.f, TOG, 1.f, "EQ", "Five-band graphic EQ." },
         { "eq.position", "EQ Position", "", 0.f, 1.f, 0.f, CHO, 1.f, "EQ", "Pre Power Amp (classic position between preamp and power amp) or Post Amp (before the cabinet).", kEqPositions, 2 },

@@ -94,8 +94,19 @@ def main():
     manifest = json.load(open(os.path.join(os.path.dirname(__file__), "..", "Resources", "FactoryIRs", "manifest.json")))
     for m in manifest:
         ir_names[m["id"]] = m["name"]
+    # Usual valves per model (preamp V1, power) — matches AmpVoicing defaults in AmpModel.cpp.
+    valves = {0: (0, 0), 1: (2, 2), 2: (0, 1), 3: (0, 1), 4: (0, 0), 5: (0, 0)}
     for i, (name, cat, desc, ira, irb, params) in enumerate(P):
         params = dict(params)
+        model = params["amp.model"]
+        params.setdefault("amp.preampValve", valves[model][0])
+        params.setdefault("amp.powerValve", valves[model][1])
+        # Since every control works on every model: keep the original sound of these presets
+        # (the clean model used a fixed presence of 3.5; vintage models had no resonance).
+        if model == 0:
+            params.setdefault("amp.presence", 0.35)
+        if model <= 3:
+            params.setdefault("amp.depth", 0.0)
         params["out.level"] = LEVELS.get(name, 0.0)
         doc = {"format": "ampforge.preset", "schemaVersion": 1, "name": name, "category": cat,
                "description": desc, "author": "ZackAMP Factory", "parameters": params,

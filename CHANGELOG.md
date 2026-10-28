@@ -6,6 +6,13 @@
 - Micro-pitch doubler: copies shifted +13 cents (left) and -13 cents (right), post amp/cab, with
   on/off and Mix.
 - Chorus / Flanger mode switch.
+- Single fixed row of amp controls: a detented MODEL knob, then Gain, Bass, Middle, Treble,
+  Presence, Resonance, Master — every control and Bright now works on every model.
+- PULL (pull-for-saturation) switch on the Gain knob: about +10 dB more preamp gain.
+- POWER section: Sag (supply sag amount) and Variac (60–110 % supply voltage).
+- Preamp (V1) and power valve selectors (12AX7/5751/12AY7/12AT7; 6L6/EL34/6V6/EL84/KT88).
+  Changing the model resets them to that model's usual valves; the default valves reproduce the
+  calibrated sound exactly. Older presets load with the model's usual valves.
 
 ### Fixed
 - Audio from the interface now actually reaches the amp (the audio callback was not registered).

@@ -22,6 +22,7 @@ struct TriodeSpec
     float bias = 0.0f;          // operating point: negative = colder (more asymmetric)
     float negLimit = 1.6f;      // cutoff-side headroom relative to grid-conduction side
     float blocking = 0.25f;     // grid-conduction bias shift amount (dynamics, "bloom")
+    float headroom = 1.0f;      // grid swing before clipping (valve-dependent); small-signal gain stays `swing`
 };
 
 /** Static triode transfer: firm limit on the grid-conduction side, softer and later
@@ -45,6 +46,7 @@ public:
         attack = onePoleCoeff (0.002, fs);
         release = onePoleCoeff (0.080, fs);
         restOut = triodeShape (spec.bias, spec.negLimit);
+        invHeadroom = 1.0f / std::max (0.1f, spec.headroom);
         reset();
     }
 
@@ -62,7 +64,7 @@ public:
         if (hasCathodeShelf)
             x = cathode.process (x);
 
-        const float v = x + spec.bias - shift;
+        const float v = x * invHeadroom + spec.bias - shift;
 
         // Grid conduction charges the coupling capacitor and pushes the bias colder;
         // it recovers with the RC time constant. Bounded so it can never run away.
@@ -70,7 +72,7 @@ public:
         const float c = conduction > shift ? attack : release;
         shift = clampv (conduction + c * (shift - conduction), 0.0f, 2.0f);
 
-        const float y = -(triodeShape (v, spec.negLimit) - restOut) * spec.swing; // inverting stage
+        const float y = -(triodeShape (v, spec.negLimit) - restOut) * spec.swing * spec.headroom; // inverting stage
         return plate.process (y);
     }
 
@@ -79,7 +81,7 @@ private:
     OnePole coupling, plate;
     Biquad cathode;
     bool hasCathodeShelf = false;
-    float shift = 0.0f, attack = 0.0f, release = 0.0f, restOut = 0.0f;
+    float shift = 0.0f, attack = 0.0f, release = 0.0f, restOut = 0.0f, invHeadroom = 1.0f;
 };
 
 /** Cathode follower driving a tone stack: near-unity gain, but it can only source limited

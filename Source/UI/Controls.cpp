@@ -111,7 +111,8 @@ ParamKnob::ParamKnob (AppController& a, int paramIndex, const juce::String& l)
     slider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
     slider.setRotaryParameters (juce::degreesToRadians (225.0f), juce::degreesToRadians (495.0f), true);
-    slider.setRange (0.0, 1.0, 0.0);
+    // Choice parameters (e.g. the amp model) click into detented positions.
+    slider.setRange (0.0, 1.0, def.scale == ParamScale::choice && def.numChoices > 1 ? 1.0 / (def.numChoices - 1) : 0.0);
     slider.setMouseDragSensitivity (220);
     slider.setDoubleClickReturnValue (true, plainToNormalised (index, def.def));
     slider.setWantsKeyboardFocus (true);

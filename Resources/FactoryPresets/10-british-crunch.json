@@ -13,6 +13,9 @@
     "amp.treble": 0.6,
     "amp.presence": 0.5,
     "amp.master": 0.6,
+    "amp.preampValve": 0,
+    "amp.powerValve": 1,
+    "amp.depth": 0.0,
     "out.level": -1.0
   },
   "cabinet": {

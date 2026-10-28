@@ -48,6 +48,9 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
     for (int i = 0; i < kNumAmpModels; ++i)
         amps[(size_t) i].prepare (osRate, getAmpVoicing (i));
     activeModel = store.getInt (pAmpModel);
+    activePreValve = store.getInt (pAmpPreampValve);
+    activePowValve = store.getInt (pAmpPowerValve);
+    amps[(size_t) activeModel].setValves (activePreValve, activePowValve);
     modelFade = ModelFade::none;
     modelFadeGain = 1.0f;
     modelFadeStep = (float) (1.0 / (0.012 * sampleRate));
@@ -89,6 +92,9 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
     for (auto* s : { &ampGain, &ampBass, &ampMid, &ampTreble, &ampPresence, &ampDepth, &ampMaster,
                      &driveDrive, &driveTone, &driveLevel, &chorusRate, &chorusDepth, &delayFb, &delayMix, &reverbMix })
         s->prepare (sampleRate, 0.04);
+    ampPull.prepare (sampleRate, 0.03);
+    powerSag.prepare (sampleRate, 0.1);
+    powerVariac.prepare (sampleRate, 0.15);
     for (auto& s : eqBands)
         s.prepare (sampleRate, 0.05);
 
@@ -265,11 +271,15 @@ void AmpForgeEngine::snapAll() noexcept
     delayIn.snap (p.getBool (pDelayOn) ? 1.0f : 0.0f);
     reverbIn.snap (p.getBool (pReverbOn) ? 1.0f : 0.0f);
     for (auto* s : { &ampGain, &ampBass, &ampMid, &ampTreble, &ampPresence, &ampDepth, &ampMaster,
-                     &driveDrive, &driveTone, &driveLevel, &chorusRate, &chorusDepth, &delayFb, &delayMix, &reverbMix })
+                     &driveDrive, &driveTone, &driveLevel, &chorusRate, &chorusDepth, &delayFb, &delayMix, &reverbMix,
+                     &ampPull, &powerSag, &powerVariac })
         s->snapToTarget();
     for (auto& s : eqBands)
         s.snapToTarget();
     activeModel = p.getInt (pAmpModel);
+    activePreValve = p.getInt (pAmpPreampValve);
+    activePowValve = p.getInt (pAmpPowerValve);
+    amps[(size_t) activeModel].setValves (activePreValve, activePowValve);
     modelFade = ModelFade::none;
     modelFadeGain = 1.0f;
     updateControls (kControlBlock); // push snapped values into the DSP objects
@@ -323,6 +333,9 @@ void AmpForgeEngine::updateControls (int n) noexcept
     ampPresence.setTarget (p.get (pAmpPresence));
     ampDepth.setTarget (p.get (pAmpDepth));
     ampMaster.setTarget (p.get (pAmpMaster));
+    ampPull.setTarget (p.getBool (pAmpPull) ? 1.0f : 0.0f);
+    powerSag.setTarget (p.get (pPowerSag));
+    powerVariac.setTarget (p.get (pPowerVariac) * 0.01f);
     AmpControls ac;
     ac.gain = ampGain.skip (n);
     ac.bass = ampBass.skip (n);
@@ -332,6 +345,9 @@ void AmpForgeEngine::updateControls (int n) noexcept
     ac.depth = ampDepth.skip (n);
     ac.master = ampMaster.skip (n);
     ac.bright = p.getBool (pAmpBright);
+    ac.pull = ampPull.skip (n);
+    ac.sag = powerSag.skip (n);
+    ac.variac = powerVariac.skip (n);
     amps[(size_t) activeModel].setControls (ac);
 
     gate.setControls (p.get (pGateThreshold), p.get (pGateRelease));
@@ -422,8 +438,12 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
     mGateOpen.store (gate.isOpen(), std::memory_order_relaxed);
 
     // ---- amp model change: fade out, switch, fade in ----
+    // Model or valve changes alter transfer curves: fade out, switch while silent, fade in.
     const int requested = store.getInt (pAmpModel);
-    if (modelFade == ModelFade::none && requested != activeModel)
+    const int requestedPre = store.getInt (pAmpPreampValve);
+    const int requestedPow = store.getInt (pAmpPowerValve);
+    if (modelFade == ModelFade::none
+        && (requested != activeModel || requestedPre != activePreValve || requestedPow != activePowValve))
         modelFade = ModelFade::out;
 
     // ---- oversampled section ----
@@ -491,6 +511,9 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
     {
         // Silent now: swap to the requested model with clean state; it fades in next block.
         activeModel = std::clamp (requested, 0, kNumAmpModels - 1);
+        activePreValve = requestedPre;
+        activePowValve = requestedPow;
+        amps[(size_t) activeModel].setValves (activePreValve, activePowValve);
         amps[(size_t) activeModel].reset();
         eqPre.reset();
         modelFade = ModelFade::in;

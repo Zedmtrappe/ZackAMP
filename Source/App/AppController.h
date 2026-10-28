@@ -115,11 +115,14 @@ private:
     void restoreSession();
     void runOnWorker (std::function<void()> job);
     void markLoaded (int index, const PresetState& state);
+    void followModelChange();
 
     AudioHost audioHost { engine };
     std::unique_ptr<juce::PropertiesFile> settings;
     juce::ThreadPool worker { 1 };
     std::atomic<int> busyJobs { 0 };
+    std::atomic<int> expectedModel { -1 }; // model a preset load is about to set
+    int lastSeenModel = -1;
 
     int currentPreset = -1;
     PresetState loadedState;

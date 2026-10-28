@@ -17,7 +17,9 @@
    per-preset MIDI program assignment, preset import/export, IR folders.
 6. Code signing and notarisation (Developer ID), installer/DMG, update mechanism.
 
-## Requested features (owner, for a later version — after live audio is confirmed working)
+## Requested features (owner)
+
+Status: items 1–4 are implemented (see CHANGELOG); items 5–7 are in progress.
 
 1. **Single fixed row of amp controls** instead of the model buttons + per-model faceplate:
    * first knob: a **switched (detented) model selector** across the six models;

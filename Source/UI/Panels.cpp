@@ -6,143 +6,98 @@ namespace af::ui
 using dsp::getAmpVoicing;
 
 //==============================================================================
-AmpPanel::AmpPanel (AppController& a) : app (a)
+AmpPanel::AmpPanel (AppController& a)
+    : app (a),
+      model (a, pAmpModel, "Model"), gain (a, pAmpGain), bass (a, pAmpBass), mid (a, pAmpMid), treble (a, pAmpTreble),
+      presence (a, pAmpPresence), depth (a, pAmpDepth, "Resonance"), master (a, pAmpMaster),
+      sag (a, pPowerSag), variac (a, pPowerVariac),
+      pull (a, pAmpPull, "PULL"), bright (a, pAmpBright, "BRIGHT"),
+      preampValve (a, pAmpPreampValve), powerValve (a, pAmpPowerValve)
 {
-    for (int i = 0; i < dsp::kNumAmpModels; ++i)
-    {
-        auto* b = modelButtons.add (new juce::TextButton (getAmpVoicing (i).name));
-        b->setClickingTogglesState (false);
-        b->setTooltip (getAmpVoicing (i).shortDescription);
-        b->onClick = [this, i] { app.selectAmpModel (i); };
-        addAndMakeVisible (b);
-    }
-    gain = std::make_unique<ParamKnob> (app, pAmpGain);
-    bass = std::make_unique<ParamKnob> (app, pAmpBass);
-    mid = std::make_unique<ParamKnob> (app, pAmpMid);
-    treble = std::make_unique<ParamKnob> (app, pAmpTreble);
-    presence = std::make_unique<ParamKnob> (app, pAmpPresence);
-    depth = std::make_unique<ParamKnob> (app, pAmpDepth);
-    master = std::make_unique<ParamKnob> (app, pAmpMaster);
-    bright = std::make_unique<ParamToggle> (app, pAmpBright, "BRIGHT");
-    for (auto* c : std::initializer_list<juce::Component*> { gain.get(), bass.get(), mid.get(), treble.get(), presence.get(),
-                                                             depth.get(), master.get(), bright.get() })
-        addChildComponent (c);
+    for (auto* c : std::initializer_list<juce::Component*> { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master,
+                                                             &sag, &variac, &pull, &bright, &preampValve, &powerValve })
+        addAndMakeVisible (c);
+    pull.setTooltip ("Pull for saturation: about +10 dB more preamp gain. Right-click: MIDI Learn.");
     refresh();
 }
 
-void AmpPanel::rebuildForModel (int model)
+void AmpPanel::applyStyle (int m)
 {
-    shownModel = model;
-    const auto& v = getAmpVoicing (model);
-    const int family = (int) v.family;
-    const auto style = getFamilyStyle (family);
-
-    std::vector<ParamKnob*> order;
-    using namespace dsp;
-    auto has = [&] (uint32_t bit) { return (v.controls & bit) != 0; };
-    if (family == 0)
-        order = { gain.get(), treble.get(), mid.get(), bass.get(), presence.get(), master.get() };
-    else if (family == 1)
-        order = { gain.get(), bass.get(), mid.get(), treble.get(), presence.get(), master.get() };
-    else
-        order = { gain.get(), treble.get(), bass.get(), mid.get(), presence.get(), depth.get(), master.get() };
-
-    visibleKnobs.clear();
-    for (auto* k : { gain.get(), bass.get(), mid.get(), treble.get(), presence.get(), depth.get(), master.get() })
-        k->setVisible (false);
-    for (auto* k : order)
-    {
-        const int p = k->getParamIndex();
-        const bool show = (p == pAmpGain && has (ctlGain)) || (p == pAmpBass && has (ctlBass)) || (p == pAmpMid && has (ctlMid))
-                          || (p == pAmpTreble && has (ctlTreble)) || (p == pAmpPresence && has (ctlPresence))
-                          || (p == pAmpDepth && has (ctlDepth)) || (p == pAmpMaster && has (ctlMaster));
-        if (! show)
-            continue;
+    shownModel = m;
+    const auto style = getFamilyStyle ((int) getAmpVoicing (m).family);
+    for (auto* k : { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master, &sag, &variac })
         k->setFaceplateColours (style.knobCap, style.knobPointer, style.accent.brighter (0.4f), style.plateText);
-        k->setVisible (true);
-        visibleKnobs.push_back (k);
+    for (auto* t : { &pull, &bright })
+    {
+        t->setColour (juce::ToggleButton::textColourId, style.plateText);
+        t->setColour (juce::ToggleButton::tickColourId, Colours::accent);
     }
-    gain->setLabel (v.gainLabel);
-    depth->setLabel (family == 2 && model == 4 ? "Resonance" : "Depth");
-    bright->setVisible (v.bright.available);
-    bright->setColour (juce::ToggleButton::textColourId, style.plateText);
-    bright->setColour (juce::ToggleButton::tickColourId, Colours::accent);
-    resized();
     repaint();
 }
 
 void AmpPanel::refresh()
 {
-    const int model = app.params().getInt (pAmpModel);
-    if (model != shownModel)
-        rebuildForModel (model);
-    for (int i = 0; i < modelButtons.size(); ++i)
-        modelButtons[i]->setToggleState (i == model, juce::dontSendNotification);
-    for (auto* k : { gain.get(), bass.get(), mid.get(), treble.get(), presence.get(), depth.get(), master.get() })
+    const int m = app.params().getInt (pAmpModel);
+    if (m != shownModel)
+        applyStyle (m);
+    for (auto* k : { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master, &sag, &variac })
         k->refresh();
-    bright->refresh();
+    pull.refresh();
+    bright.refresh();
+    preampValve.refresh();
+    powerValve.refresh();
 }
 
 void AmpPanel::resized()
 {
-    auto r = getLocalBounds().reduced (10);
-    selectorArea = r.removeFromTop (54);
-    // Model selector: three family groups of two buttons.
-    auto sel = selectorArea.withTrimmedTop (18);
-    const int groupW = sel.getWidth() / 3;
-    for (int f = 0; f < 3; ++f)
-    {
-        auto grp = sel.removeFromLeft (groupW).reduced (4, 0);
-        const int bw = grp.getWidth() / 2;
-        modelButtons[f * 2]->setBounds (grp.removeFromLeft (bw).reduced (2, 0));
-        modelButtons[f * 2 + 1]->setBounds (grp.reduced (2, 0));
-    }
-    r.removeFromTop (8);
-    plateArea = r;
+    plateArea = getLocalBounds().reduced (10);
+    auto r = plateArea.reduced (20, 12);
+    titleArea = r.removeFromTop (30);
+    auto strip = r.removeFromBottom (30);
+    r.removeFromBottom (4);
 
-    auto knobs = plateArea.reduced (24, 14);
-    knobs.removeFromTop (30); // engraved title
-    const bool hasBright = bright->isVisible();
-    auto brightArea = hasBright ? knobs.removeFromRight (92) : juce::Rectangle<int>();
-    const int n = (int) visibleKnobs.size();
-    if (n > 0)
+    // 8 amp knobs, a gap, then the 2-knob power section.
+    const int gap = 24;
+    const int w = std::min (118, (r.getWidth() - gap) / 10);
+    auto row = r.withSizeKeepingCentre (w * 10 + gap, std::min (r.getHeight(), 150));
+    std::array<juce::Rectangle<int>, 10> cols;
+    for (int i = 0; i < 10; ++i)
     {
-        const int w = std::min (knobs.getWidth() / n, 130);
-        auto row = knobs.withSizeKeepingCentre (w * n, std::min (knobs.getHeight(), 150));
-        for (auto* k : visibleKnobs)
-            k->setBounds (row.removeFromLeft (w).reduced (4, 0));
+        if (i == 8)
+            row.removeFromLeft (gap);
+        cols[(size_t) i] = row.removeFromLeft (w);
     }
-    if (hasBright)
-        bright->setBounds (brightArea.withSizeKeepingCentre (88, 28));
+    ParamKnob* knobs[] = { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master, &sag, &variac };
+    for (int i = 0; i < 10; ++i)
+        knobs[i]->setBounds (cols[(size_t) i].reduced (3, 0));
+    powerArea = cols[8].getUnion (cols[9]).expanded (6, 0).withTop (titleArea.getBottom() + 2).withBottom (strip.getBottom());
+
+    auto under = [&] (int from, int to) { return strip.withX (cols[(size_t) from].getX()).withRight (cols[(size_t) to].getRight()); };
+    pull.setBounds (under (1, 1).withSizeKeepingCentre (std::min (w, 84), 24));
+    bright.setBounds (under (4, 4).withSizeKeepingCentre (std::min (w, 96), 24));
+    auto pre = under (5, 7).reduced (4, 2);
+    preampLabel = pre.removeFromLeft (70);
+    preampValve.setBounds (pre);
+    auto pw = under (8, 9).reduced (4, 2);
+    powerLabel = pw.removeFromLeft (50);
+    powerValve.setBounds (pw);
 }
 
 void AmpPanel::paint (juce::Graphics& g)
 {
     drawPanel (g, getLocalBounds().toFloat());
-    const int model = shownModel < 0 ? 0 : shownModel;
-    const auto& v = getAmpVoicing (model);
+    const int m = shownModel < 0 ? 0 : shownModel;
+    const auto& v = getAmpVoicing (m);
     const auto style = getFamilyStyle ((int) v.family);
 
-    // Family labels over the selector
-    auto sel = selectorArea;
-    const int groupW = sel.getWidth() / 3;
-    g.setFont (ForgeLookAndFeel::labelFont (11.0f));
-    for (int f = 0; f < 3; ++f)
-    {
-        auto grp = sel.removeFromLeft (groupW).reduced (6, 0).removeFromTop (16);
-        g.setColour ((int) v.family == f ? Colours::accent : Colours::textDim);
-        g.drawText (getFamilyStyle (f).familyName, grp, juce::Justification::centredLeft);
-    }
-
-    // Faceplate
+    // Faceplate (family-coloured)
     auto plate = plateArea.toFloat();
     g.setColour (juce::Colours::black.withAlpha (0.5f));
     g.fillRoundedRectangle (plate.translated (0, 3), 10.0f);
     juce::ColourGradient grad (style.plateTop, plate.getX(), plate.getY(), style.plateBottom, plate.getX(), plate.getBottom(), false);
     g.setGradientFill (grad);
     g.fillRoundedRectangle (plate, 10.0f);
-    // Brushed texture
-    juce::Random rng (model + 7);
+    juce::Random rng (m + 7);
     for (int y = (int) plate.getY() + 2; y < (int) plate.getBottom() - 2; y += 2)
     {
         g.setColour (juce::Colours::white.withAlpha (0.015f + 0.02f * rng.nextFloat()));
@@ -150,23 +105,31 @@ void AmpPanel::paint (juce::Graphics& g)
     }
     g.setColour (style.plateText.withAlpha (0.35f));
     g.drawRoundedRectangle (plate.reduced (5.0f), 7.0f, 1.0f);
-    // Corner screws
-    for (auto pt : { plate.getTopLeft() + juce::Point<float> (14, 14), plate.getTopRight() + juce::Point<float> (-14, 14),
-                     plate.getBottomLeft() + juce::Point<float> (14, -14), plate.getBottomRight() + juce::Point<float> (-14, -14) })
-    {
-        g.setColour (style.plateBottom.darker (0.5f));
-        g.fillEllipse (juce::Rectangle<float> (7, 7).withCentre (pt));
-        g.setColour (style.plateTop.brighter (0.3f));
-        g.drawLine (pt.x - 2.5f, pt.y - 2.5f, pt.x + 2.5f, pt.y + 2.5f, 1.0f);
-    }
-    // Engraved model name + pilot lamp
-    auto title = plate.reduced (26.0f, 12.0f).removeFromTop (28.0f);
+
+    // Power section outline + label
+    g.setColour (style.plateText.withAlpha (0.25f));
+    g.drawRoundedRectangle (powerArea.toFloat(), 6.0f, 1.0f);
+    // Group label sitting on the box's top edge.
+    g.setFont (ForgeLookAndFeel::labelFont (11.0f));
+    const auto label = juce::Rectangle<int> (60, 14).withCentre ({ powerArea.getCentreX(), powerArea.getY() });
+    g.setColour (style.plateTop.interpolatedWith (style.plateBottom, 0.3f));
+    g.fillRect (label);
+    g.setColour (style.plateText.withAlpha (0.8f));
+    g.drawText ("POWER", label, juce::Justification::centred);
+
+    // Valve selector labels
+    g.drawText ("PREAMP V1", preampLabel, juce::Justification::centredRight);
+    g.drawText ("VALVES", powerLabel, juce::Justification::centredRight);
+
+    // Engraved model name, description and pilot lamp
+    auto title = titleArea.toFloat();
     g.setColour (style.plateText);
     g.setFont (ForgeLookAndFeel::labelFont (20.0f));
     g.drawText (juce::String (v.name).toUpperCase(), title, juce::Justification::centredLeft);
     g.setFont (ForgeLookAndFeel::labelFont (12.0f, false));
     g.setColour (style.plateText.withAlpha (0.7f));
-    g.drawText (v.shortDescription, title.withTrimmedLeft (260.0f).withTrimmedRight (40.0f), juce::Justification::centredRight);
+    g.drawText (juce::String (style.familyName) + "  -  " + v.shortDescription, title.withTrimmedLeft (230.0f).withTrimmedRight (30.0f),
+                juce::Justification::centredRight);
     const bool live = ! app.params().getBool (pBypass);
     drawLed (g, juce::Rectangle<float> (14, 14).withCentre ({ title.getRight() - 8.0f, title.getCentreY() }), juce::Colour (0xffff3b2f), live);
 }

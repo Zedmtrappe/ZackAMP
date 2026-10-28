@@ -16,6 +16,10 @@
     "reverb.mix": 0.16,
     "reverb.decay": 1.4,
     "reverb.tone": 0.3,
+    "amp.preampValve": 0,
+    "amp.powerValve": 0,
+    "amp.presence": 0.35,
+    "amp.depth": 0.0,
     "out.level": 3.0
   },
   "cabinet": {

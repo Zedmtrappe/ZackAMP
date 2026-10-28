@@ -17,6 +17,9 @@
     "cab.a.pan": -0.6,
     "cab.b.pan": 0.6,
     "cab.b.level": -2,
+    "amp.preampValve": 0,
+    "amp.powerValve": 1,
+    "amp.depth": 0.0,
     "out.level": -2.5
   },
   "cabinet": {

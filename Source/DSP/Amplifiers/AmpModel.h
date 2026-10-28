@@ -16,6 +16,7 @@
 #pragma once
 
 #include "TubeStage.h"
+#include "Valves.h"
 #include "../PowerAmp/PowerAmp.h"
 #include "../ToneStacks/ToneStack.h"
 
@@ -76,6 +77,8 @@ struct AmpVoicing
     float outputTrimDb = 0.0f;   // level calibration so models are similarly loud
     bool prePowerEQDefault = true;
     const char* defaultIrId = "";
+    int defaultPreampValve = 0; // index into kPreampValves (the valve the voicing is calibrated with)
+    int defaultPowerValve = 0;  // index into kPowerValves
 };
 
 constexpr int kNumAmpModels = 6;
@@ -87,6 +90,9 @@ struct AmpControls
     float gain = 0.5f, bass = 0.5f, mid = 0.5f, treble = 0.5f;
     float presence = 0.5f, depth = 0.5f, master = 0.5f;
     bool bright = false;
+    float pull = 0.0f;     // "pull for saturation" (smoothed 0..1)
+    float sag = 0.5f;      // 0..1, 0.5 = the voicing's own supply sag
+    float variac = 1.0f;   // supply voltage ratio (1 = nominal)
 };
 
 class AmpModel
@@ -97,6 +103,12 @@ public:
 
     /** Smoothed control values; call once per control block, before processing it. */
     void setControls (const AmpControls& c);
+
+    /** Selects preamp (V1) and power valves. Real-time safe (no allocation); changes the
+        transfer curves, so the engine calls it while the amp output is faded out. */
+    void setValves (int preampValve, int powerValve) noexcept;
+    int getPreampValve() const noexcept { return preValve; }
+    int getPowerValve() const noexcept { return powValve; }
 
     /** Preamp: grid-normalised guitar signal in, power-amp-input-scaled signal out. In place. */
     void processPreamp (float* buf, int n) noexcept;
@@ -121,7 +133,8 @@ private:
     AmpControls current;
     float gainPotFrom = 0.0f, gainPotTo = 0.0f;
     float masterFrom = 0.0f, masterTo = 0.0f;
-    float powerDrive = 1.0f, outputTrim = 1.0f;
+    float powerDrive = 1.0f, outputTrim = 1.0f, valveLevel = 1.0f;
+    int preValve = 0, powValve = 0;
     float lastToneB = -1, lastToneM = -1, lastToneT = -1, lastBrightGain = -1;
     bool lastBright = false;
 };

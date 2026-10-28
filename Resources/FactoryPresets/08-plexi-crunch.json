@@ -14,6 +14,9 @@
     "amp.presence": 0.55,
     "amp.master": 0.6,
     "amp.bright": 1,
+    "amp.preampValve": 0,
+    "amp.powerValve": 1,
+    "amp.depth": 0.0,
     "out.level": -0.5
   },
   "cabinet": {

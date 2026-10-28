@@ -137,7 +137,7 @@ private:
 
     dsp::Oversampler oversampler;
     std::array<dsp::AmpModel, dsp::kNumAmpModels> amps;
-    int activeModel = 0;
+    int activeModel = 0, activePreValve = 0, activePowValve = 0;
     enum class ModelFade { none, out, in } modelFade = ModelFade::none;
     float modelFadeGain = 1.0f, modelFadeStep = 0.0f;
 
@@ -156,6 +156,7 @@ private:
     Smoothed inTrim, outGain, bypassMix, driveMix, eqPreMix, eqPostMix, gateMix;
     Smoothed chorusMix, pitchMix, delayIn, reverbIn;
     dsp::LinearSmoother ampGain, ampBass, ampMid, ampTreble, ampPresence, ampDepth, ampMaster;
+    dsp::LinearSmoother ampPull, powerSag, powerVariac;
     dsp::LinearSmoother driveDrive, driveTone, driveLevel, chorusRate, chorusDepth, delayFb, delayMix, reverbMix;
     std::array<dsp::LinearSmoother, 5> eqBands;
 

@@ -337,3 +337,85 @@ TEST_CASE ("Delay sync and output level")
     CHECK (test::rms (y, 24100, 24400) > 0.2 * test::rms (y, 100, 400));
     CHECK (test::rms (y, 12000, 20000) < 1e-3);
 }
+
+TEST_CASE ("Valve swaps, pull, sag and variac change the sound; valve swaps are click-free")
+{
+    auto x = guitarish (48000, 48000, 0.3f);
+    auto run = [&] (std::initializer_list<std::pair<int, float>> settings)
+    {
+        AmpForgeEngine e;
+        e.params().set (pAmpModel, 2);
+        e.params().set (pAmpPreampValve, 0);
+        e.params().set (pAmpPowerValve, 1);
+        e.params().set (pAmpGain, 0.6f);
+        e.params().set (pAmpMaster, 0.8f);
+        e.params().set (pCabOn, 0);
+        for (auto [p, v] : settings) e.params().set (p, v);
+        e.prepare (48000, 128);
+        return render (e, x, 128);
+    };
+    const auto base = run ({});
+    auto differs = [&] (const std::vector<float>& y)
+    {
+        double d = 0, r = 0;
+        for (size_t i = 4800; i < y.size(); ++i) { d += std::pow (y[i] - base[i], 2); r += base[i] * base[i]; }
+        return d / r;
+    };
+    CHECK (differs (run ({ { pAmpPreampValve, 2.0f } })) > 0.01);
+    CHECK (differs (run ({ { pAmpPowerValve, 0.0f } })) > 0.01);
+    CHECK (differs (run ({ { pAmpPull, 1.0f } })) > 0.01);
+    CHECK (differs (run ({ { pPowerSag, 1.0f } })) > 1e-4);
+    CHECK (differs (run ({ { pPowerVariac, 65.0f } })) > 0.01);
+    for (int pv = 0; pv < dsp::kNumPowerValves; ++pv)
+        for (int pre = 0; pre < dsp::kNumPreampValves; ++pre)
+            CHECK (test::allFinite (run ({ { pAmpPreampValve, (float) pre }, { pAmpPowerValve, (float) pv }, { pPowerVariac, 60.0f }, { pPowerSag, 1.0f } })));
+
+    // Swapping the power valve mid-stream goes through the fade: no click.
+    AmpForgeEngine e;
+    e.params().set (pAmpModel, 2);
+    e.params().set (pCabOn, 0);
+    e.prepare (48000, 64);
+    auto sine = test::sine (110, 48000, 48000, 0.2f);
+    std::vector<float> l (sine.size()), r (sine.size());
+    for (size_t pos = 0; pos < sine.size(); pos += 64)
+    {
+        if (pos == 16000) e.params().set (pAmpPowerValve, 4);
+        e.process (sine.data() + pos, l.data() + pos, r.data() + pos, 64);
+    }
+    float before = 0, around = 0;
+    for (size_t i = 1; i < l.size(); ++i)
+    {
+        const float st = std::abs (l[i] - l[i - 1]);
+        if (i < 16000) before = std::max (before, st);
+        else if (i < 16000 + 2400) around = std::max (around, st);
+    }
+    CHECK (around < std::max (0.05f, before * 2.0f));
+}
+
+TEST_CASE ("Default valves and supply settings reproduce the calibrated amp")
+{
+    // Explicitly selecting each model's own valves with Sag 5 / Variac 100 % must be identical
+    // to the voicing's calibrated configuration.
+    auto x = guitarish (48000, 24000, 0.3f);
+    for (int m = 0; m < dsp::kNumAmpModels; ++m)
+    {
+        const auto& v = dsp::getAmpVoicing (m);
+        AmpForgeEngine a, b;
+        for (auto* e : { &a, &b })
+        {
+            e->params().set (pAmpModel, (float) m);
+            e->params().set (pCabOn, 0);
+        }
+        b.params().set (pAmpPreampValve, (float) v.defaultPreampValve);
+        b.params().set (pAmpPowerValve, (float) v.defaultPowerValve);
+        a.params().set (pAmpPreampValve, (float) v.defaultPreampValve);
+        a.params().set (pAmpPowerValve, (float) v.defaultPowerValve);
+        a.params().set (pPowerSag, 0.5f);
+        a.params().set (pPowerVariac, 100.0f);
+        a.prepare (48000, 128);
+        b.prepare (48000, 128);
+        const auto ya = render (a, x, 128), yb = render (b, x, 128);
+        for (size_t i = 0; i < ya.size(); ++i)
+            REQUIRE (ya[i] == yb[i]);
+    }
+}
