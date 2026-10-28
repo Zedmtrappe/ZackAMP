@@ -17,6 +17,27 @@
    per-preset MIDI program assignment, preset import/export, IR folders.
 6. Code signing and notarisation (Developer ID), installer/DMG, update mechanism.
 
+## Requested features (owner, for a later version — after live audio is confirmed working)
+
+1. **Single fixed row of amp controls** instead of the model buttons + per-model faceplate:
+   * first knob: a **switched (detented) model selector** across the six models;
+   * then Gain, Bass, Middle, Treble, Presence, Resonance/Depth, Master (and Bright) —
+     **always visible and always active for every model** (e.g. Resonance also works on the
+     clean model). Engine impact: every voicing must implement every control; today some
+     controls are fixed per model (`AmpVoicing::controls` mask, `fixedPresence`, `depthMaxDb = 0`),
+     so each voicing needs musically sensible presence/depth/mid/bright ranges.
+2. **"Pull for saturation" on the gain knob** (Peavey-style pull-boost): a latching extra-gain /
+   saturation mode, e.g. click-to-pull on the knob plus a visible "PULLED" state, mapped to a new
+   stable parameter (`amp.pull`) so presets and MIDI can use it.
+3. **Power-amp section with two knobs at the end of the amp row:**
+   * **Sag** — user control over supply sag depth/recovery (today a fixed per-model value in
+     `PowerAmpSpec::sag` / `sagReleaseMs`);
+   * **Variac** — lowers the simulated supply voltage: less headroom, earlier and softer power-amp
+     breakup, slightly lower output and a "browner" response (scale power-amp drive/headroom, knee
+     and sag together; level-compensate so it is not just a volume control).
+   New parameter IDs (`power.sag`, `power.variac`), added to presets with defaults that reproduce
+   today's sound.
+
 ## AU and VST3 plugins
 
 The engine was built for this from the start; what exists today and what is still needed:
