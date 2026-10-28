@@ -19,7 +19,7 @@
 
 ## Requested features (owner)
 
-Status: items 1–14 are implemented (see CHANGELOG); 15 is next.
+Status: items 1–14 are implemented (see CHANGELOG); 15 and 16 are next.
 
 1. **Single fixed row of amp controls** instead of the model buttons + per-model faceplate:
    * first knob: a **switched (detented) model selector** across the six models;
@@ -103,6 +103,12 @@ Status: items 1–14 are implemented (see CHANGELOG); 15 is next.
     shallower depth of field, the back wall closer behind the valves, and stronger near-field
     reflections/LED spill from the glass edge; then re-render all layers and re-check the crop
     for every window shape.
+16. **Deeper etched logo.** Make "Z.AMP" read as cut *into* the glass rather than printed on it:
+    V-groove look with a lit inner wall and a dark opposite wall (light from the LED edge catching
+    one side of each stroke), a bright rim highlight along the top edges, a faint frosted floor,
+    slight refraction/offset of what is seen through the strokes, and the glow strongest inside
+    the cut. Unlit, it should still look like a clean frosted engraving. (`GlassWindow::drawFront`
+    / `drawLit` in `Source/UI/AmpHead.cpp`; pre-rendered once per size, no runtime cost.)
 
 ## AU and VST3 plugins
 
