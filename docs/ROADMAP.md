@@ -19,7 +19,7 @@
 
 ## Requested features (owner)
 
-Status: items 1–14 are implemented (see CHANGELOG).
+Status: items 1–14 are implemented (see CHANGELOG); 15 is next.
 
 1. **Single fixed row of amp controls** instead of the model buttons + per-model faceplate:
    * first knob: a **switched (detented) model selector** across the six models;
@@ -96,6 +96,13 @@ Status: items 1–14 are implemented (see CHANGELOG).
     darkening repeats) (`delay.type`).
 14. **Compressors** — a *CS-3* style pedal before the amp and a *Studio* compressor after the
     cabinet — and an **auto-wah**.
+15. **Interior perspective: parts close behind the glass.** The rendered valves and transformers
+    read as sitting ~300 mm or more behind the glass; on a real head they would be ~100 mm at most.
+    Fix in `Tools/Render3D/amp_interior.py`: camera ~150 mm from the front row with a wider lens
+    (~24–28 mm equivalent) instead of ~900 mm with 44 mm, parts filling more of the frame,
+    shallower depth of field, the back wall closer behind the valves, and stronger near-field
+    reflections/LED spill from the glass edge; then re-render all layers and re-check the crop
+    for every window shape.
 
 ## AU and VST3 plugins
 
