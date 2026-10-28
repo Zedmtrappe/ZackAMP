@@ -37,7 +37,8 @@
 ### Added (amp head)
 - Amp panel: larger **model selector** on the left, set apart by an engraved divider, with the
   model names engraved at each position; the selected model's name lights in the knob-ring
-  colour. **Sag/Variac** moved right, smaller, with brushed-silver caps.
+  colour. **Sag/Variac** moved right, smaller, with brushed-silver caps. The model description text
+  is no longer shown on the faceplate.
 - Knob edge lighting follows the model: cool green on the JC120 through to orange on the Triple.
 - Photo-realistic amp interior behind the glass: valves, transformers and chassis rendered in
   Blender Cycles as light layers that the app mixes live (heat colour per model, valve type,

@@ -206,10 +206,6 @@ void AmpPanel::paint (juce::Graphics& g)
     g.setColour (style.plateText);
     g.setFont (ForgeLookAndFeel::labelFont (20.0f));
     g.drawText (juce::String (v.name).toUpperCase(), title, juce::Justification::centredLeft);
-    g.setFont (ForgeLookAndFeel::labelFont (12.0f, false));
-    g.setColour (style.plateText.withAlpha (0.7f));
-    g.drawText (juce::String (style.familyName) + "  -  " + v.shortDescription, title.withTrimmedLeft (230.0f).withTrimmedRight (30.0f),
-                juce::Justification::centredRight);
     const bool live = ! app.params().getBool (pBypass);
     drawLed (g, juce::Rectangle<float> (14, 14).withCentre ({ title.getRight() - 8.0f, title.getCentreY() }), juce::Colour (0xffff3b2f), live);
 }
