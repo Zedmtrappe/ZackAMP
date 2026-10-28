@@ -180,3 +180,75 @@ TEST_CASE ("Tape delay is stable and darker than studio delay")
     };
     CHECK (hf (tape) < hf (studio));
 }
+
+#include "../../Source/DSP/Effects/Compressor.h"
+
+TEST_CASE ("Compressor: both types reduce dynamic range, Sustain compresses more, quiet signals pass")
+{
+    const double fs = 48000;
+    for (int type : { (int) dsp::Compressor::studio, (int) dsp::Compressor::cs3 })
+    {
+        auto levelOut = [&] (float amp, float sustain)
+        {
+            dsp::Compressor c;
+            c.prepare (fs);
+            c.setControls (type, sustain, 0.3f, 0.5f, 0.0f);
+            auto x = test::sine (440.0, fs, (int) fs, amp);
+            for (size_t p = 0; p + 32 <= x.size(); p += 32)
+                c.process (x.data() + p, 32, 1.0f, 1.0f, 1.0f);
+            CHECK (test::allFinite (x));
+            return test::db (test::rms (x, (int) fs / 2));
+        };
+        INFO ("type " << type);
+        // 24 dB more input -> much less than 24 dB more output.
+        const double quiet = levelOut (0.02f, 0.6f), loud = levelOut (0.32f, 0.6f);
+        CHECK (loud - quiet < 15.0);
+        CHECK (loud - quiet > 1.0);
+        // More sustain = flatter.
+        const double loudMore = levelOut (0.32f, 1.0f), quietMore = levelOut (0.02f, 1.0f);
+        CHECK (loudMore - quietMore < loud - quiet);
+    }
+    // CS-3 squashes harder than Studio at the same settings.
+    auto spread = [&] (int type)
+    {
+        double out[2];
+        int k = 0;
+        for (float amp : { 0.02f, 0.32f })
+        {
+            dsp::Compressor c;
+            c.prepare (fs);
+            c.setControls (type, 0.6f, 0.3f, 0.5f, 0.0f);
+            auto x = test::sine (440.0, fs, (int) fs, amp);
+            for (size_t p = 0; p + 32 <= x.size(); p += 32)
+                c.process (x.data() + p, 32, 1.0f, 1.0f, 1.0f);
+            out[k++] = test::db (test::rms (x, (int) fs / 2));
+        }
+        return out[1] - out[0];
+    };
+    CHECK (spread (dsp::Compressor::cs3) < spread (dsp::Compressor::studio));
+}
+
+TEST_CASE ("Auto-wah sweeps up with picking strength and stays stable")
+{
+    const double fs = 48000;
+    // Broadband input (pulse train); compare high-band energy for a soft vs a hard signal.
+    auto run = [&] (float amp)
+    {
+        dsp::AutoWah w;
+        w.prepare (fs);
+        std::vector<float> x ((size_t) fs);
+        for (size_t i = 0; i < x.size(); ++i)
+            x[i] = (i % 200) < 3 ? amp : 0.0f;
+        for (size_t p = 0; p + 32 <= x.size(); p += 32)
+            w.process (x.data() + p, 32, 1.0f, 0.7f, 0.6f, 0.6f, 1.0f, 1.0f, 1.0f);
+        CHECK (test::allFinite (x));
+        double hf = 0, all = 0;
+        for (size_t i = x.size() / 2 + 1; i < x.size(); ++i)
+        {
+            hf += (x[i] - x[i - 1]) * (x[i] - x[i - 1]);
+            all += x[i] * x[i];
+        }
+        return hf / std::max (all, 1e-12);
+    };
+    CHECK (run (0.5f) > run (0.01f) * 1.5); // brighter (higher filter) when hit harder
+}

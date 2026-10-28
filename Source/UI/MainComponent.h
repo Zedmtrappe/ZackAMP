@@ -55,7 +55,7 @@ private:
     TopBar topBar { app };
     AmpHead ampHead { app };
     SectionHeader eqCabHeader { "EQ & Cabinet", "Graphic EQ, speaker cabinet / IRs" };
-    SectionHeader fxHeader { "Effects", "Gate, drive, pitch, chorus, delay, reverb" };
+    SectionHeader fxHeader { "Effects", "Gate, comp, wah, drive, smooth, pitch, chorus, delay, reverb" };
     EQPanel eqPanel { app };
     CabinetPanel cabPanel { app };
     EffectsPanel fxPanel { app };

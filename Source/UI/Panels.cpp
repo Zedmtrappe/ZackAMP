@@ -27,8 +27,8 @@ void AmpPanel::applyStyle (int m)
     // Knob edge lighting follows the model: cool green on the cleanest amp through to orange on
     // the highest-gain one (order: JC120, Tweed, AC30, JCM800, Coliseum, MP1, Triple).
     constexpr int rank[] = { 1, 0, 2, 3, 4, 5, 6 };
-    const float t = (float) rank[juce::jlimit (0, 6, m)] / 6.0f;
-    const auto light = juce::Colour::fromHSV (juce::jmap (t, 0.42f, 0.075f), 0.85f, 1.0f, 1.0f);
+    const float heatPos = (float) rank[juce::jlimit (0, 6, m)] / 6.0f;
+    const auto light = juce::Colour::fromHSV (juce::jmap (heatPos, 0.42f, 0.075f), 0.85f, 1.0f, 1.0f);
     for (auto* k : { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master, &sag, &variac })
         k->setFaceplateColours (style.knobCap, light.brighter (0.3f), light, style.plateText, light);
     for (auto* t : { &pull, &bright })
@@ -403,7 +403,7 @@ void EffectModule::resized()
     const int n = knobs.size();
     if (n == 0)
         return;
-    const int cols = n <= 3 ? n : 2;
+    const int cols = n <= 3 ? n : (r.getWidth() / n >= 72 ? n : 2); // one row when there is room
     const int rows = (n + cols - 1) / cols;
     const int w = r.getWidth() / cols, h = r.getHeight() / rows;
     for (int i = 0; i < n; ++i)
@@ -424,6 +424,8 @@ void EffectModule::paint (juce::Graphics& g)
 EffectsPanel::EffectsPanel (AppController& a)
     : app (a),
       gate (a, "Gate", pGateOn, { pGateThreshold, pGateRelease }),
+      comp (a, "Comp", pCompOn, { pCompSustain, pCompAttack, pCompTone, pCompLevel }),
+      wah (a, "Auto-Wah", pWahOn, { pWahSens, pWahRange, pWahPeak, pWahMix }),
       drive (a, "Drive", pDriveOn, { pDriveDrive, pDriveTone, pDriveLevel }),
       smooth (a, "Smooth", pSmoothOn, { pSmoothAmount }),
       pitch (a, "Pitch", pPitchOn, { pPitchMix }),
@@ -432,10 +434,13 @@ EffectsPanel::EffectsPanel (AppController& a)
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
       output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
       delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode),
-      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a)
+      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType),
+      compType (a, pCompType), compPosition (a, pCompPosition), smoothLight (a)
 {
-    for (auto* m : { &gate, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &comp, &wah, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
+    comp.setHeaderExtra (&compType, 84);
+    comp.addExtra (&compPosition);
     drive.setHeaderExtra (&driveType, 96);
     delay.setHeaderExtra (&delayType, 84);
     reverb.setHeaderExtra (&reverbType, 96);
@@ -495,10 +500,11 @@ void ProcessLight::paint (juce::Graphics& g)
 
 void EffectsPanel::refresh()
 {
-    for (auto* m : { &gate, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &comp, &wah, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         m->refresh();
-    for (auto* c : { &driveType, &delayType, &reverbType })
+    for (auto* c : { &driveType, &delayType, &reverbType, &compType, &compPosition })
         c->refresh();
+    compPosition.setEnabled (app.params().getInt (pCompType) == 0); // CS-3 is always before the amp
     smoothLight.refresh();
     delaySync.refresh();
     delayDivision.refresh();
@@ -517,25 +523,30 @@ void EffectsPanel::resized()
     auto r = getLocalBounds();
     flowArea = r.removeFromTop (22);
     r.removeFromTop (4);
-    // Width weights by module complexity.
-    const float weights[] = { 1.0f, 1.35f, 0.75f, 0.7f, 1.3f, 1.55f, 1.35f, 1.25f };
-    float total = 0;
-    for (float w : weights) total += w;
+    // Two rows: pedals before the amp, then the effects after the cabinet.
     const int gap = 8;
-    const float unit = (float) (r.getWidth() - gap * 7) / total;
-    int i = 0;
-    for (auto* m : { &gate, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
+    auto layoutRow = [gap] (juce::Rectangle<int> row, std::initializer_list<std::pair<EffectModule*, float>> mods)
     {
-        m->setBounds (r.removeFromLeft ((int) (unit * weights[i++])));
-        r.removeFromLeft (gap);
-    }
+        float total = 0;
+        for (auto& m : mods) total += m.second;
+        const float unit = (float) (row.getWidth() - gap * ((int) mods.size() - 1)) / total;
+        for (auto& m : mods)
+        {
+            m.first->setBounds (row.removeFromLeft ((int) (unit * m.second)));
+            row.removeFromLeft (gap);
+        }
+    };
+    auto top = r.removeFromTop ((r.getHeight() - gap) / 2);
+    r.removeFromTop (gap);
+    layoutRow (top, { { &gate, 1.0f }, { &comp, 1.6f }, { &wah, 1.6f }, { &drive, 1.4f } });
+    layoutRow (r, { { &smooth, 0.75f }, { &pitch, 0.7f }, { &chorus, 1.3f }, { &delay, 1.55f }, { &reverb, 1.35f }, { &output, 1.25f } });
 }
 
 void EffectsPanel::paint (juce::Graphics& g)
 {
     // Signal-flow strip: the fixed processing order, lit where a stage is active.
     struct Stage { const char* name; int param; };
-    const Stage stages[] = { { "IN", -1 }, { "GATE", pGateOn }, { "DRIVE", pDriveOn }, { "AMP", -1 },
+    const Stage stages[] = { { "IN", -1 }, { "GATE", pGateOn }, { "COMP", pCompOn }, { "WAH", pWahOn }, { "DRIVE", pDriveOn }, { "AMP", -1 },
                              { "EQ", pEqOn }, { "CAB", pCabOn }, { "SMOOTH", pSmoothOn }, { "PITCH", pPitchOn }, { "CHORUS", pChorusOn }, { "DELAY", pDelayOn },
                              { "REVERB", pReverbOn }, { "OUT", -1 } };
     auto r = flowArea.toFloat().reduced (2.0f, 2.0f);
@@ -553,7 +564,9 @@ void EffectsPanel::paint (juce::Graphics& g)
         juce::String label = stages[i].name;
         if (stages[i].param == pChorusOn && app.params().getInt (pChorusMode) == 1)
             label = "FLANGER";
-        if (i == 4 && app.params().getBool (pEqOn))
+        if (stages[i].param == pCompOn && app.params().getInt (pCompType) == 0 && app.params().getInt (pCompPosition) == 1)
+            label = "COMP (post)";
+        if (stages[i].param == pEqOn && app.params().getBool (pEqOn))
             label << (app.params().getInt (pEqPosition) == 0 ? " (pre-PA)" : " (post)");
         g.drawFittedText (label, cell.toNearestInt(), juce::Justification::centred, 1);
         if (i < n - 1)

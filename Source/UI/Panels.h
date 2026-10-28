@@ -144,9 +144,9 @@ public:
 
 private:
     AppController& app;
-    EffectModule gate, drive, smooth, pitch, chorus, delay, reverb, output;
+    EffectModule gate, comp, wah, drive, smooth, pitch, chorus, delay, reverb, output;
     ParamToggle delaySync;
-    ParamChoice delayDivision, chorusMode, driveType, delayType, reverbType;
+    ParamChoice delayDivision, chorusMode, driveType, delayType, reverbType, compType, compPosition;
     ProcessLight smoothLight;
     juce::TextButton tapTempo { "TAP" };
     std::vector<double> taps;

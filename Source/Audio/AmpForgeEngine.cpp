@@ -61,6 +61,9 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
     eqPost.prepare (sampleRate);
     pitch.prepare (sampleRate);
     smooth.prepare (sampleRate);
+    compPre.prepare (sampleRate);
+    compPost.prepare (sampleRate);
+    wah.prepare (sampleRate);
     chorus.prepare (sampleRate);
     delay.prepare (sampleRate);
     reverb.prepare (sampleRate);
@@ -88,7 +91,7 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
 
     for (auto* s : { &inTrim, &outGain })
         s->prepare (sampleRate, 0.03);
-    for (auto* s : { &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn, &smoothMix })
+    for (auto* s : { &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn, &smoothMix, &compPreMix, &compPostMix, &wahMix })
         s->prepare (sampleRate, 0.02);
     for (auto* s : { &ampGain, &ampBass, &ampMid, &ampTreble, &ampPresence, &ampDepth, &ampMaster,
                      &driveDrive, &driveTone, &driveLevel, &chorusRate, &chorusDepth, &delayFb, &delayMix, &reverbMix })
@@ -266,6 +269,13 @@ void AmpForgeEngine::snapAll() noexcept
     activeDriveType = p.getInt (pDriveType);
     drive.setType (activeDriveType);
     smoothMix.snap (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
+    {
+        const bool compOn = p.getBool (pCompOn);
+        const bool post = p.getInt (pCompType) == 0 && p.getInt (pCompPosition) == 1;
+        compPreMix.snap (compOn && ! post ? 1.0f : 0.0f);
+        compPostMix.snap (compOn && post ? 1.0f : 0.0f);
+    }
+    wahMix.snap (p.getBool (pWahOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     eqPreMix.snap (eqOn && p.getInt (pEqPosition) == 0 ? 1.0f : 0.0f);
     eqPostMix.snap (eqOn && p.getInt (pEqPosition) == 1 ? 1.0f : 0.0f);
@@ -303,6 +313,9 @@ void AmpForgeEngine::resetDsp() noexcept
     cabinet.reset();
     pitch.reset();
     smooth.reset();
+    compPre.reset();
+    compPost.reset();
+    wah.reset();
     chorus.reset();
     delay.reset();
     reverb.reset();
@@ -327,6 +340,19 @@ void AmpForgeEngine::updateControls (int n) noexcept
     }
     driveMix.target (p.getBool (pDriveOn) && driveType == activeDriveType ? 1.0f : 0.0f);
     smoothMix.target (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
+    {
+        // Studio can sit before the amp or after the cabinet; CS-3 is always a pedal. Moving it
+        // cross-fades between the two positions (separate instances, no clicks).
+        const bool compOn = p.getBool (pCompOn);
+        const int compType = p.getInt (pCompType);
+        const bool post = compType == 0 && p.getInt (pCompPosition) == 1;
+        compPreMix.target (compOn && ! post ? 1.0f : 0.0f);
+        compPostMix.target (compOn && post ? 1.0f : 0.0f);
+        const float sus = p.get (pCompSustain), att = p.get (pCompAttack), tone = p.get (pCompTone), lvl = p.get (pCompLevel);
+        compPre.setControls (compType, sus, att, tone, lvl);
+        compPost.setControls (compType, sus, att, tone, lvl);
+    }
+    wahMix.target (p.getBool (pWahOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     const int eqPos = p.getInt (pEqPosition);
     eqPreMix.target (eqOn && eqPos == 0 ? 1.0f : 0.0f);
@@ -337,7 +363,7 @@ void AmpForgeEngine::updateControls (int n) noexcept
     delayIn.target (p.getBool (pDelayOn) ? 1.0f : 0.0f);
     reverbIn.target (p.getBool (pReverbOn) ? 1.0f : 0.0f);
 
-    for (auto* s : { &inTrim, &outGain, &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn, &smoothMix })
+    for (auto* s : { &inTrim, &outGain, &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn, &smoothMix, &compPreMix, &compPostMix, &wahMix })
         s->advance (n);
 
     ampGain.setTarget (p.get (pAmpGain));
@@ -451,6 +477,22 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
     }
     mGateOpen.store (gate.isOpen(), std::memory_order_relaxed);
 
+    // ---- pedals before the amp: compressor, auto-wah (base rate, clean signal) ----
+    constexpr float detectScale = 1.0f / kInputScale; // internal units -> dBFS for the detectors
+    if (compPreMix.from > 0.0f || compPreMix.to > 0.0f)
+    {
+        if (compPreMix.from == 0.0f)
+            compPre.reset();
+        compPre.process (chunkIn.data(), n, detectScale, compPreMix.from, compPreMix.to);
+    }
+    if (wahMix.from > 0.0f || wahMix.to > 0.0f)
+    {
+        if (wahMix.from == 0.0f)
+            wah.reset();
+        wah.process (chunkIn.data(), n, detectScale, store.get (pWahSens), store.get (pWahRange), store.get (pWahPeak),
+                     store.get (pWahMix), wahMix.from, wahMix.to);
+    }
+
     // ---- amp model change: fade out, switch, fade in ----
     // Model or valve changes alter transfer curves: fade out, switch while silent, fade in.
     const int requested = store.getInt (pAmpModel);
@@ -544,6 +586,12 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
     cabinet.process (base.data(), L, R, n, cs);
 
     // ---- post effects ----
+    if (compPostMix.from > 0.0f || compPostMix.to > 0.0f)
+    {
+        if (compPostMix.from == 0.0f)
+            compPost.reset();
+        compPost.process (L, R, n, 1.0f, compPostMix.from, compPostMix.to);
+    }
     if (smoothMix.from > 0.0f || smoothMix.to > 0.0f)
     {
         if (smoothMix.from == 0.0f)

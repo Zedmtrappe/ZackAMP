@@ -16,7 +16,7 @@ namespace
     };
     constexpr int kTopBarHeight = 56, kStatusHeight = 30, kBannerHeight = 46;
     constexpr int kHeaderHeight = 34, kGap = 8, kMargin = 10;
-    constexpr int kEqCabHeight = 250, kFxHeight = 240;
+    constexpr int kEqCabHeight = 250, kFxHeight = 430;
 } // namespace
 
 PermissionBanner::PermissionBanner()

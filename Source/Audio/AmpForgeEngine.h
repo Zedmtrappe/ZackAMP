@@ -27,6 +27,7 @@
 #include "../DSP/Effects/Overdrive.h"
 #include "../DSP/Effects/Reverb.h"
 #include "../DSP/Effects/Smooth.h"
+#include "../DSP/Effects/Compressor.h"
 #include "../DSP/GraphicEQ/GraphicEQ.h"
 #include "../DSP/Utilities/Oversampler.h"
 #include "../Parameters/Parameters.h"
@@ -151,6 +152,8 @@ private:
     dsp::CabinetSection cabinet { garbage };
     dsp::MicroPitch pitch;
     dsp::Smooth smooth;
+    dsp::Compressor compPre, compPost;
+    dsp::AutoWah wah;
     int activeDriveType = 0;
     dsp::Chorus chorus;
     dsp::StereoDelay delay;
@@ -160,7 +163,7 @@ private:
 
     // smoothed controls
     Smoothed inTrim, outGain, bypassMix, driveMix, eqPreMix, eqPostMix, gateMix;
-    Smoothed chorusMix, pitchMix, delayIn, reverbIn, smoothMix;
+    Smoothed chorusMix, pitchMix, delayIn, reverbIn, smoothMix, compPreMix, compPostMix, wahMix;
     dsp::LinearSmoother ampGain, ampBass, ampMid, ampTreble, ampPresence, ampDepth, ampMaster;
     dsp::LinearSmoother ampPull, powerSag, powerVariac;
     dsp::LinearSmoother driveDrive, driveTone, driveLevel, chorusRate, chorusDepth, delayFb, delayMix, reverbMix;

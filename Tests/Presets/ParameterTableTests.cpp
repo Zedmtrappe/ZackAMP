@@ -10,6 +10,9 @@ TEST_CASE ("Parameter table rows line up with the ParamIndex enum")
     const std::pair<int, const char*> expected[] = {
         { pInTrim, "in.trim" }, { pBypass, "engine.bypass" },
         { pGateOn, "gate.enabled" }, { pGateThreshold, "gate.threshold" }, { pGateRelease, "gate.release" },
+        { pCompOn, "comp.enabled" }, { pCompType, "comp.type" }, { pCompPosition, "comp.position" }, { pCompSustain, "comp.sustain" },
+        { pCompAttack, "comp.attack" }, { pCompTone, "comp.tone" }, { pCompLevel, "comp.level" },
+        { pWahOn, "wah.enabled" }, { pWahSens, "wah.sens" }, { pWahRange, "wah.range" }, { pWahPeak, "wah.peak" }, { pWahMix, "wah.mix" },
         { pDriveOn, "drive.enabled" }, { pDriveDrive, "drive.drive" }, { pDriveTone, "drive.tone" }, { pDriveLevel, "drive.level" }, { pDriveType, "drive.type" },
         { pAmpModel, "amp.model" }, { pAmpGain, "amp.gain" }, { pAmpBass, "amp.bass" }, { pAmpMid, "amp.mid" },
         { pAmpTreble, "amp.treble" }, { pAmpPresence, "amp.presence" }, { pAmpDepth, "amp.depth" }, { pAmpMaster, "amp.master" },

@@ -23,6 +23,11 @@
 - Reverb types **Room**, **Hall** (the original), **Spring** and **Chamber**; type changes fade
   the tail out and back in.
 
+- **Compressor**: *Studio* (clean 4:1 soft knee, Pre = before the amp or Post = after the cabinet,
+  stereo-linked) and *CS-3* (pedal sustainer: squash, attack, tone); Sustain/Attack/Tone/Level.
+- **Auto-wah** (envelope filter) before the amp: Sens, Range, Peak, Mix.
+- The Effects section now has two rows: pedals before the amp, then the effects after the cabinet.
+
 ### Added (amp head)
 - Knob edge lighting follows the model: cool green on the JC120 through to orange on the Triple.
 - Photo-realistic amp interior behind the glass: valves, transformers and chassis rendered in

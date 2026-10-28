@@ -19,7 +19,7 @@
 
 ## Requested features (owner)
 
-Status: items 1–13 are implemented (see CHANGELOG); 14 (compressor, auto-wah) is in progress.
+Status: items 1–14 are implemented (see CHANGELOG).
 
 1. **Single fixed row of amp controls** instead of the model buttons + per-model faceplate:
    * first knob: a **switched (detented) model selector** across the six models;

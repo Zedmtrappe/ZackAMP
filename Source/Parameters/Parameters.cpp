@@ -14,6 +14,8 @@ namespace
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger" };
     const char* const kDriveTypes[] = { "Screamer", "RAT" };
+    const char* const kCompTypes[] = { "Studio", "CS-3" };
+    const char* const kCompPositions[] = { "Pre", "Post" };
     const char* const kDelayTypes[] = { "Studio", "Tape" };
     const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
@@ -32,6 +34,20 @@ namespace
         { "gate.enabled", "Gate", "", 0.f, 1.f, 0.f, TOG, 1.f, "Gate", "Noise gate: listens to the clean guitar input and mutes amp hiss between phrases." },
         { "gate.threshold", "Threshold", "dB", -96.f, -20.f, -62.f, LIN, 1.f, "Gate", "Input level below which the gate closes (with 6 dB hysteresis)." },
         { "gate.release", "Release", "ms", 10.f, 600.f, 120.f, LOG, 1.f, "Gate", "How gently the gate closes. Longer keeps more sustain." },
+
+        { "comp.enabled", "Comp", "", 0.f, 1.f, 0.f, TOG, 1.f, "Comp", "Compressor. Studio: clean 4:1 with soft knee. CS-3: squashy pedal sustainer." },
+        { "comp.type", "Type", "", 0.f, 1.f, 0.f, CHO, 1.f, "Comp", "Studio (clean, transparent) or CS-3 (pedal-style sustain and squash).", kCompTypes, 2 },
+        { "comp.position", "Position", "", 0.f, 1.f, 0.f, CHO, 1.f, "Comp", "Studio type only: Pre = before the amp (like a pedal), Post = after the cabinet (like a mix compressor). CS-3 is always before the amp.", kCompPositions, 2 },
+        { "comp.sustain", "Sustain", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Comp", "Amount of compression: lowers the threshold (make-up gain follows)." },
+        { "comp.attack", "Attack", "", 0.f, 1.f, 0.4f, LIN, 10.f, "Comp", "Low: squashes the pick attack. High: lets the pick through before compressing." },
+        { "comp.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Comp", "Treble shelf after the compressor (centre = flat)." },
+        { "comp.level", "Level", "dB", -12.f, 12.f, 0.f, LIN, 1.f, "Comp", "Output level." },
+
+        { "wah.enabled", "Auto-Wah", "", 0.f, 1.f, 0.f, TOG, 1.f, "Wah", "Envelope filter: the harder you pick, the higher it sweeps. Before the amp." },
+        { "wah.sens", "Sens", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Wah", "How far your picking dynamics sweep the filter." },
+        { "wah.range", "Range", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Wah", "Sweep range: low and narrow to wide and bright." },
+        { "wah.peak", "Peak", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Wah", "Resonance of the filter: subtle to quacky." },
+        { "wah.mix", "Mix", "%", 0.f, 1.f, 0.85f, LIN, 100.f, "Wah", "Filtered signal blended with the dry guitar." },
 
         { "drive.enabled", "Drive", "", 0.f, 1.f, 0.f, TOG, 1.f, "Drive", "Overdrive / boost pedal in front of the amp." },
         { "drive.drive", "Drive", "", 0.f, 1.f, 0.25f, LIN, 10.f, "Drive", "Pedal clipping amount. Near zero it works as a tightening mid boost." },

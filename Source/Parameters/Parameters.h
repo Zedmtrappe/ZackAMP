@@ -41,6 +41,8 @@ enum ParamIndex : int
     pInTrim,
     pBypass,
     pGateOn, pGateThreshold, pGateRelease,
+    pCompOn, pCompType, pCompPosition, pCompSustain, pCompAttack, pCompTone, pCompLevel,
+    pWahOn, pWahSens, pWahRange, pWahPeak, pWahMix,
     pDriveOn, pDriveDrive, pDriveTone, pDriveLevel, pDriveType,
     pAmpModel, pAmpGain, pAmpBass, pAmpMid, pAmpTreble, pAmpPresence, pAmpDepth, pAmpMaster, pAmpBright,
     pAmpPull, pAmpPreampValve, pAmpPowerValve, pPowerSag, pPowerVariac,
