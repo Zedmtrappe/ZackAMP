@@ -101,6 +101,7 @@ public:
     bool isBusy() const noexcept { return busyJobs.load() > 0; }
 
     juce::PropertiesFile& getSettings() { return *settings; }
+    uint64_t getAudioCallbackCount() const noexcept { return audioHost.getCallbackCount(); }
 
 private:
     void timerCallback() override;

@@ -59,6 +59,8 @@ void AppController::initialise()
 
     restoreSession();
     openAudioDevice();
+    // Route the device's audio through ZackAMP's engine (AudioHost -> AmpForgeEngine).
+    deviceManager.addAudioCallback (&audioHost);
     enableMidiInputs();
     midiListConnection = std::make_unique<juce::MidiDeviceListConnection> (
         juce::MidiDeviceListConnection::make ([this] { enableMidiInputs(); }));
@@ -80,6 +82,7 @@ void AppController::shutdown()
         settings->setValue ("audioDeviceState", xml.get());
     saveMidiSettings();
     settings->saveIfNeeded();
+    deviceManager.removeAudioCallback (&audioHost);
     deviceManager.closeAudioDevice();
     engine.collectGarbage();
     settings.reset();

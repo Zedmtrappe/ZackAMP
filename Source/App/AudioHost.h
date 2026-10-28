@@ -21,6 +21,8 @@ public:
     int getInputChannel() const noexcept { return inputChannel.load(); }
 
     bool isRunning() const noexcept { return running.load(); }
+    /** Number of audio callbacks processed (diagnostics / smoke test). */
+    uint64_t getCallbackCount() const noexcept { return callbacks.load (std::memory_order_relaxed); }
     juce::String takeLastError();
 
     void audioDeviceIOCallbackWithContext (const float* const* inputs, int numIn, float* const* outputs, int numOut,
@@ -33,6 +35,7 @@ private:
     AmpForgeEngine& engine;
     std::atomic<int> inputChannel { 0 };
     std::atomic<bool> running { false };
+    std::atomic<uint64_t> callbacks { 0 };
     std::vector<float> silence, scratchL, scratchR; // sized in audioDeviceAboutToStart
     std::mutex errorLock;
     juce::String lastError;

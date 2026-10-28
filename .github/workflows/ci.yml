@@ -41,8 +41,7 @@ jobs:
           EXTRA_CMAKE_ARGS: -DAMPFORGE_BUILD_TOOLS=OFF
       - name: Package
         run: Scripts/package_macos.sh build/macos
-      - name: Launch smoke test
-        continue-on-error: true
+      - name: Launch smoke test (fails if an audio device is open but no audio reaches the engine)
         run: |
           perl -e 'alarm 60; exec @ARGV' "build/macos/ZackAMP_artefacts/Release/ZackAMP.app/Contents/MacOS/ZackAMP" --smoke-test 5
       - name: Publish as the "latest" release
@@ -71,5 +70,7 @@ jobs:
         run: Scripts/build.sh
       - name: Sanitizers
         run: Scripts/run_sanitizers.sh
-      - name: Headless launch
-        run: xvfb-run -a "build/release/ZackAMP_artefacts/Release/ZackAMP" --smoke-test 5
+      - name: Headless launch with a null audio device (checks audio reaches the engine)
+        run: |
+          printf 'pcm.!default {\n  type plug\n  slave.pcm "nulldev"\n}\npcm.nulldev {\n  type null\n}\n' > ~/.asoundrc
+          xvfb-run -a "build/release/ZackAMP_artefacts/Release/ZackAMP" --smoke-test 5

@@ -4,6 +4,8 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include <cstdio>
+
 namespace af
 {
 class MainWindow final : public juce::DocumentWindow
@@ -47,7 +49,23 @@ public:
         if (commandLine.contains ("--smoke-test"))
         {
             const int secs = juce::jmax (1, commandLine.fromFirstOccurrenceOf ("--smoke-test", false, false).trim().getIntValue());
-            juce::Timer::callAfterDelay (secs * 1000, [] { juce::JUCEApplication::getInstance()->systemRequestedQuit(); });
+            juce::Timer::callAfterDelay (secs * 1000, [this]
+            {
+                // With an audio device open, audio must actually flow through the engine.
+                if (auto* dev = controller->deviceManager.getCurrentAudioDevice())
+                {
+                    const auto n = controller->getAudioCallbackCount();
+                    std::printf ("smoke test: device \"%s\", %llu audio callbacks\n", dev->getName().toRawUTF8(), (unsigned long long) n);
+                    if (n == 0)
+                    {
+                        std::printf ("smoke test FAILED: audio device open but no audio reached the engine\n");
+                        setApplicationReturnValue (1);
+                    }
+                }
+                else
+                    std::printf ("smoke test: no audio device available, audio path not checked\n");
+                juce::JUCEApplication::getInstance()->systemRequestedQuit();
+            });
         }
     }
 

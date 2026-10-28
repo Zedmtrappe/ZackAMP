@@ -40,6 +40,7 @@ void AudioHost::audioDeviceIOCallbackWithContext (const float* const* inputs, in
     // Real-time thread: no allocation, no locks, no logging.
     if (numSamples <= 0)
         return;
+    callbacks.fetch_add (1, std::memory_order_relaxed);
     if ((size_t) numSamples > scratchL.size())
     {
         // Never expected (the device promised a smaller buffer), but never overrun either.
