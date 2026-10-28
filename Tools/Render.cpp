@@ -4,6 +4,7 @@
 //   ampforge_render --preset "<name>" --in <di.wav> --out <out.wav> [--rate 48000]
 //   ampforge_render --all-presets <dir> [--in <di.wav>]   render every factory preset
 //   ampforge_render --calibrate                    measure preset loudness, suggest out.level
+//   ampforge_render --models [inputBoostDb]        loudness of each amp model at the same knobs
 //
 // The DI test set is synthesised (Karplus-Strong plucked strings with pick, pickup and
 // palm-mute models), so it is original material that can ship with the project. It is a
@@ -288,6 +289,33 @@ int main (int argc, char** argv)
             const double cur = p.state.values[(size_t) pOutLevel];
             std::printf ("%-26s %8.1f dB %8.1f dB %10.1f dB   (peak %.1f dBFS)\n", p.state.name.toRawUTF8(), l, cur,
                          cur + (target - l), 20 * std::log10 (std::max (pk, 1e-9f)));
+        }
+        return 0;
+    }
+
+    if (args.contains ("--models"))
+    {
+        // Same knobs, same cabinet, only the model (and its usual valves) changes — what you hear
+        // when turning the model knob. Gain at 3, 5 and 7; everything else at defaults.
+        auto in = concatClips (fs);
+        const float trimDb = argAfter ("--models").getFloatValue(); // optional input boost, dB
+        for (auto& v : in) v *= std::pow (10.0f, trimDb / 20.0f);
+        float inPk = 0; for (float v : in) inPk = std::max (inPk, std::abs (v));
+        std::printf ("input peak %.1f dBFS\n%-10s %9s %9s %9s %9s\n", 20 * std::log10 (inPk), "model", "gain 3", "gain 5", "gain 7", "gain 10");
+        for (int m = 0; m < dsp::kNumAmpModels; ++m)
+        {
+            std::printf ("%-10s", dsp::getAmpVoicing (m).name);
+            for (float g : { 0.3f, 0.5f, 0.7f, 1.0f })
+            {
+                PresetState st;
+                st.irA = defaultIrForModel (3);
+                st.values[(size_t) pAmpModel] = (float) m;
+                st.values[(size_t) pAmpPreampValve] = (float) dsp::getAmpVoicing (m).defaultPreampValve;
+                st.values[(size_t) pAmpPowerValve] = (float) dsp::getAmpVoicing (m).defaultPowerValve;
+                st.values[(size_t) pAmpGain] = g;
+                std::printf (" %6.1f dB", loudnessDb (renderPreset (st, in)));
+            }
+            std::printf ("\n");
         }
         return 0;
     }

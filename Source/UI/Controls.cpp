@@ -2,12 +2,32 @@
 
 namespace af::ui
 {
+std::vector<std::pair<int, float>> defaultsFor (std::initializer_list<int> params)
+{
+    std::vector<std::pair<int, float>> d;
+    for (int p : params)
+        d.emplace_back (p, paramDef (p).def);
+    return d;
+}
+
+void resetBlock (AppController& app, const std::vector<std::pair<int, float>>& defaults, const juce::String& blockName)
+{
+    app.setParamsWithUndo (defaults, "Reset " + blockName);
+    app.postMessage (blockName + ": controls reset to defaults (Undo to get them back).");
+}
+
 void showParamContextMenu (AppController& app, int paramIndex, juce::Component* target)
 {
     const auto& def = paramDef (paramIndex);
     juce::PopupMenu m;
     m.addSectionHeader (def.name);
     m.addItem (1, "Reset to default (" + juce::String (formatParamValue (paramIndex, def.def)) + ")");
+    juce::Component::SafePointer<juce::Component> blockComp;
+    if (auto* block = target->findParentComponentOfClass<ResettableBlock>())
+    {
+        blockComp = dynamic_cast<juce::Component*> (block);
+        m.addItem (5, "Reset all " + block->getBlockName() + " controls");
+    }
     m.addSeparator();
     const int cc = app.midi.findCCForParam (paramIndex);
     if (app.midi.getLearnParam() == paramIndex)
@@ -16,8 +36,13 @@ void showParamContextMenu (AppController& app, int paramIndex, juce::Component* 
         m.addItem (2, "MIDI Learn (move a controller now)");
     m.addItem (3, cc >= 0 ? "Clear MIDI mapping (CC " + juce::String (cc) + ")" : juce::String ("No MIDI mapping"), cc >= 0);
     juce::Component::SafePointer<juce::Component> safe (target);
-    m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (target), [&app, paramIndex, cc, safe] (int r) {
-        if (r == 1)
+    m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (target), [&app, paramIndex, cc, safe, blockComp] (int r) {
+        if (r == 5)
+        {
+            if (auto* block = dynamic_cast<ResettableBlock*> (blockComp.getComponent()))
+                block->resetBlockControls();
+        }
+        else if (r == 1)
             app.setParamWithUndo (paramIndex, paramDef (paramIndex).def);
         else if (r == 2)
         {

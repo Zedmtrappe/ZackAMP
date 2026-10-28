@@ -87,7 +87,7 @@ P = [
 ]
 
 # Output level per preset (dB), calibrated with `ampforge_render --calibrate`.
-LEVELS = {'Glass Clean': -5.5, 'Studio Clean Chorus': -4.0, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': 1.0, 'Top Boost Chime': 1.5, 'Tweed Blues': -1.0, 'Texas Drive': -3.5, 'Brit Crunch': -1.0, 'Cranked AC30': -2.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': -1.5, 'Fusion Lead': -1.5, 'Classic V Rhythm': -3.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': -1.5, 'RAT Grunge': -1.0, 'Ambient Swells': -3.0, 'Dual Cab Crunch': -5.5}
+LEVELS = {'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': -5.5, 'Top Boost Chime': -6.5, 'Tweed Blues': -5.5, 'Texas Drive': -11.0, 'Brit Crunch': -1.0, 'Cranked AC30': -5.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': 0.5, 'Fusion Lead': 0.5, 'Classic V Rhythm': -1.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': 1.5, 'RAT Grunge': -6.5, 'Ambient Swells': -2.5, 'Dual Cab Crunch': -5.5}
 LEVELS_OLD = {'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 3.0, 'Edge of Breakup': 1.5, 'Touch Sensitive': -7.5, 'Tweed Blues': -1.0, 'Texas Drive': -9.5, 'Plexi Crunch': -0.5, 'Cranked Plexi': -5.0, 'British Crunch': -1.0, 'Boosted Brit': -4.0, 'Hot Rod Lead': -4.0, 'Singing Lead': -4.0, 'Fusion Lead': -1.0, 'Classic V Rhythm': -2.5, 'High Gain Rhythm': -1.5, 'Modern Metal': -3.0, 'Tight Extended Range': -2.0, 'Ambient Swells': -1.5, 'Dual Cab Crunch': -2.5}
 
 def main():

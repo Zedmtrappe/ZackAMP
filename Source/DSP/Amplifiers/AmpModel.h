@@ -75,6 +75,8 @@ struct AmpVoicing
     PowerAmpSpec power;
     float powerDriveDb = 0.0f;   // preamp output -> power amp input scaling
     float outputTrimDb = 0.0f;   // level calibration so models are similarly loud
+    float gainRangeScale = 1.0f; // < 1 narrows the gain pot's dB range (clean amps: a usable volume knob)
+    float volumeMakeupDb = 0.0f; // output make-up at gain 0, fading to 0 dB at gain 10 (level only, no tone change)
     bool prePowerEQDefault = true;
     const char* defaultIrId = "";
     int defaultPreampValve = 0; // index into kPreampValves (the valve the voicing is calibrated with)
@@ -133,6 +135,7 @@ private:
     AmpControls current;
     float gainPotFrom = 0.0f, gainPotTo = 0.0f;
     float masterFrom = 0.0f, masterTo = 0.0f;
+    float makeupFrom = 1.0f, makeupTo = 1.0f;
     float powerDrive = 1.0f, outputTrim = 1.0f, valveLevel = 1.0f;
     int preValve = 0, powValve = 0;
     float lastToneB = -1, lastToneM = -1, lastToneT = -1, lastBrightGain = -1;

@@ -24,7 +24,7 @@
     "gate.threshold": -60,
     "amp.preampValve": 0,
     "amp.powerValve": 0,
-    "out.level": -3.0
+    "out.level": -1.0
   },
   "cabinet": {
     "a": {

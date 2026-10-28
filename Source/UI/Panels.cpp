@@ -175,6 +175,12 @@ void AmpPanel::paint (juce::Graphics& g)
             else if (j == juce::Justification::centredLeft)
                 box = box.withX (at.x - 2.0f);
             const auto name = juce::String (getAmpVoicing (i).name).toUpperCase();
+            const float tw = juce::GlyphArrangement::getStringWidth (g.getCurrentFont(), name) + 8.0f;
+            const float tx = j == juce::Justification::centredRight ? box.getRight() - tw
+                           : j == juce::Justification::centredLeft  ? box.getX()
+                                                                    : box.getCentreX() - tw * 0.5f;
+            if ((size_t) i < nameHit.size())
+                nameHit[(size_t) i] = { tx - 2.0f, box.getY() - 3.0f, tw + 4.0f, box.getHeight() + 6.0f };
             if (i == m)
                 lit (name, box, j);
             else
@@ -207,6 +213,58 @@ void AmpPanel::paint (juce::Graphics& g)
 }
 
 //==============================================================================
+int AmpPanel::modelNameAt (juce::Point<float> p) const
+{
+    for (int i = 0; i < std::min ((int) nameHit.size(), dsp::getNumAmpModels()); ++i)
+        if (nameHit[(size_t) i].contains (p))
+            return i;
+    return -1;
+}
+
+void AmpPanel::mouseMove (const juce::MouseEvent& e)
+{
+    setMouseCursor (modelNameAt (e.position) >= 0 ? juce::MouseCursor::PointingHandCursor : juce::MouseCursor::NormalCursor);
+}
+
+void AmpPanel::mouseDown (const juce::MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+        resetBlockControls();
+    else if (const int i = modelNameAt (e.position); i >= 0)
+        app.selectAmpModel (i);
+}
+
+juce::String AmpPanel::getBlockName() const { return juce::String (getAmpVoicing (app.params().getInt (pAmpModel)).name) + " amp"; }
+
+void AmpPanel::resetBlockControls()
+{
+    // Everything but the model: knobs, switches, power section, and the model's usual valves.
+    auto d = defaultsFor ({ pAmpGain, pAmpBass, pAmpMid, pAmpTreble, pAmpPresence, pAmpDepth, pAmpMaster, pAmpBright, pAmpPull,
+                            pPowerSag, pPowerVariac });
+    const auto& v = dsp::getAmpVoicing (app.params().getInt (pAmpModel));
+    d.emplace_back (pAmpPreampValve, (float) v.defaultPreampValve);
+    d.emplace_back (pAmpPowerValve, (float) v.defaultPowerValve);
+    resetBlock (app, d, getBlockName());
+}
+
+void EQPanel::mouseDown (const juce::MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+        resetBlockControls();
+}
+
+juce::String EQPanel::getBlockName() const { return "Graphic EQ"; }
+void EQPanel::resetBlockControls() { resetBlock (app, defaultsFor ({ pEq80, pEq240, pEq750, pEq2200, pEq6600 }), getBlockName()); }
+
+void CabinetPanel::mouseDown (const juce::MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+        resetBlockControls();
+}
+
+juce::String CabinetPanel::getBlockName() const { return "Cabinet"; }
+void CabinetPanel::resetBlockControls() { resetBlock (app, defaultsFor ({ pCabALevel, pCabAPan, pCabBLevel, pCabBPan }), getBlockName()); }
+
 EQPanel::EQPanel (AppController& a)
     : app (a), enable (a, pEqOn, "GRAPHIC EQ"), position (a, pEqPosition)
 {
@@ -438,6 +496,23 @@ EffectModule::EffectModule (AppController& a, const juce::String& t, int enableP
     }
     for (int p : knobParams)
         addAndMakeVisible (knobs.add (new ParamKnob (app, p)));
+}
+
+void EffectModule::mouseDown (const juce::MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+        resetBlockControls();
+}
+
+juce::String EffectModule::getBlockName() const { return title; }
+
+void EffectModule::resetBlockControls()
+{
+    std::vector<std::pair<int, float>> d;
+    for (auto* k : knobs)
+        d.emplace_back (k->getParamIndex(), paramDef (k->getParamIndex()).def);
+    if (! d.empty())
+        resetBlock (app, d, title);
 }
 
 void EffectModule::refresh()

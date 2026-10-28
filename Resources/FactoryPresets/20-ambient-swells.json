@@ -29,7 +29,7 @@
     "amp.preampValve": 3,
     "amp.powerValve": 4,
     "amp.depth": 0.0,
-    "out.level": -3.0
+    "out.level": -2.5
   },
   "cabinet": {
     "a": {

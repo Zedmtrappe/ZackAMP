@@ -13,16 +13,22 @@ public:
 };
 
 //==============================================================================
-class AmpPanel final : public juce::Component, public Refreshable
+class AmpPanel final : public juce::Component, public Refreshable, public ResettableBlock
 {
 public:
     explicit AmpPanel (AppController& app);
     void refresh() override;
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown (const juce::MouseEvent&) override; // click a model name: select it; right-click: reset
+    void mouseMove (const juce::MouseEvent&) override;
+    juce::String getBlockName() const override;
+    void resetBlockControls() override;
 
 private:
     void applyStyle (int model);
+    int modelNameAt (juce::Point<float> p) const;
+    std::array<juce::Rectangle<float>, dsp::kNumAmpModels> nameHit {}; // engraved model names (set in paint)
     AppController& app;
     // One fixed row: every control is always visible and works on every model.
     ParamKnob model, gain, bass, mid, treble, presence, depth, master, sag, variac;
@@ -35,13 +41,16 @@ private:
 };
 
 //==============================================================================
-class EQPanel final : public juce::Component, public Refreshable
+class EQPanel final : public juce::Component, public Refreshable, public ResettableBlock
 {
 public:
     explicit EQPanel (AppController& app);
     void refresh() override;
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown (const juce::MouseEvent&) override; // right-click: reset the block's controls
+    juce::String getBlockName() const override;
+    void resetBlockControls() override;
 
 private:
     AppController& app;
@@ -73,13 +82,16 @@ private:
 };
 
 //==============================================================================
-class CabinetPanel final : public juce::Component, public Refreshable, public juce::FileDragAndDropTarget
+class CabinetPanel final : public juce::Component, public Refreshable, public ResettableBlock, public juce::FileDragAndDropTarget
 {
 public:
     explicit CabinetPanel (AppController& app);
     void refresh() override;
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown (const juce::MouseEvent&) override; // right-click: reset the block's controls
+    juce::String getBlockName() const override;
+    void resetBlockControls() override;
 
     bool isInterestedInFileDrag (const juce::StringArray& files) override;
     void filesDropped (const juce::StringArray& files, int x, int y) override;
@@ -99,13 +111,16 @@ private:
 };
 
 //==============================================================================
-class EffectModule final : public juce::Component
+class EffectModule final : public juce::Component, public ResettableBlock
 {
 public:
     EffectModule (AppController& app, const juce::String& title, int enableParam, std::vector<int> knobParams);
     void refresh();
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown (const juce::MouseEvent&) override; // right-click: reset the block's controls
+    juce::String getBlockName() const override;
+    void resetBlockControls() override;
     void addExtra (juce::Component* c) { extras.push_back (c); addAndMakeVisible (c); }
     /** A control shown at the right of the module's header (e.g. a type selector or a light). */
     void setHeaderExtra (juce::Component* c, int width) { headerExtra = c; headerExtraWidth = width; addAndMakeVisible (c); }

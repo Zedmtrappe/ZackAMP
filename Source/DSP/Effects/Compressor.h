@@ -1,8 +1,9 @@
 // Z.AMP — compressor, two types:
 //
 // Studio — clean feed-forward compressor: soft knee (6 dB), 4:1, attack 1–30 ms, 150 ms release,
-//          automatic make-up gain, gentle tilt tone. Can run before the amp (pedal) or after
-//          the cabinet (stereo-linked, like a mix-bus compressor).
+//          automatic make-up gain, gentle tilt tone. Runs after the cabinet (stereo-linked, like
+//          a mix-bus compressor). Amount 0 is identical to off: the threshold rises to 0 dBFS and
+//          the whole effect (tone and level included) fades out over the bottom 8% of the knob.
 // CS-3   — pedal-style OTA compressor/sustainer: near-limiting ratio, the Sustain knob lowers the
 //          threshold and raises the make-up together, Attack lets more or less of the pick through,
 //          a slower release that "breathes", and a Tone shelf to restore the top it squashes.
@@ -27,6 +28,7 @@ public:
         sampleRate = fs;
         detAttack = onePoleCoeff (0.0003, fs);
         lastTone = -1.0f;
+        wetFrom = wetTo = 1.0f;
         setControls (studio, 0.5f, 0.5f, 0.5f, 0.0f);
         reset();
     }
@@ -57,7 +59,7 @@ public:
         }
         else
         {
-            thresholdDb = -8.0f - 32.0f * sustain;
+            thresholdDb = -40.0f * sustain;
             ratio = 4.0f;
             kneeDb = 6.0f;
             attackCoeff = onePoleCoeff (0.001 * std::pow (30.0, (double) attack), sampleRate); // 1..30 ms
@@ -66,6 +68,8 @@ public:
             makeupDb = -thresholdDb * (1.0f - 1.0f / ratio) * 0.5f;
         }
         outGain = dbToGain (levelDb + makeupDb);
+        wetFrom = wetTo;
+        wetTo = type == cs3 ? 1.0f : clampv (sustain / 0.08f, 0.0f, 1.0f);
         if (std::abs (toneKnob - lastTone) > 1e-4f || type != lastType)
         {
             lastTone = toneKnob;
@@ -84,12 +88,14 @@ public:
         for (int i = 0; i < n; ++i)
         {
             const float g = gainFor (std::abs (x[i]) * detectScale);
-            const float m = mixFrom + (mixTo - mixFrom) * (float) (i + 1) / (float) n;
+            const float t = (float) (i + 1) / (float) n;
+            const float m = (mixFrom + (mixTo - mixFrom) * t) * (wetFrom + (wetTo - wetFrom) * t);
             const float y = tone[0].process (x[i] * g);
             x[i] += m * (y - x[i]);
             maxGr = std::max (maxGr, grDb * m);
         }
         meterDb.store (maxGr, std::memory_order_relaxed);
+        wetFrom = wetTo;
     }
 
     /** Stereo-linked, in place (post-cabinet position). */
@@ -99,13 +105,15 @@ public:
         for (int i = 0; i < n; ++i)
         {
             const float g = gainFor (std::max (std::abs (l[i]), std::abs (r[i])) * detectScale);
-            const float m = mixFrom + (mixTo - mixFrom) * (float) (i + 1) / (float) n;
+            const float t = (float) (i + 1) / (float) n;
+            const float m = (mixFrom + (mixTo - mixFrom) * t) * (wetFrom + (wetTo - wetFrom) * t);
             const float yl = tone[0].process (l[i] * g), yr = tone[1].process (r[i] * g);
             l[i] += m * (yl - l[i]);
             r[i] += m * (yr - r[i]);
             maxGr = std::max (maxGr, grDb * m);
         }
         meterDb.store (maxGr, std::memory_order_relaxed);
+        wetFrom = wetTo;
     }
 
     /** Largest gain reduction (dB) in the last processed block — for meters, any thread. */
@@ -136,6 +144,7 @@ private:
     float thresholdDb = -20.0f, ratio = 4.0f, kneeDb = 6.0f, makeupDb = 0.0f, outGain = 1.0f;
     float attackCoeff = 0.0f, releaseCoeff = 0.0f, detAttack = 0.0f, detRelease = 0.0f;
     float env = 0.0f, grDb = 0.0f, lastTone = -1.0f;
+    float wetFrom = 1.0f, wetTo = 1.0f; // amount fade (studio), ramped across each block
     Biquad tone[2];
     std::atomic<float> meterDb { 0.0f };
 };

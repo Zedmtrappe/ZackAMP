@@ -12,6 +12,19 @@ namespace af::ui
 {
 /** Shared right-click menu: reset, MIDI learn / clear. */
 void showParamContextMenu (AppController& app, int paramIndex, juce::Component* target);
+/** A panel or effect block whose controls can all be reset at once (right-click on the block, or
+    "Reset all ... controls" in any of its controls' right-click menus). */
+class ResettableBlock
+{
+public:
+    virtual ~ResettableBlock() = default;
+    virtual juce::String getBlockName() const = 0;
+    virtual void resetBlockControls() = 0;
+};
+
+/** Right-click on a block: puts the given controls back to their defaults (one undo step). */
+void resetBlock (AppController& app, const std::vector<std::pair<int, float>>& defaults, const juce::String& blockName);
+std::vector<std::pair<int, float>> defaultsFor (std::initializer_list<int> params);
 
 class KnobSlider final : public juce::Slider
 {
@@ -86,6 +99,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void mouseDown (const juce::MouseEvent&) override;
+    int getParamIndex() const noexcept { return index; }
 
 private:
     AppController& app;

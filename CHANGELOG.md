@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Changed (feedback round)
+- Studio Comp: Amount 0 is now identical to off (threshold rises to 0 dBFS and the whole effect,
+  tone and level included, fades out over the bottom of the knob). Tested bit-for-bit.
+- Right-click on a block (amp panel, EQ, cabinet, any effect) resets all its controls to their
+  defaults in one undoable step; every knob's right-click menu also has "Reset all … controls".
+  The amp keeps its model and goes back to that model's usual valves.
+- Click an engraved model name on the faceplate to select that model.
+- Changing the amp model no longer changes the cabinet.
+- Model levels re-balanced: at the same knob settings all seven models now sit within about 3 dB
+  at Gain 5 (was 12 dB). The JC120 Volume has a narrower range (it was up to 6 dB louder than
+  everything else from 7 upwards); Tweed, AC30 and JC120 get output make-up at low Volume
+  settings (level only — breakup is unchanged). Factory preset levels re-calibrated. User presets
+  on Tweed/JC120/AC30/Coliseum/MP1 may play at a different level than before.
+- `ampforge_render --models [boostDb]` measures model loudness at equal knob settings.
+
 ### Added
 - Micro-pitch doubler: copies shifted +13 cents (left) and -13 cents (right), post amp/cab, with
   on/off and Mix.

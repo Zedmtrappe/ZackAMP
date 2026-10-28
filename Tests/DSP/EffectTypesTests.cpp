@@ -228,6 +228,24 @@ TEST_CASE ("Compressor: both types reduce dynamic range, Sustain compresses more
     CHECK (spread (dsp::Compressor::cs3) < spread (dsp::Compressor::studio));
 }
 
+TEST_CASE ("Studio compressor at Amount 0 is identical to off, whatever the other knobs")
+{
+    const double fs = 48000;
+    dsp::Compressor c;
+    c.prepare (fs);
+    auto x = test::sine (440.0, fs, (int) fs / 2, 0.9f);
+    const auto dry = x;
+    for (size_t p = 0; p + 64 <= x.size(); p += 64)
+    {
+        c.setControls (dsp::Compressor::studio, 0.0f, 0.2f, 1.0f, 9.0f); // tone and level far from neutral
+        c.process (x.data() + p, 64, 1.0f, 1.0f, 1.0f);
+    }
+    // After the first block's fade-out the output is the input, bit for bit.
+    for (size_t i = 64; i < x.size(); ++i)
+        REQUIRE (x[i] == dry[i]);
+    CHECK (c.getMeterDb() == 0.0f);
+}
+
 TEST_CASE ("Auto-wah sweeps up with picking strength and stays stable")
 {
     const double fs = 48000;

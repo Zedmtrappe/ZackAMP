@@ -34,7 +34,7 @@
     "reverb.mix": 0.2,
     "amp.preampValve": 0,
     "amp.powerValve": 0,
-    "out.level": -1.5
+    "out.level": 0.5
   },
   "cabinet": {
     "a": {

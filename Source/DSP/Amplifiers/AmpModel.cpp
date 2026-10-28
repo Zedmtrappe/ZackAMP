@@ -58,6 +58,8 @@ namespace
             a.cathodeFollower = { 0.028f, 0.85f, 2.5f, 20.0f };
             a.power = { 0.30f, 2.0f, 0.05f, 0.50f, 180.0f, 4000.0f, 7.0f, 90.0f, 0.0f, 0.5f, 45.0f, 7500.0f, 0.70f };
             a.powerDriveDb = 3.0f;
+            a.outputTrimDb = 1.0f;
+            a.volumeMakeupDb = 12.0f;
             a.defaultIrId = "factory:am-1x12-open-cap";
         }
         {
@@ -81,7 +83,9 @@ namespace
             a.bright = { true, 3000.0f, 6.0f };
             a.power = { 0.03f, 9.0f, 0.0f, 0.02f, 60.0f, 4500.0f, 6.0f, 90.0f, 0.0f, 0.5f, 30.0f, 15000.0f, 0.10f };
             a.powerDriveDb = 6.0f;
-            a.outputTrimDb = 7.0f;
+            a.outputTrimDb = -2.0f;
+            a.volumeMakeupDb = 6.0f;
+            a.gainRangeScale = 0.35f; // linear amp: the full pot range would be a 30 dB level jump
             a.defaultIrId = "factory:am-2x12-open-cap";
         }
         {
@@ -105,7 +109,8 @@ namespace
             a.bright = { true, 2600.0f, 6.0f };
             a.power = { 0.40f, 1.8f, 0.07f, 0.45f, 160.0f, 3000.0f, 6.0f, 100.0f, 0.0f, 0.5f, 65.0f, 9000.0f, 0.80f };
             a.powerDriveDb = 9.0f;
-            a.outputTrimDb = -2.5f;
+            a.outputTrimDb = -1.0f;
+            a.volumeMakeupDb = 14.0f;
             a.defaultIrId = "factory:am-2x12-open-room";
         }
         {
@@ -150,7 +155,7 @@ namespace
             a.toneStack = tsModernLead;
             a.power = { 0.22f, 3.6f, 0.03f, 0.10f, 90.0f, 4500.0f, 7.0f, 85.0f, 6.0f, 0.5f, 50.0f, 9500.0f, 0.30f };
             a.powerDriveDb = -14.0f;
-            a.outputTrimDb = 1.5f;
+            a.outputTrimDb = -0.5f;
             a.defaultIrId = "factory:bt-1x12-closed-cap";
         }
         {
@@ -175,7 +180,7 @@ namespace
             a.toneStack = tsScooped;
             a.power = { 0.12f, 4.5f, 0.02f, 0.06f, 80.0f, 4500.0f, 7.0f, 85.0f, 6.0f, 0.5f, 50.0f, 10000.0f, 0.25f };
             a.powerDriveDb = -12.0f;
-            a.outputTrimDb = -2.0f;
+            a.outputTrimDb = -5.0f;
             a.defaultIrId = "factory:md-2x12-closed-cap";
         }
         {
@@ -264,6 +269,7 @@ void AmpModel::prepare (double oversampledRate, const AmpVoicing& v)
     setControls (current);
     gainPotFrom = gainPotTo;
     masterFrom = masterTo;
+    makeupFrom = makeupTo;
     reset();
 }
 
@@ -315,7 +321,9 @@ void AmpModel::setControls (const AmpControls& c)
     gainPotFrom = gainPotTo;
     // "Pull for saturation": up to +10 dB more preamp gain, blended smoothly.
     constexpr float kPullBoost = 3.1623f; // +10 dB
-    gainPotTo = potTaper (c.gain, v.gainFloorDb) * (1.0f + c.pull * (kPullBoost - 1.0f));
+    gainPotTo = std::pow (potTaper (c.gain, v.gainFloorDb), v.gainRangeScale) * (1.0f + c.pull * (kPullBoost - 1.0f));
+    makeupFrom = makeupTo;
+    makeupTo = dbToGain (v.volumeMakeupDb * (1.0f - clampv (c.gain, 0.0f, 1.0f)));
     masterFrom = masterTo;
     masterTo = (v.controls & ctlMaster) ? potTaper (c.master, -60.0f) : 1.0f;
 
@@ -394,13 +402,16 @@ void AmpModel::processPreamp (float* buf, int n) noexcept
 void AmpModel::processPower (float* buf, int n) noexcept
 {
     const float step = (masterTo - masterFrom) / (float) std::max (1, n);
-    float m = masterFrom;
+    const float mkStep = (makeupTo - makeupFrom) / (float) std::max (1, n);
+    float m = masterFrom, mk = makeupFrom;
     for (int i = 0; i < n; ++i)
     {
         m += step;
-        buf[i] = power.process (buf[i] * m * powerDrive) * outputTrim * valveLevel;
+        mk += mkStep;
+        buf[i] = power.process (buf[i] * m * powerDrive) * outputTrim * valveLevel * mk;
     }
     masterFrom = masterTo;
+    makeupFrom = makeupTo;
 }
 
 } // namespace af::dsp

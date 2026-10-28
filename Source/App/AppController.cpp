@@ -263,20 +263,18 @@ void AppController::selectAmpModel (int model)
 void AppController::followModelChange()
 {
     // A model change made by the user (knob, MIDI, undo...) resets the valves to the new
-    // model's usual pair and moves a default cabinet along. Preset loads set their own
-    // valves and cabinet, so they are excluded via expectedModel / busy jobs.
+    // model's usual pair; the cabinet stays as it is. Preset loads set their own valves,
+    // so they are excluded via expectedModel / busy jobs.
     const int model = engine.params().getInt (pAmpModel);
     if (model == lastSeenModel)
         return;
-    const int old = lastSeenModel;
+    const bool first = lastSeenModel < 0;
     lastSeenModel = model;
-    if (old < 0 || busyJobs.load() > 0 || expectedModel.exchange (-1) == model)
+    if (first || busyJobs.load() > 0 || expectedModel.exchange (-1) == model)
         return;
     const auto& v = dsp::getAmpVoicing (model);
     engine.params().set (pAmpPreampValve, (float) v.defaultPreampValve);
     engine.params().set (pAmpPowerValve, (float) v.defaultPowerValve);
-    if (getCabinetIrId (0) == defaultIrForModel (old))
-        setCabinetIR (0, defaultIrForModel (model));
 }
 
 void AppController::beginGesture (int index) { gestureStart[index] = engine.params().get (index); }

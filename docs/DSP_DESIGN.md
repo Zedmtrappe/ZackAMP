@@ -125,7 +125,15 @@ Every model has every control (Presence, Resonance and Bright included); valve s
 relative to each model's usual valves (Tweed 12AY7/6V6, JC120 12AT7/KT88, AC30 12AX7/EL84,
 JCM800 12AX7/EL34, Coliseum/MP1/Triple 12AX7/6L6).
 
-The default cabinet differs per model; switching models moves the cab with it unless you chose a different IR, and resets the valve selectors to the new model's usual valves (loading a preset does not).
+The default cabinet differs per model (used for a fresh start or a missing IR); switching models leaves the cabinet alone and resets the valve selectors to the new model's usual valves (loading a preset does not).
+
+**Level balance.** `ampforge_render --models` plays the synthetic DI through every model at the
+same knobs and cabinet. Each voicing's `outputTrimDb` puts Gain 5 at about -21 dB (loudness proxy)
+for every model. Volume-knob amps (Tweed, AC30, JC120) also have `volumeMakeupDb`, an output-only
+make-up that is full at Volume 0 and 0 dB at 10. It changes level, not breakup. The JC120 has
+`gainRangeScale` 0.35 because a linear amp's 30 dB pot range would otherwise be a 30 dB level range.
+Clean amps still get louder than high-gain ones with very hot input (they don't compress); that is
+inherent, not a calibration error.
 
 ### Measured behaviour (220 Hz sine, cab off, `ampforge_measure`, 48 kHz, 8x)
 
