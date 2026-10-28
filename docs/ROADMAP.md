@@ -53,6 +53,28 @@
      character, not just loudness. Implemented as parameter overrides of `TriodeSpec` /
      `PowerAmpSpec`, so it combines with Sag/Variac (item 3).
 
+5. **Graphic EQ: sliders only.** Remove the response-curve display (and any other cut/boost
+   graphic); the five sliders and their dB readouts are the whole EQ.
+6. **Collapsible sections.** Only the main amp controls are always visible. The other sections
+   (currently the EQ/cabinet row and the effects row) are collapsed by default and expand/collapse
+   with an arrow on their header. The open/closed state is remembered between launches; the window
+   shrinks/grows (or the space is reused) accordingly.
+7. **"Old-school amp head" look** for the main window:
+   * cabinet-style head (tolex/piping/handle styling) instead of the flat panel look;
+   * a **glass front panel with "ZackAMP" etched into it**, **edge-lit with purple LEDs**, so the
+     etching glows purple when the amp is on (dims with Bypass / when audio is off);
+   * **behind the glass, visible valves and transformers**;
+   * **valve glow follows the amp model**: a subtle warm orange on the low-gain models, rising
+     through brighter orange/yellow to **white-hot on the high-gain models** (Lacquer Clean →
+     Lacquer Tweed → Albion Plexi → Albion Lead → Cascade Lead → Cascade Heavy); could also track
+     the Gain knob and later the valve selectors (item 4);
+   * **transformers glow slightly on the modern high-gain models** (artistic licence).
+   Implementation notes: drawn in code and/or original rendered artwork (no third-party assets);
+   glow, etched-glass and LED-edge effects via gradients and pre-rendered blurred layers so it stays
+   cheap; any animation (gentle flicker, glow transitions when switching models) runs at a modest
+   frame rate on the UI thread only, never affecting audio. Knobs keep their current size and
+   behaviour. Works at the minimum window size and on Retina displays.
+
 ## AU and VST3 plugins
 
 The engine was built for this from the start; what exists today and what is still needed:
