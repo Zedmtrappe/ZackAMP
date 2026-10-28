@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Micro-pitch doubler: copies shifted +13 cents (left) and -13 cents (right), post amp/cab, with
+  on/off and Mix.
+- Chorus / Flanger mode switch.
+
+### Fixed
+- Audio from the interface now actually reaches the amp (the audio callback was not registered).
+- macOS audio-input ("Microphone") permission is explained before the prompt; a banner with an
+  "Open System Settings" button appears while access is denied; audio restarts when it is granted.
+- Choosing an input device now switches its inputs on.
+
 ## 0.1.0 — first complete build (unreleased)
 
 Built and tested on Linux; macOS build configured but not yet verified.

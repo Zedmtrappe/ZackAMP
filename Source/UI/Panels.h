@@ -120,9 +120,9 @@ public:
 
 private:
     AppController& app;
-    EffectModule gate, drive, chorus, delay, reverb, output;
+    EffectModule gate, drive, pitch, chorus, delay, reverb, output;
     ParamToggle delaySync;
-    ParamChoice delayDivision;
+    ParamChoice delayDivision, chorusMode;
     juce::TextButton tapTempo { "TAP" };
     std::vector<double> taps;
     juce::Rectangle<int> flowArea;

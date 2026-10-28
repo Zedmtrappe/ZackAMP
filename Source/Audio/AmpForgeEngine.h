@@ -12,7 +12,7 @@
 // Signal flow (fixed order, see docs/DSP_DESIGN.md):
 //   input trim -> [gate detector] -> upsample -> [drive] -> preamp -> [EQ pre-power]
 //   -> power amp -> downsample -> [EQ post-amp] -> gate gain -> cabinet (mono->stereo)
-//   -> chorus -> delay -> reverb -> output level -> DC block -> safety limiter
+//   -> micro-pitch -> chorus -> delay -> reverb -> output level -> DC block -> safety limiter
 //
 // The audio thread never allocates, locks, logs or touches files. Internally it works in
 // control blocks of at most kControlBlock samples, so host block size is irrelevant.
@@ -20,6 +20,7 @@
 
 #include "../DSP/Amplifiers/AmpModel.h"
 #include "../DSP/Cabinet/CabinetSection.h"
+#include "../DSP/Effects/MicroPitch.h"
 #include "../DSP/Effects/ModulationEffects.h"
 #include "../DSP/Effects/NoiseGate.h"
 #include "../DSP/Effects/OutputLimiter.h"
@@ -144,6 +145,7 @@ private:
     dsp::NoiseGate gate;
     dsp::GraphicEQ eqPre, eqPost;
     dsp::CabinetSection cabinet { garbage };
+    dsp::MicroPitch pitch;
     dsp::Chorus chorus;
     dsp::StereoDelay delay;
     dsp::Reverb reverb;
@@ -152,7 +154,7 @@ private:
 
     // smoothed controls
     Smoothed inTrim, outGain, bypassMix, driveMix, eqPreMix, eqPostMix, gateMix;
-    Smoothed chorusMix, delayIn, reverbIn;
+    Smoothed chorusMix, pitchMix, delayIn, reverbIn;
     dsp::LinearSmoother ampGain, ampBass, ampMid, ampTreble, ampPresence, ampDepth, ampMaster;
     dsp::LinearSmoother driveDrive, driveTone, driveLevel, chorusRate, chorusDepth, delayFb, delayMix, reverbMix;
     std::array<dsp::LinearSmoother, 5> eqBands;

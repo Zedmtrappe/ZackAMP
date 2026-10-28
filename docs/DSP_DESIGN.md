@@ -19,7 +19,7 @@ interface input (mono, chosen channel)
  → graphic EQ  [position "Post Amp"]
  → gate gain → amp-model switch fade
  → cabinet: IR slot A (+ slot B in dual mode), mono → stereo
- → chorus → delay → reverb (stereo)
+ → micro-pitch → chorus/flanger → delay → reverb (stereo)
  → Output level → DC blocker → safety limiter (-1 dBFS, no look-ahead) → output
 ```
 
@@ -187,8 +187,15 @@ variant), converted to minimum phase via the real cepstrum. Honest summary: plau
 * **Noise gate:** peak detector on the clean input, 6 dB hysteresis, 40 ms hold, 0.8 ms attack,
   user release (10–600 ms), -80 dB floor; gain applied after the amp where the hiss is. Test: hiss
   between notes attenuated by > 80 dB relative to the note.
-* **Chorus:** two cubic-Hermite modulated delay lines (7 ms base, up to 4 ms depth), LFOs in
-  quadrature for stereo width.
+* **Micro-pitch:** two splice-type pitch shifters (+13 / -13 cents) fed with the mono cab output,
+  panned left / right and added to the dry signal at the Mix level. Each shifter reads a delay line
+  with two taps whose delays ramp across a 30 ms window (5–35 ms), crossfaded with sin² windows that
+  sum to 1. Measured average shift over seven notes: +13.4 / -13.4 cents (individual notes within
+  ~1 cent; splice shifters slip a fraction of a cycle at each tap hand-over). The dry path is
+  untouched; only the pitched copies are delayed.
+* **Chorus / flanger:** two cubic-Hermite modulated delay lines, LFOs in quadrature for stereo width.
+  Chorus: 7–11 ms, no feedback. Flanger: 0.3–4.3 ms sweep with soft-limited feedback (0.6).
+  Mode changes fade the wet path out and in over 10 ms (tested click-free).
 * **Delay:** stereo, up to 2.5 s, tempo sync (8 note divisions), feedback through a variable
   low-pass (800 Hz–12 kHz) and fixed 90 Hz high-pass with soft limiting, time changes glide over 250 ms.
 * **Reverb:** 4 series all-pass diffusers → 8-line FDN with orthonormal Hadamard feedback,

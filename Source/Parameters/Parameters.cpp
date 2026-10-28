@@ -11,6 +11,7 @@ namespace
 {
     const char* const kAmpModels[] = { "Lacquer Clean", "Lacquer Tweed", "Albion Plexi",
                                        "Albion Lead", "Cascade Lead", "Cascade Heavy" };
+    const char* const kModModes[] = { "Chorus", "Flanger" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
     const char* const kDivisions[] = { "1/2", "1/4", "1/4 D", "1/4 T", "1/8", "1/8 D", "1/8 T", "1/16" }; // D = dotted, T = triplet
     constexpr float kDivisionBeats[] = { 2.0f, 1.0f, 1.5f, 2.0f / 3.0f, 0.5f, 0.75f, 1.0f / 3.0f, 0.25f };
@@ -58,7 +59,11 @@ namespace
         { "cab.b.level", "Cab B Level", "dB", -30.f, 6.f, -3.f, LIN, 1.f, "Cabinet", "Cabinet B level (dual mode)." },
         { "cab.b.pan", "Cab B Pan", "", -1.f, 1.f, 0.f, LIN, 1.f, "Cabinet", "Cabinet B pan (dual mode)." },
 
-        { "chorus.enabled", "Chorus", "", 0.f, 1.f, 0.f, TOG, 1.f, "Chorus", "Stereo chorus." },
+        { "pitch.enabled", "Pitch", "", 0.f, 1.f, 0.f, TOG, 1.f, "Pitch", "Micro-pitch doubler: adds copies of the amp+cab sound shifted 13 cents up (left) and 13 cents down (right)." },
+        { "pitch.mix", "Mix", "%", 0.f, 1.f, 0.5f, LIN, 100.f, "Pitch", "Level of the pitched copies added to the dry sound." },
+
+        { "chorus.enabled", "Chorus", "", 0.f, 1.f, 0.f, TOG, 1.f, "Chorus", "Stereo chorus / flanger (choose with the Mode switch)." },
+        { "chorus.mode", "Mode", "", 0.f, 1.f, 0.f, CHO, 1.f, "Chorus", "Chorus (lush doubling) or Flanger (short swept delay with feedback, jet-like).", kModModes, 2 },
         { "chorus.rate", "Rate", "Hz", 0.05f, 5.f, 0.6f, LOG, 1.f, "Chorus", "Modulation speed." },
         { "chorus.depth", "Depth", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Chorus", "Modulation depth." },
         { "chorus.mix", "Mix", "%", 0.f, 1.f, 0.5f, LIN, 100.f, "Chorus", "Chorus blend." },

@@ -52,6 +52,9 @@ private:
     int mask = 0, write = 0;
 };
 
+/** Stereo chorus / flanger (one modulated delay line per channel, LFOs in quadrature).
+    Chorus: 7–11 ms delay, no feedback. Flanger: 0.3–4.3 ms sweep with soft-limited feedback.
+    Switching mode fades the wet signal out, changes the delay range while silent, and fades back in. */
 class Chorus
 {
 public:
@@ -60,6 +63,7 @@ public:
         sampleRate = fs;
         for (auto& d : lines)
             d.prepare ((int) (0.05 * fs));
+        fadeStep = (float) (1.0 / (0.010 * fs));
         reset();
     }
 
@@ -68,36 +72,58 @@ public:
         for (auto& d : lines)
             d.reset();
         phase = 0.0;
+        feedback[0] = feedback[1] = 0.0f;
+        modeFade = 1.0f;
     }
 
     /** rate Hz, depth 0..1, mix 0..1 (block-constant; the engine smooths them). */
-    void process (float* l, float* r, int n, float rateHz, float depth, float mix) noexcept
+    void process (float* l, float* r, int n, float rateHz, float depth, float mix, bool flanger) noexcept
     {
         const double inc = rateHz / sampleRate;
-        const float baseMs = 7.0f, depthMs = 4.0f * depth;
+        float* ch[2] = { l, r };
         for (int i = 0; i < n; ++i)
         {
-            const float lfoL = (float) std::sin (kTwoPi * phase);
-            const float lfoR = (float) std::sin (kTwoPi * (phase + 0.25)); // quadrature: stereo width
+            // Mode change: fade the wet path out, swap mode with clean state, fade back in.
+            if (flanger != activeFlanger)
+            {
+                modeFade -= fadeStep;
+                if (modeFade <= 0.0f)
+                {
+                    // Wet path is silent now: swap modes. The delay lines keep their continuous
+                    // input history (clearing them would make the signal re-enter as a step).
+                    modeFade = 0.0f;
+                    activeFlanger = flanger;
+                    feedback[0] = feedback[1] = 0.0f;
+                }
+            }
+            else if (modeFade < 1.0f)
+                modeFade = std::min (1.0f, modeFade + fadeStep);
+
+            const float baseMs = activeFlanger ? 0.3f : 7.0f;
+            const float depthMs = 4.0f * depth;
+            const float fbAmount = activeFlanger ? 0.6f : 0.0f;
+            for (int c = 0; c < 2; ++c)
+            {
+                const float lfo = (float) std::sin (kTwoPi * (phase + 0.25 * c)); // quadrature: stereo width
+                const float d = std::max (1.0f, (baseMs + depthMs * 0.5f * (1.0f + lfo)) * 0.001f * (float) sampleRate);
+                lines[c].push (ch[c][i] + fbAmount * feedback[c]);
+                const float wet = lines[c].read (d);
+                feedback[c] = tanhRational (wet);
+                // Equal-ish loudness dry/wet blend; these effects are normally used as a blend.
+                ch[c][i] = ch[c][i] * (1.0f - 0.5f * mix * modeFade) + wet * mix * 0.7f * modeFade;
+            }
             phase += inc;
             if (phase >= 1.0)
                 phase -= 1.0;
-
-            lines[0].push (l[i]);
-            lines[1].push (r[i]);
-            const float dL = (baseMs + depthMs * 0.5f * (1.0f + lfoL)) * 0.001f * (float) sampleRate;
-            const float dR = (baseMs + depthMs * 0.5f * (1.0f + lfoR)) * 0.001f * (float) sampleRate;
-            const float wetL = lines[0].read (dL);
-            const float wetR = lines[1].read (dR);
-            // Equal-ish loudness dry/wet blend; chorus is normally used as a blend, not 100% wet.
-            l[i] = l[i] * (1.0f - 0.5f * mix) + wetL * mix * 0.7f;
-            r[i] = r[i] * (1.0f - 0.5f * mix) + wetR * mix * 0.7f;
         }
     }
 
 private:
     double sampleRate = 48000.0, phase = 0.0;
     DelayLine lines[2];
+    float feedback[2] {};
+    float modeFade = 1.0f, fadeStep = 0.002f;
+    bool activeFlanger = false;
 };
 
 class StereoDelay

@@ -540,14 +540,16 @@ EffectsPanel::EffectsPanel (AppController& a)
     : app (a),
       gate (a, "Gate", pGateOn, { pGateThreshold, pGateRelease }),
       drive (a, "Drive", pDriveOn, { pDriveDrive, pDriveTone, pDriveLevel }),
+      pitch (a, "Pitch", pPitchOn, { pPitchMix }),
       chorus (a, "Chorus", pChorusOn, { pChorusRate, pChorusDepth, pChorusMix }),
       delay (a, "Delay", pDelayOn, { pDelayTime, pDelayFeedback, pDelayMix, pDelayTone }),
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
       output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
-      delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision)
+      delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode)
 {
-    for (auto* m : { &gate, &drive, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &drive, &pitch, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
+    chorus.addExtra (&chorusMode);
     delay.addExtra (&delaySync);
     delay.addExtra (&delayDivision);
     delay.addExtra (&tapTempo);
@@ -572,10 +574,11 @@ EffectsPanel::EffectsPanel (AppController& a)
 
 void EffectsPanel::refresh()
 {
-    for (auto* m : { &gate, &drive, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &drive, &pitch, &chorus, &delay, &reverb, &output })
         m->refresh();
     delaySync.refresh();
     delayDivision.refresh();
+    chorusMode.refresh();
     const bool sync = app.params().getBool (pDelaySync);
     delay.knob (0)->setEnabled (! sync);
     delayDivision.setEnabled (sync);
@@ -591,13 +594,13 @@ void EffectsPanel::resized()
     flowArea = r.removeFromTop (22);
     r.removeFromTop (4);
     // Width weights by module complexity.
-    const float weights[] = { 1.0f, 1.3f, 1.3f, 1.55f, 1.3f, 1.3f };
+    const float weights[] = { 1.0f, 1.3f, 0.7f, 1.3f, 1.55f, 1.3f, 1.3f };
     float total = 0;
     for (float w : weights) total += w;
     const int gap = 8;
-    const float unit = (float) (r.getWidth() - gap * 5) / total;
+    const float unit = (float) (r.getWidth() - gap * 6) / total;
     int i = 0;
-    for (auto* m : { &gate, &drive, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &drive, &pitch, &chorus, &delay, &reverb, &output })
     {
         m->setBounds (r.removeFromLeft ((int) (unit * weights[i++])));
         r.removeFromLeft (gap);
@@ -609,7 +612,7 @@ void EffectsPanel::paint (juce::Graphics& g)
     // Signal-flow strip: the fixed processing order, lit where a stage is active.
     struct Stage { const char* name; int param; };
     const Stage stages[] = { { "IN", -1 }, { "GATE", pGateOn }, { "DRIVE", pDriveOn }, { "AMP", -1 },
-                             { "EQ", pEqOn }, { "CAB", pCabOn }, { "CHORUS", pChorusOn }, { "DELAY", pDelayOn },
+                             { "EQ", pEqOn }, { "CAB", pCabOn }, { "PITCH", pPitchOn }, { "CHORUS", pChorusOn }, { "DELAY", pDelayOn },
                              { "REVERB", pReverbOn }, { "OUT", -1 } };
     auto r = flowArea.toFloat().reduced (2.0f, 2.0f);
     const int n = (int) std::size (stages);
@@ -624,6 +627,8 @@ void EffectsPanel::paint (juce::Graphics& g)
         g.fillRoundedRectangle (cell, 4.0f);
         g.setColour (active ? Colours::text : Colours::textDim);
         juce::String label = stages[i].name;
+        if (stages[i].param == pChorusOn && app.params().getInt (pChorusMode) == 1)
+            label = "FLANGER";
         if (i == 4 && app.params().getBool (pEqOn))
             label << (app.params().getInt (pEqPosition) == 0 ? " (pre-PA)" : " (post)");
         g.drawFittedText (label, cell.toNearestInt(), juce::Justification::centred, 1);

@@ -23,6 +23,8 @@ Scripts/run_sanitizers.sh                         # ASan+UBSan and TSan builds o
 | Tone stack | digital vs analogue model ≤ 0.05 dB (≥ 96 kHz); passive TMB behaviour (mid scoop, bass/treble/mid ranges); stable, decaying impulse response at extreme settings with 1000× input |
 | Graphic EQ | each band hits its value at its centre (±0.35 dB, 4 sample rates, ±6/±12 dB); combined curves ±1 dB; flat is flat; coefficients stable; processed sine response matches design (±0.2 dB) |
 | Convolution | matches direct convolution (≤ 2·10⁻⁵) for IR lengths 1…4801 with irregular host blocks (1, 7, 33, 500…) — zero latency; stereo IR independence; resampler accuracy; truncation/fade/normalisation finite |
+| Micro-pitch | ±13 cents (average of seven notes within 0.6 cents, each note within 1.3); zero mix leaves the signal untouched |
+| Flanger | stable with feedback, different from chorus, chorus↔flanger switch without clicks |
 | Cabinet | IR switch (phase-inverted, delayed IR) produces no discontinuity; bypass is exact dry signal |
 
 ### Engine (`Tests/Audio`)

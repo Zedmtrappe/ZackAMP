@@ -56,6 +56,7 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
     gate.prepare (sampleRate);
     eqPre.prepare (osRate);
     eqPost.prepare (sampleRate);
+    pitch.prepare (sampleRate);
     chorus.prepare (sampleRate);
     delay.prepare (sampleRate);
     reverb.prepare (sampleRate);
@@ -83,7 +84,7 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
 
     for (auto* s : { &inTrim, &outGain })
         s->prepare (sampleRate, 0.03);
-    for (auto* s : { &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &delayIn, &reverbIn })
+    for (auto* s : { &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn })
         s->prepare (sampleRate, 0.02);
     for (auto* s : { &ampGain, &ampBass, &ampMid, &ampTreble, &ampPresence, &ampDepth, &ampMaster,
                      &driveDrive, &driveTone, &driveLevel, &chorusRate, &chorusDepth, &delayFb, &delayMix, &reverbMix })
@@ -260,6 +261,7 @@ void AmpForgeEngine::snapAll() noexcept
     eqPostMix.snap (eqOn && p.getInt (pEqPosition) == 1 ? 1.0f : 0.0f);
     gateMix.snap (p.getBool (pGateOn) ? 1.0f : 0.0f);
     chorusMix.snap (p.getBool (pChorusOn) ? p.get (pChorusMix) : 0.0f);
+    pitchMix.snap (p.getBool (pPitchOn) ? p.get (pPitchMix) : 0.0f);
     delayIn.snap (p.getBool (pDelayOn) ? 1.0f : 0.0f);
     reverbIn.snap (p.getBool (pReverbOn) ? 1.0f : 0.0f);
     for (auto* s : { &ampGain, &ampBass, &ampMid, &ampTreble, &ampPresence, &ampDepth, &ampMaster,
@@ -285,6 +287,7 @@ void AmpForgeEngine::resetDsp() noexcept
     eqPre.reset();
     eqPost.reset();
     cabinet.reset();
+    pitch.reset();
     chorus.reset();
     delay.reset();
     reverb.reset();
@@ -306,10 +309,11 @@ void AmpForgeEngine::updateControls (int n) noexcept
     eqPostMix.target (eqOn && eqPos == 1 ? 1.0f : 0.0f);
     gateMix.target (p.getBool (pGateOn) ? 1.0f : 0.0f);
     chorusMix.target (p.getBool (pChorusOn) ? p.get (pChorusMix) : 0.0f);
+    pitchMix.target (p.getBool (pPitchOn) ? p.get (pPitchMix) : 0.0f);
     delayIn.target (p.getBool (pDelayOn) ? 1.0f : 0.0f);
     reverbIn.target (p.getBool (pReverbOn) ? 1.0f : 0.0f);
 
-    for (auto* s : { &inTrim, &outGain, &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &delayIn, &reverbIn })
+    for (auto* s : { &inTrim, &outGain, &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn })
         s->advance (n);
 
     ampGain.setTarget (p.get (pAmpGain));
@@ -503,8 +507,14 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
     cabinet.process (base.data(), L, R, n, cs);
 
     // ---- post effects ----
+    if (pitchMix.from > 0.0f || pitchMix.to > 0.0f)
+    {
+        if (pitchMix.from == 0.0f)
+            pitch.reset(); // start from silence, never from stale audio
+        pitch.process (L, R, n, pitchMix.from, pitchMix.to);
+    }
     if (chorusMix.from > 0.0f || chorusMix.to > 0.0f)
-        chorus.process (L, R, n, chorusRate.getCurrent(), chorusDepth.getCurrent(), chorusMix.to);
+        chorus.process (L, R, n, chorusRate.getCurrent(), chorusDepth.getCurrent(), chorusMix.to, store.getInt (pChorusMode) == 1);
 
     const float delayMs = store.getBool (pDelaySync)
                               ? 60000.0f / store.get (pTempo) * delayDivisionBeats (store.getInt (pDelayDivision))
