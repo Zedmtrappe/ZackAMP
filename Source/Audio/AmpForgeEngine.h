@@ -113,6 +113,8 @@ public:
 
     /** Current gain reduction of the Smooth (2 kHz) compressor in dB, for its "process" light. */
     float getSmoothReductionDb() const noexcept { return smooth.getReductionDb(); }
+    /** Current gain reduction of the Studio Comp in dB, for its meter. */
+    float getStudioCompReductionDb() const noexcept { return compPost.getMeterDb(); }
 
 private:
     struct Smoothed

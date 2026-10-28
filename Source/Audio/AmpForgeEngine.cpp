@@ -582,6 +582,8 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
             compPost.reset();
         compPost.process (L, R, n, 1.0f, compPostMix.from, compPostMix.to);
     }
+    else
+        compPost.clearMeter();
     if (smoothMix.from > 0.0f || smoothMix.to > 0.0f)
     {
         if (smoothMix.from == 0.0f)
@@ -597,7 +599,7 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
         pitch.process (L, R, n, pitchMix.from, pitchMix.to);
     }
     if (chorusMix.from > 0.0f || chorusMix.to > 0.0f)
-        chorus.process (L, R, n, chorusRate.getCurrent(), chorusDepth.getCurrent(), chorusMix.to, store.getInt (pChorusMode) == 1);
+        chorus.process (L, R, n, chorusRate.getCurrent(), chorusDepth.getCurrent(), chorusMix.to, store.getInt (pChorusMode));
 
     const float delayMs = store.getBool (pDelaySync)
                               ? 60000.0f / store.get (pTempo) * delayDivisionBeats (store.getInt (pDelayDivision))

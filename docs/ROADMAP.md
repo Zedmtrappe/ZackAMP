@@ -19,7 +19,7 @@
 
 ## Requested features (owner)
 
-Status: items 1–14 are implemented (see CHANGELOG); 15 and 16 are next.
+Status: items 1–14 are implemented (see CHANGELOG); 15–17 are next.
 
 1. **Single fixed row of amp controls** instead of the model buttons + per-model faceplate:
    * first knob: a **switched (detented) model selector** across the six models;
@@ -109,6 +109,12 @@ Status: items 1–14 are implemented (see CHANGELOG); 15 and 16 are next.
     slight refraction/offset of what is seen through the strokes, and the glow strongest inside
     the cut. Unlit, it should still look like a clean frosted engraving. (`GlassWindow::drawFront`
     / `drawLit` in `Source/UI/AmpHead.cpp`; pre-rendered once per size, no runtime cost.)
+17. **Valves look like the selected type, more distinctly.** Already: the four power valves are
+    re-rendered per type (6L6, EL34, 6V6, EL84, KT88: size, base, and the printed type name).
+    To do: more characterful bottles (EL34 "fat" straight glass, KT88 shouldered "coke bottle",
+    6V6 slim, 6L6GC tall straight), plate shapes and getter styles per type, and the preamp V1
+    valve following its selector (12AX7 / 5751 / 12AY7 / 12AT7: printing, plate length and
+    colour). V1 rendered as its own overlay layer so the combinations do not multiply the renders.
 
 ## AU and VST3 plugins
 

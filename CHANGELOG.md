@@ -29,7 +29,15 @@
 - **Auto-wah** (envelope filter) before the amp: Sens, Range, Peak, Mix.
 - The Effects section now has two rows: pedals before the amp, then the effects after the cabinet.
 
+- Modulation modes **Script Phaser** (four-stage, no feedback) and **Phase 90** (with feedback),
+  alongside Chorus and Flanger (the module is now called MOD).
+- **Plate** reverb type.
+- **Gain-reduction meter** on the Studio Comp.
+
 ### Added (amp head)
+- Amp panel: larger **model selector** on the left, set apart by an engraved divider, with the
+  model names engraved at each position; the selected model's name lights in the knob-ring
+  colour. **Sag/Variac** moved right, smaller, with brushed-silver caps.
 - Knob edge lighting follows the model: cool green on the JC120 through to orange on the Triple.
 - Photo-realistic amp interior behind the glass: valves, transformers and chassis rendered in
   Blender Cycles as light layers that the app mixes live (heat colour per model, valve type,

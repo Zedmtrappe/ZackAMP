@@ -95,7 +95,7 @@ TEST_CASE ("Drive types: Screamer and RAT are stable, distinct, and the RAT keep
 TEST_CASE ("Reverb types are stable and a type change does not click")
 {
     const double fs = 48000;
-    for (int type = 0; type < 4; ++type)
+    for (int type = 0; type < 5; ++type)
     {
         dsp::Reverb rv;
         rv.prepare (fs);
@@ -251,4 +251,47 @@ TEST_CASE ("Auto-wah sweeps up with picking strength and stays stable")
         return hf / std::max (all, 1e-12);
     };
     CHECK (run (0.5f) > run (0.01f) * 1.5); // brighter (higher filter) when hit harder
+}
+
+#include "../../Source/DSP/Effects/ModulationEffects.h"
+#include <random>
+
+TEST_CASE ("Phasers: stable, notch the spectrum, Phase 90 deeper than Script")
+{
+    const double fs = 48000;
+    auto run = [&] (int mode)
+    {
+        dsp::Chorus c;
+        c.prepare (fs);
+        std::mt19937 rng (3);
+        std::uniform_real_distribution<float> noise (-0.2f, 0.2f);
+        std::vector<float> l ((size_t) fs * 2), r;
+        for (auto& v : l) v = noise (rng);
+        r = l;
+        const auto dry = l;
+        for (size_t p = 0; p + 64 <= l.size(); p += 64)
+            c.process (l.data() + p, r.data() + p, 64, 0.5f, 0.7f, 1.0f, mode);
+        double diff = 0;
+        for (size_t i = (size_t) fs / 2; i < l.size(); ++i)
+            diff += (l[i] - dry[i]) * (l[i] - dry[i]);
+        CHECK (test::allFinite (l));
+        CHECK (test::peak (l) < 1.0f);
+        return diff;
+    };
+    const double script = run (dsp::Chorus::scriptPhaser), p90 = run (dsp::Chorus::phase90);
+    CHECK (script > 1.0); // audibly changes the sound
+    CHECK (p90 > script); // feedback: deeper effect
+}
+
+TEST_CASE ("Compressor meter reports gain reduction and clears")
+{
+    dsp::Compressor c;
+    c.prepare (48000.0);
+    c.setControls (dsp::Compressor::studio, 0.8f, 0.3f, 0.5f, 0.0f);
+    auto x = test::sine (440.0, 48000.0, 24000, 0.4f), y = x;
+    for (size_t p = 0; p + 32 <= x.size(); p += 32)
+        c.process (x.data() + p, y.data() + p, 32, 1.0f, 1.0f, 1.0f);
+    CHECK (c.getMeterDb() > 3.0f);
+    c.clearMeter();
+    CHECK (c.getMeterDb() == 0.0f);
 }

@@ -12,10 +12,10 @@ namespace
     const char* const kAmpModels[] = { "Tweed", "JC120", "AC30", "JCM800", "Coliseum", "MP1", "Triple" };
     const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
-    const char* const kModModes[] = { "Chorus", "Flanger" };
+    const char* const kModModes[] = { "Chorus", "Flanger", "Script Phaser", "Phase 90" };
     const char* const kDriveTypes[] = { "Screamer", "RAT" };
     const char* const kDelayTypes[] = { "Studio", "Tape" };
-    const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber" };
+    const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber", "Plate" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
     const char* const kDivisions[] = { "1/2", "1/4", "1/4 D", "1/4 T", "1/8", "1/8 D", "1/8 T", "1/16" }; // D = dotted, T = triplet
     constexpr float kDivisionBeats[] = { 2.0f, 1.0f, 1.5f, 2.0f / 3.0f, 0.5f, 0.75f, 1.0f / 3.0f, 0.25f };
@@ -93,8 +93,8 @@ namespace
         { "pitch.enabled", "Pitch", "", 0.f, 1.f, 0.f, TOG, 1.f, "Pitch", "Micro-pitch doubler: adds copies of the amp+cab sound shifted 13 cents up (left) and 13 cents down (right)." },
         { "pitch.mix", "Mix", "%", 0.f, 1.f, 0.5f, LIN, 100.f, "Pitch", "Level of the pitched copies added to the dry sound." },
 
-        { "chorus.enabled", "Chorus", "", 0.f, 1.f, 0.f, TOG, 1.f, "Chorus", "Stereo chorus / flanger (choose with the Mode switch)." },
-        { "chorus.mode", "Mode", "", 0.f, 1.f, 0.f, CHO, 1.f, "Chorus", "Chorus (lush doubling) or Flanger (short swept delay with feedback, jet-like).", kModModes, 2 },
+        { "chorus.enabled", "Mod", "", 0.f, 1.f, 0.f, TOG, 1.f, "Chorus", "Modulation: chorus, flanger or phaser (choose with the Mode selector)." },
+        { "chorus.mode", "Mode", "", 0.f, 3.f, 0.f, CHO, 1.f, "Chorus", "Chorus (lush doubling), Flanger (jet-like sweep), Script Phaser (smooth, subtle, no feedback) or Phase 90 (deeper, with feedback).", kModModes, 4 },
         { "chorus.rate", "Rate", "Hz", 0.05f, 5.f, 0.6f, LOG, 1.f, "Chorus", "Modulation speed." },
         { "chorus.depth", "Depth", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Chorus", "Modulation depth." },
         { "chorus.mix", "Mix", "%", 0.f, 1.f, 0.5f, LIN, 100.f, "Chorus", "Chorus blend." },
@@ -112,7 +112,7 @@ namespace
         { "reverb.mix", "Mix", "%", 0.f, 1.f, 0.25f, LIN, 100.f, "Reverb", "Reverb level." },
         { "reverb.decay", "Decay", "s", 0.3f, 10.f, 1.8f, LOG, 1.f, "Reverb", "Reverb time (RT60)." },
         { "reverb.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Reverb", "Dark to bright." },
-        { "reverb.type", "Type", "", 0.f, 3.f, 1.f, CHO, 1.f, "Reverb", "Room: small and close. Hall: big and smooth. Spring: the classic amp tank, with its drip. Chamber: dense, bright and even.", kReverbTypes, 4 },
+        { "reverb.type", "Type", "", 0.f, 4.f, 1.f, CHO, 1.f, "Reverb", "Room: small and close. Hall: big and smooth. Spring: the classic amp tank, with its drip. Chamber: dense, bright and even. Plate: instant, dense and bright, the classic studio plate.", kReverbTypes, 5 },
 
         { "out.level", "Output", "dB", -60.f, 12.f, 0.f, LIN, 1.f, "Output", "Final output level. A safety limiter at -1 dBFS protects your monitors." },
         { "global.tempo", "Tempo", "bpm", 40.f, 240.f, 120.f, LIN, 1.f, "Global", "Tempo for synced delay." },

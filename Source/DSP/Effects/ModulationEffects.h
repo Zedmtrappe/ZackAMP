@@ -52,9 +52,13 @@ private:
     int mask = 0, write = 0;
 };
 
-/** Stereo chorus / flanger (one modulated delay line per channel, LFOs in quadrature).
-    Chorus: 7–11 ms delay, no feedback. Flanger: 0.3–4.3 ms sweep with soft-limited feedback.
-    Switching mode fades the wet signal out, changes the delay range while silent, and fades back in. */
+/** Stereo modulation block (one effect at a time):
+    Chorus: 7–11 ms delay, LFOs in quadrature, no feedback.
+    Flanger: 0.3–4.3 ms sweep with soft-limited feedback.
+    Script Phaser / Phase 90: four-stage all-pass phaser (the classic orange-pedal topology), the
+    break frequency swept exponentially ~150 Hz – 2.6 kHz; "Script" without feedback (smooth,
+    subtle), "Phase 90" with feedback (deeper notches, more pronounced "swoosh").
+    Switching mode fades the wet signal out, changes the mode while silent, and fades back in. */
 class Chorus
 {
 public:
@@ -73,18 +77,23 @@ public:
             d.reset();
         phase = 0.0;
         feedback[0] = feedback[1] = 0.0f;
+        for (auto& stages : allpass)
+            for (auto& st : stages)
+                st = {};
         modeFade = 1.0f;
     }
 
+    enum Mode { chorus = 0, flanger = 1, scriptPhaser = 2, phase90 = 3 };
+
     /** rate Hz, depth 0..1, mix 0..1 (block-constant; the engine smooths them). */
-    void process (float* l, float* r, int n, float rateHz, float depth, float mix, bool flanger) noexcept
+    void process (float* l, float* r, int n, float rateHz, float depth, float mix, int mode) noexcept
     {
         const double inc = rateHz / sampleRate;
         float* ch[2] = { l, r };
         for (int i = 0; i < n; ++i)
         {
             // Mode change: fade the wet path out, swap mode with clean state, fade back in.
-            if (flanger != activeFlanger)
+            if (mode != activeMode)
             {
                 modeFade -= fadeStep;
                 if (modeFade <= 0.0f)
@@ -92,13 +101,45 @@ public:
                     // Wet path is silent now: swap modes. The delay lines keep their continuous
                     // input history (clearing them would make the signal re-enter as a step).
                     modeFade = 0.0f;
-                    activeFlanger = flanger;
+                    activeMode = mode;
                     feedback[0] = feedback[1] = 0.0f;
+                    for (auto& stages : allpass)
+                        for (auto& st : stages)
+                            st = {};
                 }
             }
             else if (modeFade < 1.0f)
                 modeFade = std::min (1.0f, modeFade + fadeStep);
 
+            if (activeMode >= scriptPhaser)
+            {
+                // One LFO for both channels (the pedal is mono); exponential sweep.
+                const float lfo = 0.5f * (1.0f + (float) std::sin (kTwoPi * phase));
+                const float hz = 150.0f * std::pow (2.6f + 15.0f * depth, lfo);
+                const float t = (float) std::tan (kPi * std::min ((double) hz, 0.45 * sampleRate) / sampleRate);
+                const float a = (t - 1.0f) / (t + 1.0f);
+                const float fb = activeMode == phase90 ? 0.45f : 0.0f;
+                for (int c = 0; c < 2; ++c)
+                {
+                    float v = ch[c][i] + fb * feedback[c];
+                    for (auto& st : allpass[c])
+                    {
+                        const float y = a * v + st.x1 - a * st.y1;
+                        st.x1 = v;
+                        st.y1 = y;
+                        v = y;
+                    }
+                    feedback[c] = tanhRational (v);
+                    // The classic phaser is a 50/50 blend of dry and phase-shifted signal.
+                    ch[c][i] += 0.5f * mix * modeFade * (v - ch[c][i]);
+                }
+                phase += inc;
+                if (phase >= 1.0)
+                    phase -= 1.0;
+                continue;
+            }
+
+            const bool activeFlanger = activeMode == flanger;
             const float baseMs = activeFlanger ? 0.3f : 7.0f;
             const float depthMs = 4.0f * depth;
             const float fbAmount = activeFlanger ? 0.6f : 0.0f;
@@ -123,7 +164,9 @@ private:
     DelayLine lines[2];
     float feedback[2] {};
     float modeFade = 1.0f, fadeStep = 0.002f;
-    bool activeFlanger = false;
+    int activeMode = chorus;
+    struct AllPassState { float x1 = 0.0f, y1 = 0.0f; };
+    AllPassState allpass[2][4];
 };
 
 class StereoDelay

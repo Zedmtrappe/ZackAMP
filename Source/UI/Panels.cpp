@@ -17,6 +17,7 @@ AmpPanel::AmpPanel (AppController& a)
                                                              &sag, &variac, &pull, &bright, &preampValve, &powerValve })
         addAndMakeVisible (c);
     pull.setTooltip ("Pull for saturation: about +10 dB more preamp gain. Right-click: MIDI Learn.");
+    model.setTextVisible (false); // the model names are engraved around it
     refresh();
 }
 
@@ -29,8 +30,13 @@ void AmpPanel::applyStyle (int m)
     constexpr int rank[] = { 1, 0, 2, 3, 4, 5, 6 };
     const float heatPos = (float) rank[juce::jlimit (0, 6, m)] / 6.0f;
     const auto light = juce::Colour::fromHSV (juce::jmap (heatPos, 0.42f, 0.075f), 0.85f, 1.0f, 1.0f);
-    for (auto* k : { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master, &sag, &variac })
+    ringLight = light;
+    for (auto* k : { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master })
         k->setFaceplateColours (style.knobCap, light.brighter (0.3f), light, style.plateText, light);
+    // Power section: brushed-silver caps with a neutral ring, to set it apart from the preamp controls.
+    for (auto* k : { &sag, &variac })
+        k->setFaceplateColours (juce::Colour (0xffa9aeb6), juce::Colour (0xff15161a), juce::Colour (0xffd6dbe2), style.plateText,
+                                juce::Colour (0xffcfd6e0).withAlpha (0.45f));
     for (auto* t : { &pull, &bright })
     {
         t->setColour (juce::ToggleButton::textColourId, style.plateText);
@@ -57,32 +63,46 @@ void AmpPanel::resized()
     plateArea = getLocalBounds();
     auto r = plateArea.reduced (20, 12);
     titleArea = r.removeFromTop (30);
+    auto body = r;
     auto strip = r.removeFromBottom (30);
     r.removeFromBottom (4);
 
-    // 8 amp knobs, a gap, then the 2-knob power section.
-    const int gap = 24;
-    const int w = std::min (118, (r.getWidth() - gap) / 10);
-    auto row = r.withSizeKeepingCentre (w * 10 + gap, std::min (r.getHeight(), 150));
-    std::array<juce::Rectangle<int>, 10> cols;
-    for (int i = 0; i < 10; ++i)
-    {
-        if (i == 8)
-            row.removeFromLeft (gap);
-        cols[(size_t) i] = row.removeFromLeft (w);
-    }
-    ParamKnob* knobs[] = { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master, &sag, &variac };
-    for (int i = 0; i < 10; ++i)
-        knobs[i]->setBounds (cols[(size_t) i].reduced (3, 0));
-    powerArea = cols[8].getUnion (cols[9]).expanded (6, 0).withTop (titleArea.getBottom() + 2).withBottom (strip.getBottom());
+    // [ MODEL selector ] | 7 amp knobs |   [ POWER: sag, variac (smaller) ]
+    const int dividerGap = 22, powerGap = 40;
+    const int w = std::min (112, (r.getWidth() - dividerGap - powerGap - 24) * 10 / 109); // 2.4 + 7 + 2 x 0.75 units
+    const int modelW = w * 24 / 10, powerW = w * 3 / 4;
+    auto row = r.withSizeKeepingCentre (modelW + dividerGap + 7 * w + powerGap + 2 * powerW, r.getHeight());
+
+    // Model selector: a larger knob with the model names engraved around it (it uses the strip
+    // height too, since nothing else sits below it).
+    modelArea = row.removeFromLeft (modelW).withTop (body.getY()).withBottom (body.getBottom());
+    const int side = std::min ({ modelArea.getWidth() - 96, modelArea.getHeight() - 58, 140 });
+    model.setBounds (juce::Rectangle<int> (side, side).withCentre ({ modelArea.getCentreX(), modelArea.getY() + 22 + side / 2 }));
+    dividerX = row.getX() + dividerGap / 2;
+    row.removeFromLeft (dividerGap);
+
+    std::array<juce::Rectangle<int>, 7> cols;
+    for (auto& c : cols)
+        c = row.removeFromLeft (w);
+    ParamKnob* ampKnobs[] = { &gain, &bass, &mid, &treble, &presence, &depth, &master };
+    const int rowH = std::min (r.getHeight(), 150);
+    for (int i = 0; i < 7; ++i)
+        ampKnobs[i]->setBounds (cols[(size_t) i].withSizeKeepingCentre (w - 6, rowH));
+
+    row.removeFromLeft (powerGap);
+    auto sagCol = row.removeFromLeft (powerW), variacCol = row.removeFromLeft (powerW);
+    const int powH = std::min (rowH, 128);
+    sag.setBounds (sagCol.withSizeKeepingCentre (powerW - 4, powH).translated (0, 6));
+    variac.setBounds (variacCol.withSizeKeepingCentre (powerW - 4, powH).translated (0, 6));
+    powerArea = sagCol.getUnion (variacCol).expanded (10, 0).withTop (titleArea.getBottom() + 2).withBottom (strip.getBottom());
 
     auto under = [&] (int from, int to) { return strip.withX (cols[(size_t) from].getX()).withRight (cols[(size_t) to].getRight()); };
-    pull.setBounds (under (1, 1).withSizeKeepingCentre (std::min (w, 84), 24));
-    bright.setBounds (under (4, 4).withSizeKeepingCentre (std::min (w, 96), 24));
-    auto pre = under (5, 7).reduced (4, 2);
+    pull.setBounds (under (0, 0).withSizeKeepingCentre (std::min (w, 84), 24));
+    bright.setBounds (under (3, 3).withSizeKeepingCentre (std::min (w, 96), 24));
+    auto pre = under (4, 6).reduced (4, 2);
     preampLabel = pre.removeFromLeft (70);
     preampValve.setBounds (pre);
-    auto pw = under (8, 9).reduced (4, 2);
+    auto pw = strip.withX (powerArea.getX() + 4).withRight (powerArea.getRight() - 4).reduced (2, 2);
     powerLabel = pw.removeFromLeft (50);
     powerValve.setBounds (pw);
 }
@@ -118,7 +138,66 @@ void AmpPanel::paint (juce::Graphics& g)
     g.setColour (style.plateText.withAlpha (0.8f));
     g.drawText ("POWER", label, juce::Justification::centred);
 
+    // Model selector: names engraved at each detent position, "MODEL" beneath, divider.
+    {
+        const auto kb = model.getKnobBounds().toFloat() + model.getPosition().toFloat();
+        const auto centre = kb.getCentre();
+        const float radius = kb.getWidth() * 0.5f + 15.0f;
+        auto engrave = [&g, &style] (const juce::String& text, juce::Rectangle<float> area, juce::Justification j, bool dim)
+        {
+            g.setColour (juce::Colours::black.withAlpha (0.55f));
+            g.drawText (text, area.translated (0.0f, 1.0f), j, false);
+            g.setColour (dim ? style.plateText.withAlpha (0.55f) : style.plateText);
+            g.drawText (text, area, j, false);
+        };
+        // The selected model's engraving is lit from behind in the knob-ring colour.
+        auto lit = [&g, this] (const juce::String& text, juce::Rectangle<float> area, juce::Justification j)
+        {
+            g.setColour (ringLight.withAlpha (0.18f));
+            for (auto d : { juce::Point<float> (-1.5f, 0), { 1.5f, 0 }, { 0, -1.5f }, { 0, 1.5f }, { -1, -1 }, { 1, 1 }, { -1, 1 }, { 1, -1 } })
+                g.drawText (text, area.translated (d.x, d.y), j, false);
+            g.setColour (juce::Colours::black.withAlpha (0.5f));
+            g.drawText (text, area.translated (0.0f, 1.0f), j, false);
+            g.setColour (ringLight.brighter (0.25f));
+            g.drawText (text, area, j, false);
+        };
+        g.setFont (ForgeLookAndFeel::labelFont (11.0f));
+        const int numModels = dsp::getNumAmpModels();
+        for (int i = 0; i < numModels; ++i)
+        {
+            const float a = juce::degreesToRadians (225.0f + 270.0f * (float) i / (float) (numModels - 1));
+            const juce::Point<float> at { centre.x + radius * std::sin (a), centre.y - radius * std::cos (a) };
+            const float sx = std::sin (a);
+            auto j = sx < -0.3f ? juce::Justification::centredRight : sx > 0.3f ? juce::Justification::centredLeft : juce::Justification::centred;
+            auto box = juce::Rectangle<float> (80.0f, 14.0f).withCentre (at);
+            if (j == juce::Justification::centredRight)
+                box = box.withRightX (at.x + 2.0f);
+            else if (j == juce::Justification::centredLeft)
+                box = box.withX (at.x - 2.0f);
+            const auto name = juce::String (getAmpVoicing (i).name).toUpperCase();
+            if (i == m)
+                lit (name, box, j);
+            else
+                engrave (name, box, j, true);
+            // Detent dot
+            g.setColour (i == m ? ringLight : style.plateText.withAlpha (0.35f));
+            const auto dot = centre + juce::Point<float> (std::sin (a), -std::cos (a)) * (radius - 10.0f);
+            g.fillEllipse (juce::Rectangle<float> (3.0f, 3.0f).withCentre (dot));
+        }
+        g.setFont (ForgeLookAndFeel::labelFont (12.0f));
+        engrave ("MODEL", juce::Rectangle<float> (80.0f, 16.0f).withCentre ({ centre.x, kb.getBottom() + 10.0f }), juce::Justification::centred, false);
+
+        // Engraved divider between the selector and the amp controls.
+        const float top = (float) titleArea.getBottom() + 6.0f, bottom = (float) plateArea.getBottom() - 16.0f;
+        g.setColour (juce::Colours::black.withAlpha (0.5f));
+        g.drawVerticalLine (dividerX, top, bottom);
+        g.setColour (style.plateText.withAlpha (0.18f));
+        g.drawVerticalLine (dividerX + 1, top, bottom);
+    }
+
     // Valve selector labels
+    g.setFont (ForgeLookAndFeel::labelFont (11.0f));
+    g.setColour (style.plateText.withAlpha (0.8f));
     g.drawText ("PREAMP V1", preampLabel, juce::Justification::centredRight);
     g.drawText ("VALVES", powerLabel, juce::Justification::centredRight);
 
@@ -403,7 +482,7 @@ void EffectModule::resized()
     const int n = knobs.size();
     if (n == 0)
         return;
-    const int cols = n <= 3 ? n : (r.getWidth() / n >= 72 ? n : 2); // one row when there is room
+    const int cols = n <= 3 ? n : (r.getWidth() / n >= 62 ? n : 2); // one row when there is room
     const int rows = (n + cols - 1) / cols;
     const int w = r.getWidth() / cols, h = r.getHeight() / rows;
     for (int i = 0; i < n; ++i)
@@ -430,12 +509,12 @@ EffectsPanel::EffectsPanel (AppController& a)
       studioComp (a, "Studio Comp", pStudioCompOn, { pStudioCompAmount, pStudioCompAttack, pStudioCompTone, pStudioCompLevel }),
       smooth (a, "Smooth", pSmoothOn, { pSmoothAmount }),
       pitch (a, "Pitch", pPitchOn, { pPitchMix }),
-      chorus (a, "Chorus", pChorusOn, { pChorusRate, pChorusDepth, pChorusMix }),
+      chorus (a, "Mod", pChorusOn, { pChorusRate, pChorusDepth, pChorusMix }),
       delay (a, "Delay", pDelayOn, { pDelayTime, pDelayFeedback, pDelayMix, pDelayTone }),
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
       output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
       delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode),
-      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a)
+      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a), studioCompMeter (a)
 {
     for (auto* m : { &gate, &comp, &wah, &drive, &studioComp, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
@@ -443,6 +522,7 @@ EffectsPanel::EffectsPanel (AppController& a)
     delay.setHeaderExtra (&delayType, 84);
     reverb.setHeaderExtra (&reverbType, 96);
     smooth.setHeaderExtra (&smoothLight, 22);
+    studioComp.addExtra (&studioCompMeter);
     chorus.addExtra (&chorusMode);
     delay.addExtra (&delaySync);
     delay.addExtra (&delayDivision);
@@ -464,6 +544,52 @@ EffectsPanel::EffectsPanel (AppController& a)
                 app.setParamWithUndo (pDelaySync, 1.0f);
         }
     };
+}
+
+void GainReductionMeter::refresh()
+{
+    const float gr = app.params().getBool (pStudioCompOn) ? app.engine.getStudioCompReductionDb() : 0.0f;
+    const float next = gr > shownDb ? gr : shownDb + (gr - shownDb) * 0.2f; // fast attack, eased release
+    if (gr >= peakDb) { peakDb = gr; peakHold = 45; }
+    else if (--peakHold < 0) peakDb = std::max (gr, peakDb - 0.3f);
+    if (std::abs (next - shownDb) > 0.02f || peakHold == 0)
+    {
+        shownDb = next < 0.02f ? 0.0f : next;
+        repaint();
+    }
+}
+
+void GainReductionMeter::paint (juce::Graphics& g)
+{
+    auto r = getLocalBounds().toFloat().reduced (1.0f, 3.0f);
+    g.setFont (ForgeLookAndFeel::labelFont (10.0f));
+    g.setColour (Colours::textDim);
+    g.drawText ("GR", r.removeFromLeft (22.0f), juce::Justification::centredLeft);
+    auto readout = r.removeFromRight (44.0f);
+    g.drawText (juce::String (shownDb, 1) + " dB", readout, juce::Justification::centredRight);
+    r.removeFromRight (4.0f);
+    g.setColour (juce::Colour (0xff0d0e10));
+    g.fillRoundedRectangle (r, 2.0f);
+    constexpr float kRange = 12.0f;
+    const auto bar = r.reduced (1.5f);
+    // Segments light from the right (0 dB) towards the left as reduction grows.
+    const int segs = 24;
+    const float w = bar.getWidth() / (float) segs;
+    for (int i = 0; i < segs; ++i)
+    {
+        const float dbAt = kRange * (float) (i + 1) / (float) segs;
+        const auto cell = juce::Rectangle<float> (bar.getRight() - w * (float) (i + 1), bar.getY(), w - 1.0f, bar.getHeight());
+        const bool lit = shownDb >= dbAt - kRange / (float) segs * 0.5f;
+        const auto c = dbAt > 9.0f ? Colours::bad : dbAt > 5.0f ? Colours::warn : juce::Colour (0xffffb020);
+        g.setColour (lit ? c : c.withAlpha (0.12f));
+        g.fillRect (cell);
+    }
+    if (peakDb > 0.2f)
+    {
+        const float x = bar.getRight() - bar.getWidth() * std::min (peakDb, kRange) / kRange;
+        g.setColour (Colours::text);
+        g.fillRect (x, bar.getY(), 1.5f, bar.getHeight());
+    }
 }
 
 void ProcessLight::refresh()
@@ -503,6 +629,7 @@ void EffectsPanel::refresh()
     for (auto* c : { &driveType, &delayType, &reverbType })
         c->refresh();
     smoothLight.refresh();
+    studioCompMeter.refresh();
     delaySync.refresh();
     delayDivision.refresh();
     chorusMode.refresh();
@@ -536,7 +663,7 @@ void EffectsPanel::resized()
     auto top = r.removeFromTop ((r.getHeight() - gap) / 2);
     r.removeFromTop (gap);
     layoutRow (top, { { &gate, 1.0f }, { &comp, 1.6f }, { &wah, 1.6f }, { &drive, 1.4f } });
-    layoutRow (r, { { &studioComp, 1.5f }, { &smooth, 0.75f }, { &pitch, 0.7f }, { &chorus, 1.3f }, { &delay, 1.55f }, { &reverb, 1.35f }, { &output, 1.25f } });
+    layoutRow (r, { { &studioComp, 2.1f }, { &smooth, 0.82f }, { &pitch, 0.6f }, { &chorus, 1.3f }, { &delay, 1.55f }, { &reverb, 1.35f }, { &output, 1.2f } });
 }
 
 void EffectsPanel::paint (juce::Graphics& g)
@@ -559,8 +686,11 @@ void EffectsPanel::paint (juce::Graphics& g)
         g.fillRoundedRectangle (cell, 4.0f);
         g.setColour (active ? Colours::text : Colours::textDim);
         juce::String label = stages[i].name;
-        if (stages[i].param == pChorusOn && app.params().getInt (pChorusMode) == 1)
-            label = "FLANGER";
+        if (stages[i].param == pChorusOn)
+        {
+            static const char* const modNames[] = { "CHORUS", "FLANGER", "PHASER", "PHASE 90" };
+            label = modNames[juce::jlimit (0, 3, app.params().getInt (pChorusMode))];
+        }
         if (stages[i].param == pEqOn && app.params().getBool (pEqOn))
             label << (app.params().getInt (pEqPosition) == 0 ? " (pre-PA)" : " (post)");
         g.drawFittedText (label, cell.toNearestInt(), juce::Justification::centred, 1);

@@ -29,7 +29,9 @@ private:
     ParamToggle pull, bright;
     ParamChoice preampValve, powerValve;
     int shownModel = -1;
-    juce::Rectangle<int> plateArea, titleArea, powerArea, preampLabel, powerLabel;
+    juce::Rectangle<int> plateArea, titleArea, powerArea, preampLabel, powerLabel, modelArea;
+    int dividerX = 0;
+    juce::Colour ringLight { Colours::accent }; // the model's knob-ring colour (also lights its name)
 };
 
 //==============================================================================
@@ -121,6 +123,20 @@ private:
     bool shownOn = false;
 };
 
+/** Gain-reduction meter (0–12 dB, fills from the right like a studio compressor's GR meter). */
+class GainReductionMeter final : public juce::Component, public juce::SettableTooltipClient
+{
+public:
+    explicit GainReductionMeter (AppController& a) : app (a) { setTooltip ("Gain reduction of the Studio Comp."); }
+    void refresh();
+    void paint (juce::Graphics&) override;
+
+private:
+    AppController& app;
+    float shownDb = 0.0f, peakDb = 0.0f;
+    int peakHold = 0;
+};
+
 /** "Process" light: glows brighter the more gain reduction the Smooth compressor applies. */
 class ProcessLight final : public juce::Component, public juce::SettableTooltipClient
 {
@@ -148,6 +164,7 @@ private:
     ParamToggle delaySync;
     ParamChoice delayDivision, chorusMode, driveType, delayType, reverbType;
     ProcessLight smoothLight;
+    GainReductionMeter studioCompMeter;
     juce::TextButton tapTempo { "TAP" };
     std::vector<double> taps;
     juce::Rectangle<int> flowArea;

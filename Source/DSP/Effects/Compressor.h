@@ -13,6 +13,8 @@
 #include "../Utilities/DspCommon.h"
 #include "../Utilities/Filters.h"
 
+#include <atomic>
+
 namespace af::dsp
 {
 class Compressor
@@ -78,18 +80,22 @@ public:
     /** Mono, in place; `mix` ramps 0..1 across the block (0 = bypassed). */
     void process (float* x, int n, float detectScale, float mixFrom, float mixTo) noexcept
     {
+        float maxGr = 0.0f;
         for (int i = 0; i < n; ++i)
         {
             const float g = gainFor (std::abs (x[i]) * detectScale);
             const float m = mixFrom + (mixTo - mixFrom) * (float) (i + 1) / (float) n;
             const float y = tone[0].process (x[i] * g);
             x[i] += m * (y - x[i]);
+            maxGr = std::max (maxGr, grDb * m);
         }
+        meterDb.store (maxGr, std::memory_order_relaxed);
     }
 
     /** Stereo-linked, in place (post-cabinet position). */
     void process (float* l, float* r, int n, float detectScale, float mixFrom, float mixTo) noexcept
     {
+        float maxGr = 0.0f;
         for (int i = 0; i < n; ++i)
         {
             const float g = gainFor (std::max (std::abs (l[i]), std::abs (r[i])) * detectScale);
@@ -97,10 +103,14 @@ public:
             const float yl = tone[0].process (l[i] * g), yr = tone[1].process (r[i] * g);
             l[i] += m * (yl - l[i]);
             r[i] += m * (yr - r[i]);
+            maxGr = std::max (maxGr, grDb * m);
         }
+        meterDb.store (maxGr, std::memory_order_relaxed);
     }
 
-    float getReductionDb() const noexcept { return grDb; }
+    /** Largest gain reduction (dB) in the last processed block — for meters, any thread. */
+    float getMeterDb() const noexcept { return meterDb.load (std::memory_order_relaxed); }
+    void clearMeter() noexcept { meterDb.store (0.0f, std::memory_order_relaxed); }
 
 private:
     float gainFor (float level) noexcept
@@ -127,6 +137,7 @@ private:
     float attackCoeff = 0.0f, releaseCoeff = 0.0f, detAttack = 0.0f, detRelease = 0.0f;
     float env = 0.0f, grDb = 0.0f, lastTone = -1.0f;
     Biquad tone[2];
+    std::atomic<float> meterDb { 0.0f };
 };
 
 /** Envelope-controlled resonant band-pass ("auto-wah"): picking harder sweeps it higher. */

@@ -37,6 +37,9 @@ public:
     void setFaceplateColours (juce::Colour cap, juce::Colour pointer, juce::Colour arc, juce::Colour text,
                               juce::Colour ring = juce::Colours::transparentBlack);
     int getParamIndex() const noexcept { return index; }
+    /** Hide the name and value text (the knob fills the component; the panel engraves its own). */
+    void setTextVisible (bool shouldShow) { showText = shouldShow; resized(); repaint(); }
+    juce::Rectangle<int> getKnobBounds() const { return slider.getBounds(); }
 
     void paint (juce::Graphics&) override;
     void resized() override;
@@ -48,7 +51,7 @@ private:
     juce::String label;
     juce::Colour textColour { Colours::text };
     KnobSlider slider;
-    bool updating = false;
+    bool updating = false, showText = true;
 };
 
 class ParamToggle final : public juce::ToggleButton

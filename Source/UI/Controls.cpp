@@ -166,14 +166,19 @@ void ParamKnob::refresh()
 void ParamKnob::resized()
 {
     auto r = getLocalBounds();
-    r.removeFromTop (16);
-    r.removeFromBottom (16);
+    if (showText)
+    {
+        r.removeFromTop (16);
+        r.removeFromBottom (16);
+    }
     const int side = std::min (r.getWidth(), r.getHeight());
     slider.setBounds (r.withSizeKeepingCentre (side, side));
 }
 
 void ParamKnob::paint (juce::Graphics& g)
 {
+    if (! showText)
+        return;
     auto r = getLocalBounds();
     g.setColour (textColour.withAlpha (isEnabled() ? 0.95f : 0.4f));
     g.setFont (ForgeLookAndFeel::labelFont (12.0f));

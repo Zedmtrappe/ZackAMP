@@ -7,7 +7,7 @@
 // RT60 so "decay" is in seconds at mid frequencies.
 //
 // Types scale the same network: Room (small, short pre-delay), Hall (the original large space),
-// Chamber (mid-size, denser and brighter), Spring (a short network fed through a dispersive
+// Chamber (mid-size, denser and brighter), Plate (instant, very dense and bright), Spring (a short network fed through a dispersive
 // all-pass chain — the "drip" and chirp of a spring tank — with the tank's band-limited output).
 // A type change fades the wet output out, clears the tank and fades back in (no clicks).
 #pragma once
@@ -24,7 +24,7 @@ public:
     void prepare (double fs);
     void reset() noexcept;
 
-    enum Type { room = 0, hall = 1, spring = 2, chamber = 3 };
+    enum Type { room = 0, hall = 1, spring = 2, chamber = 3, plate = 4 };
 
     /** decay seconds (RT60), tone 0..1 (dark..bright), type. Call at control rate. */
     void setControls (float decaySeconds, float tone, int type = hall);

@@ -34,15 +34,17 @@ void Reverb::prepare (double fs)
 
 void Reverb::applyType (int t)
 {
-    type = clampv (t, 0, 3);
+    type = clampv (t, 0, 4);
     switch (type)
     {
         case room:    scale = 0.40f; preDelayMs = 3.0f;  modAmount = 0.4f; break;
         case chamber: scale = 0.66f; preDelayMs = 7.0f;  modAmount = 0.5f; break;
         case spring:  scale = 0.55f; preDelayMs = 2.0f;  modAmount = 0.0f; break;
+        case plate:   scale = 0.50f; preDelayMs = 1.0f;  modAmount = 0.6f; break;
         default:      scale = 1.00f; preDelayMs = 12.0f; modAmount = 1.0f; break;
     }
-    const float g = type == chamber ? 0.70f : type == room ? 0.66f : 0.62f;
+    // Plate: the densest build-up (a plate has no distinct early reflections).
+    const float g = type == plate ? 0.75f : type == chamber ? 0.70f : type == room ? 0.66f : 0.62f;
     for (auto& d : diffusers)
         d.g = g;
     updateDecay();
@@ -74,7 +76,7 @@ void Reverb::reset() noexcept
 
 void Reverb::setControls (float decaySeconds, float tone, int newType)
 {
-    newType = clampv (newType, 0, 3);
+    newType = clampv (newType, 0, 4);
     if (newType != type && newType != pendingType)
         pendingType = newType; // switched in process() once the wet output has faded out
     if (decaySeconds != lastDecay)
@@ -89,6 +91,8 @@ void Reverb::setControls (float decaySeconds, float tone, int newType)
         double cutoff = 1500.0 * std::pow (10.0, (double) clampv (tone, 0.0f, 1.0f)); // 1.5k..15k
         if (type == chamber)
             cutoff *= 1.4;
+        else if (type == plate)
+            cutoff *= 1.8; // bright, shimmering top
         damping = (float) std::exp (-kTwoPi * std::min (cutoff, 0.45 * sampleRate) / sampleRate);
     }
 }
