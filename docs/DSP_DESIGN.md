@@ -108,14 +108,22 @@ factory presets keep them at neutral settings, so the calibrated sound is unchan
 
 ### Voicings
 
-| Model | Family | Preamp chain | Character / controls |
+The owner's line-up (private build: the names say which classic amp each voicing is modelled on;
+the circuits are built from this engine's blocks, not copied schematics).
+
+| Model | Preamp chain | Power section | Character |
 |---|---|---|---|
-| Lacquer Clean | American | V1 → TMB (250k/250k/10k/100k, 250p/100n/47n) → Volume (+bright cap) → V2 | Big headroom, scooped; NFB power amp; Volume, Treble, Middle, Bass, Master, Bright |
-| Lacquer Tweed | American | V1 → Volume → V2 (slightly cold) → CF → TMB (250k/1M/25k/56k, 250p/20n/20n) | Early breakup, loose, warm; tube-rectifier sag; + Presence |
-| Plexi | British | V1 (cathode shelf) → Volume (+bright) → V2 → CF → TMB (220k/1M/25k/33k, 470p/22n/22n) | Crunch grows with volume, upper-mid push; EL34-style softer knee; + Presence, Bright |
-| Albion Lead | British | V1 (tight shelf) → Gain → cold V2 → divider → V3 → CF → TMB | Cascaded classic-rock gain, tight lows |
-| Cascade Lead | Modern | V1 → TMB (*before the gain*) → Drive → cold V2 → V3 → divider → V4 → [EQ] | Treble/bass shape what distorts (a hallmark of this design family); vocal mids; Presence, Depth |
-| Cascade Heavy | Modern | V1 (tight) → Gain → cold V2 → divider → V3 → divider → V4 → CF → TMB → [EQ] | Modern high gain with firm lows, deep resonance (Depth up to +9 dB) |
+| Tweed | V1 → Volume → V2 (slightly cold) → CF → tweed TMB | 6V6, low NFB, tube-rectifier sag | Touch-sensitive early breakup, loose and warm |
+| JC120 | Linear "V1" (5x headroom) → TMB → Volume → linear "V2" | Solid-state: very hard knee, no sag, high NFB, 15 kHz top | Huge clean headroom; clips abruptly only when cranked |
+| AC30 | V1 → CF → Top Boost stack (1M/1M, 56 pF) → Volume → V2 | EL84, no NFB (soft knee, follows the speaker), rectifier sag | Chime, early sweet power-amp breakup |
+| JCM800 | V1 (cathode shelf) → Pre-amp → cold V2 → V3 → CF → British TMB | EL34 | Cold-clipped cascade, tight lows, bite |
+| Coliseum | V1 → TMB (*before the gain*) → Drive → V2..V4 cascade | 6L6, stiff, lots of headroom | Singing lead, vocal mids; pairs with the graphic EQ |
+| MP1 | V1 (110 Hz input HP) → Drive → V2..V3 → scooped stack → make-up stage | Clean, stiff 6L6 (rack power amp) | Tight, scooped, saturated 80s rack rhythm |
+| Triple | V1 → Gain → cold V2..V4 → CF → stack | 6L6 with more sag | Thick, saturated, huge low end |
+
+Every model has every control (Presence, Resonance and Bright included); valve selectors are applied
+relative to each model's usual valves (Tweed 12AY7/6V6, JC120 12AT7/KT88, AC30 12AX7/EL84,
+JCM800 12AX7/EL34, Coliseum/MP1/Triple 12AX7/6L6).
 
 The default cabinet differs per model; switching models moves the cab with it unless you chose a different IR, and resets the valve selectors to the new model's usual valves (loading a preset does not).
 

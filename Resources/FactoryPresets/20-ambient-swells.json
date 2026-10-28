@@ -1,13 +1,13 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Ambient Swells",
   "category": "Ambient",
-  "description": "Clean pads: long delay and lush reverb for volume swells.",
+  "description": "Clean pads: long tape echo and a big hall for volume swells.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 0,
-    "amp.gain": 0.4,
+    "amp.model": 1,
+    "amp.gain": 0.45,
     "amp.bass": 0.5,
     "amp.treble": 0.5,
     "amp.master": 0.62,
@@ -16,19 +16,20 @@
     "chorus.depth": 0.6,
     "chorus.mix": 0.4,
     "delay.enabled": 1,
+    "delay.type": 1,
     "delay.time": 520,
     "delay.feedback": 0.55,
     "delay.mix": 0.35,
     "delay.tone": 3000,
     "reverb.enabled": 1,
+    "reverb.type": 1,
     "reverb.mix": 0.45,
     "reverb.decay": 6.0,
     "reverb.tone": 0.45,
-    "amp.preampValve": 0,
-    "amp.powerValve": 0,
-    "amp.presence": 0.35,
+    "amp.preampValve": 3,
+    "amp.powerValve": 4,
     "amp.depth": 0.0,
-    "out.level": -1.5
+    "out.level": -3.0
   },
   "cabinet": {
     "a": {

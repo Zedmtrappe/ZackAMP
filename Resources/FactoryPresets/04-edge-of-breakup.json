@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Edge of Breakup",
   "category": "Edge of Breakup",
   "description": "Clean when you pick lightly, hair and grit when you dig in. Roll back the guitar volume to clean up.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 1,
+    "amp.model": 0,
     "amp.gain": 0.52,
     "amp.bass": 0.45,
     "amp.mid": 0.55,
@@ -16,7 +16,7 @@
     "amp.preampValve": 2,
     "amp.powerValve": 2,
     "amp.depth": 0.0,
-    "out.level": 1.5
+    "out.level": 1.0
   },
   "cabinet": {
     "a": {

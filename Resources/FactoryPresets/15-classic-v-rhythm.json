@@ -1,9 +1,9 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Classic V Rhythm",
   "category": "High Gain",
-  "description": "The famous V-shaped graphic EQ curve on a mid-focused high-gain amp.",
+  "description": "The famous V-shaped graphic EQ curve on the high-power lead amp.",
   "author": "Z.AMP Factory",
   "parameters": {
     "amp.model": 4,
@@ -24,7 +24,7 @@
     "gate.threshold": -60,
     "amp.preampValve": 0,
     "amp.powerValve": 0,
-    "out.level": -2.5
+    "out.level": -3.0
   },
   "cabinet": {
     "a": {

@@ -1,23 +1,22 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
-  "name": "Plexi Crunch",
+  "schemaVersion": 2,
+  "name": "Brit Crunch",
   "category": "Classic Rock",
-  "description": "Vintage British crunch: chords ring, single notes bite.",
+  "description": "1980s British amp at crunch: chords ring, single notes bite.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 2,
-    "amp.gain": 0.66,
+    "amp.model": 3,
+    "amp.gain": 0.35,
     "amp.bass": 0.45,
     "amp.mid": 0.6,
     "amp.treble": 0.6,
     "amp.presence": 0.55,
     "amp.master": 0.6,
-    "amp.bright": 1,
     "amp.preampValve": 0,
     "amp.powerValve": 1,
     "amp.depth": 0.0,
-    "out.level": -0.5
+    "out.level": -1.0
   },
   "cabinet": {
     "a": {

@@ -9,8 +9,7 @@ namespace af
 {
 namespace
 {
-    const char* const kAmpModels[] = { "Lacquer Clean", "Lacquer Tweed", "Plexi",
-                                       "Albion Lead", "Cascade Lead", "Cascade Heavy" };
+    const char* const kAmpModels[] = { "Tweed", "JC120", "AC30", "JCM800", "Coliseum", "MP1", "Triple" };
     const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger" };
@@ -40,7 +39,7 @@ namespace
         { "drive.level", "Level", "dB", -12.f, 12.f, 3.f, LIN, 1.f, "Drive", "Pedal output level: how hard it pushes the amp." },
         { "drive.type", "Type", "", 0.f, 1.f, 0.f, CHO, 1.f, "Drive", "Screamer: mid-hump soft clipping, tight lows (great in front of a gainy amp). RAT: op-amp distortion into hard diode clipping, full lows; Tone works as its Filter.", kDriveTypes, 2 },
 
-        { "amp.model", "Amp Model", "", 0.f, 5.f, 0.f, CHO, 1.f, "Amp", "Amplifier model.", kAmpModels, 6 },
+        { "amp.model", "Amp Model", "", 0.f, 6.f, 0.f, CHO, 1.f, "Amp", "Amplifier model.", kAmpModels, 7 },
         { "amp.gain", "Gain", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Preamp volume / gain pot." },
         { "amp.bass", "Bass", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Tone stack bass. Passive: interacts with mid and treble." },
         { "amp.mid", "Middle", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Tone stack middle." },

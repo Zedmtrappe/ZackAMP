@@ -1,0 +1,33 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 2,
+  "name": "Cranked AC30",
+  "category": "Classic Rock",
+  "description": "Everything up on the class-A amp: thick, compressed and singing.",
+  "author": "Z.AMP Factory",
+  "parameters": {
+    "amp.model": 2,
+    "amp.gain": 0.88,
+    "amp.bass": 0.4,
+    "amp.mid": 0.6,
+    "amp.treble": 0.5,
+    "amp.presence": 0.45,
+    "amp.master": 0.75,
+    "gate.enabled": 1,
+    "gate.threshold": -66,
+    "amp.preampValve": 0,
+    "amp.powerValve": 3,
+    "amp.depth": 0.0,
+    "out.level": -2.0
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-2x12-open-room",
+      "irName": "US 2x12 Open \u2014 Room"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

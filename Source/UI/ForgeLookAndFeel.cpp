@@ -5,10 +5,10 @@ namespace af::ui
 FamilyStyle getFamilyStyle (int family)
 {
     // Every model uses the same black/graphite faceplate (owner's choice); only the family name differs.
-    const char* names[] = { "AMERICAN", "BRITISH", "MODERN" };
+    const char* names[] = { "AMERICAN", "BRITISH", "MODERN", "SOLID STATE" };
     return { juce::Colour (0xff3a3d44), juce::Colour (0xff212328), juce::Colour (0xffd9dde4),
              juce::Colour (0xff121315), juce::Colour (0xff8fd0ff), juce::Colour (0xff5aa0d0),
-             names[juce::jlimit (0, 2, family)] };
+             names[juce::jlimit (0, 3, family)] };
 }
 
 ForgeLookAndFeel::ForgeLookAndFeel()

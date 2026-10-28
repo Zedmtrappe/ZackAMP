@@ -1,13 +1,13 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "High Gain Rhythm",
   "category": "High Gain",
-  "description": "Thick, defined high-gain rhythm with a firm low end.",
+  "description": "Thick, saturated modern rhythm with a huge low end.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 5,
-    "amp.gain": 0.6,
+    "amp.model": 6,
+    "amp.gain": 0.55,
     "amp.bass": 0.5,
     "amp.mid": 0.5,
     "amp.treble": 0.55,
@@ -18,7 +18,7 @@
     "gate.threshold": -60,
     "amp.preampValve": 0,
     "amp.powerValve": 0,
-    "out.level": -1.5
+    "out.level": -1.0
   },
   "cabinet": {
     "a": {

@@ -1,26 +1,26 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Glass Clean",
   "category": "Clean",
-  "description": "Sparkling American clean with the bright switch on and a touch of room.",
+  "description": "Crystal solid-state clean with the bright switch on and a touch of room.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 0,
-    "amp.gain": 0.38,
+    "amp.model": 1,
+    "amp.gain": 0.45,
     "amp.bass": 0.45,
     "amp.mid": 0.5,
     "amp.treble": 0.62,
     "amp.master": 0.6,
     "amp.bright": 1,
     "reverb.enabled": 1,
+    "reverb.type": 0,
     "reverb.mix": 0.22,
-    "reverb.decay": 2.2,
-    "amp.preampValve": 0,
-    "amp.powerValve": 0,
-    "amp.presence": 0.35,
+    "reverb.decay": 1.4,
+    "amp.preampValve": 3,
+    "amp.powerValve": 4,
     "amp.depth": 0.0,
-    "out.level": -1.5
+    "out.level": -5.5
   },
   "cabinet": {
     "a": {

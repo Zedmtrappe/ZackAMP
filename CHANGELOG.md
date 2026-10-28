@@ -29,6 +29,9 @@
   transformer glow, LED light). Falls back to the drawn interior if the images are missing.
 
 ### Changed
+- **New amp line-up:** Tweed, JC120, AC30, JCM800, Coliseum, MP1, Triple (replacing the six earlier
+  models). Presets are migrated to schema 2 (old models mapped to the closest new one); the
+  factory presets were rewritten and re-calibrated, with new ones for the new amps and effects.
 - The app is now called **Z.AMP** (download `Z.AMP-macOS.zip`, installer `Install Z.AMP.command`).
   Presets, IRs and settings stay where they were (`~/Library/Application Support/ZackAMP`).
 - "Albion Plexi" is now called "Plexi"; every model uses the black faceplate.

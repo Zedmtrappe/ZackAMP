@@ -1,33 +1,33 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Texas Drive",
   "category": "Blues",
-  "description": "Mid-hump overdrive pedal into a clean amp on the edge.",
+  "description": "Screamer pushing a tweed on the edge.",
   "author": "Z.AMP Factory",
   "parameters": {
     "amp.model": 0,
-    "amp.gain": 0.55,
+    "amp.gain": 0.45,
     "amp.bass": 0.45,
     "amp.mid": 0.55,
     "amp.treble": 0.55,
     "amp.master": 0.65,
     "drive.enabled": 1,
+    "drive.type": 0,
     "drive.drive": 0.35,
     "drive.tone": 0.55,
     "drive.level": 5.0,
     "reverb.enabled": 1,
     "reverb.mix": 0.15,
-    "amp.preampValve": 0,
-    "amp.powerValve": 0,
-    "amp.presence": 0.35,
+    "amp.preampValve": 2,
+    "amp.powerValve": 2,
     "amp.depth": 0.0,
-    "out.level": -9.5
+    "out.level": -3.5
   },
   "cabinet": {
     "a": {
-      "irId": "factory:am-2x12-open-cap",
-      "irName": "US 2x12 Open \u2014 Cap"
+      "irId": "factory:am-1x12-open-cap",
+      "irName": "US 1x12 Open \u2014 Cap"
     },
     "b": {
       "irId": "",

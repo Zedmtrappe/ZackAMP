@@ -1,13 +1,13 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Boosted Brit",
   "category": "British Crunch",
-  "description": "Overdrive used as a boost into a Plexi-style amp for an 80s edge.",
+  "description": "Screamer as a clean boost into the British lead amp: the 80s edge.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 2,
-    "amp.gain": 0.7,
+    "amp.model": 3,
+    "amp.gain": 0.6,
     "amp.bass": 0.4,
     "amp.mid": 0.6,
     "amp.treble": 0.58,
@@ -22,7 +22,7 @@
     "amp.preampValve": 0,
     "amp.powerValve": 1,
     "amp.depth": 0.0,
-    "out.level": -4.0
+    "out.level": -5.0
   },
   "cabinet": {
     "a": {

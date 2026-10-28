@@ -117,6 +117,21 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
             s.values[(size_t) pAmpPowerValve] = (float) voicing.defaultPowerValve;
     }
 
+    // v1 -> v2: the amp line-up changed. Map each old model to its closest new one and use the
+    // new model's usual valves (old valve settings were calibrated for the old voicings).
+    if (version < 2 && root["parameters"].getDynamicObject() != nullptr)
+    {
+        // Old: Lacquer Clean, Lacquer Tweed, Plexi, Albion Lead, Cascade Lead, Cascade Heavy
+        // New: Tweed 0, JC120 1, AC30 2, JCM800 3, Coliseum 4, MP1 5, Triple 6
+        constexpr int oldToNew[] = { 1, 0, 3, 3, 4, 6 };
+        const int oldModel = juce::jlimit (0, 5, (int) s.values[(size_t) pAmpModel]);
+        const int newModel = oldToNew[oldModel];
+        s.values[(size_t) pAmpModel] = (float) newModel;
+        const auto& voicing = dsp::getAmpVoicing (newModel);
+        s.values[(size_t) pAmpPreampValve] = (float) voicing.defaultPreampValve;
+        s.values[(size_t) pAmpPowerValve] = (float) voicing.defaultPowerValve;
+    }
+
     const auto cab = root["cabinet"];
     s.irA = cab["a"]["irId"].toString();
     s.irAName = cab["a"]["irName"].toString();

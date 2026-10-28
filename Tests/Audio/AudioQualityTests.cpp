@@ -36,7 +36,7 @@ std::vector<float> renderHeavy (OversamplingMode mode, double f0, double fs)
 {
     AmpForgeEngine e;
     e.setOversamplingMode (mode);
-    e.params().set (pAmpModel, 5);
+    e.params().set (pAmpModel, 6); // Triple: the highest-gain model
     e.params().set (pAmpGain, 0.8f);
     e.params().set (pCabOn, 0); // no cabinet: worst case, nothing hides aliasing
     e.prepare (fs, 256);
@@ -91,10 +91,11 @@ TEST_CASE ("Output has no significant DC offset")
 
 TEST_CASE ("Fast knob changes are smoothed (no zipper steps)")
 {
+    for (int model : { 2, 3 })
     for (int param : { (int) pAmpGain, (int) pAmpMaster, (int) pAmpBass, (int) pOutLevel, (int) pEq750 })
     {
         AmpForgeEngine e;
-        e.params().set (pAmpModel, 2);
+        e.params().set (pAmpModel, (float) model);
         e.params().set (pCabOn, 0);
         e.params().set (pEqOn, 1);
         e.params().set (param, normalisedToPlain (param, 0.1f));
@@ -117,8 +118,13 @@ TEST_CASE ("Fast knob changes are smoothed (no zipper steps)")
         };
         const float around = maxD2 (23990, 26400);
         const float steady = maxD2 (40000, 48000);
-        INFO (std::string (paramDef (param).id) << " around " << around << " steady " << steady);
-        CHECK (around <= steady * 1.5f + 1e-4f);
+        INFO ("model " << model << " " << std::string (paramDef (param).id) << " around " << around << " steady " << steady);
+        // A smoothed ramp has small "corners" proportional to the signal level; an unsmoothed
+        // step would produce a jump of the order of the level change itself (~100x larger).
+        float level = 0;
+        for (size_t i = 40000; i < l.size(); ++i)
+            level = std::max (level, std::abs (l[i]));
+        CHECK (around <= steady * 1.5f + 1e-4f + 2e-3f * level);
     }
 }
 

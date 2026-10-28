@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Singing Lead",
   "category": "Lead",
   "description": "Smooth, vocal high-gain lead with mid push from the graphic EQ.",
@@ -20,6 +20,8 @@
     "eq.b750": 2,
     "eq.b2200": 1.5,
     "eq.b6600": -2,
+    "smooth.enabled": 1,
+    "smooth.amount": 0.4,
     "gate.enabled": 1,
     "gate.threshold": -64,
     "gate.release": 200,
@@ -32,7 +34,7 @@
     "reverb.mix": 0.2,
     "amp.preampValve": 0,
     "amp.powerValve": 0,
-    "out.level": -4.0
+    "out.level": -1.5
   },
   "cabinet": {
     "a": {

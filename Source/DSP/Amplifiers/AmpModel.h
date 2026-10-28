@@ -25,7 +25,7 @@
 
 namespace af::dsp
 {
-enum class AmpFamily : uint8_t { american, british, modern };
+enum class AmpFamily : uint8_t { american, british, modern, solidState };
 
 enum AmpControlBits : uint32_t
 {
@@ -81,7 +81,7 @@ struct AmpVoicing
     int defaultPowerValve = 0;  // index into kPowerValves
 };
 
-constexpr int kNumAmpModels = 6;
+constexpr int kNumAmpModels = 7;
 const AmpVoicing& getAmpVoicing (int index) noexcept;
 int getNumAmpModels() noexcept;
 

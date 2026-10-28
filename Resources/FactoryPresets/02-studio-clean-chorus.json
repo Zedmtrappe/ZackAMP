@@ -1,13 +1,13 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Studio Clean Chorus",
   "category": "Clean",
-  "description": "Polished clean rhythm with stereo chorus and a subtle slap.",
+  "description": "The classic stereo-chorus clean, with a subtle slap.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 0,
-    "amp.gain": 0.4,
+    "amp.model": 1,
+    "amp.gain": 0.45,
     "amp.bass": 0.5,
     "amp.treble": 0.55,
     "amp.master": 0.62,
@@ -21,11 +21,10 @@
     "delay.mix": 0.12,
     "reverb.enabled": 1,
     "reverb.mix": 0.15,
-    "amp.preampValve": 0,
-    "amp.powerValve": 0,
-    "amp.presence": 0.35,
+    "amp.preampValve": 3,
+    "amp.powerValve": 4,
     "amp.depth": 0.0,
-    "out.level": -1.5
+    "out.level": -4.0
   },
   "cabinet": {
     "a": {

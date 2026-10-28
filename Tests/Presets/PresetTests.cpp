@@ -198,11 +198,29 @@ TEST_CASE ("Presets without valve settings get the model's usual valves")
     PresetState out;
     juce::String err;
     juce::StringArray w;
-    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":1,"name":"Old Tweed",
-        "parameters":{"amp.model":1,"amp.gain":0.7}})", out, err, w));
-    CHECK ((int) out.values[(size_t) pAmpPreampValve] == dsp::getAmpVoicing (1).defaultPreampValve);
-    CHECK ((int) out.values[(size_t) pAmpPowerValve] == dsp::getAmpVoicing (1).defaultPowerValve);
-    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":1,"name":"Swapped",
-        "parameters":{"amp.model":1,"amp.preampValve":0,"amp.powerValve":4}})", out, err, w));
+    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":2,"name":"No Valves",
+        "parameters":{"amp.model":2,"amp.gain":0.7}})", out, err, w));
+    CHECK ((int) out.values[(size_t) pAmpPreampValve] == dsp::getAmpVoicing (2).defaultPreampValve);
+    CHECK ((int) out.values[(size_t) pAmpPowerValve] == dsp::getAmpVoicing (2).defaultPowerValve);
+    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":2,"name":"Swapped",
+        "parameters":{"amp.model":2,"amp.preampValve":0,"amp.powerValve":4}})", out, err, w));
     CHECK ((int) out.values[(size_t) pAmpPowerValve] == 4);
+}
+
+TEST_CASE ("Version 1 presets are moved to the closest model of the new line-up")
+{
+    PresetState out;
+    juce::String err;
+    juce::StringArray w;
+    const int expected[] = { 1, 0, 3, 3, 4, 6 }; // old clean, tweed, plexi, lead, cascade lead/heavy
+    for (int old = 0; old < 6; ++old)
+    {
+        const auto json = juce::String (R"({"format":"ampforge.preset","schemaVersion":1,"name":"Old","parameters":{"amp.model":)")
+                          + juce::String (old) + R"(,"amp.preampValve":1,"amp.powerValve":4}})";
+        REQUIRE (PresetCodec::fromJson (json, out, err, w));
+        const int m = (int) out.values[(size_t) pAmpModel];
+        CHECK (m == expected[old]);
+        CHECK ((int) out.values[(size_t) pAmpPreampValve] == dsp::getAmpVoicing (m).defaultPreampValve);
+        CHECK ((int) out.values[(size_t) pAmpPowerValve] == dsp::getAmpVoicing (m).defaultPowerValve);
+    }
 }

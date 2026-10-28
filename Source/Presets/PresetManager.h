@@ -32,7 +32,7 @@ struct PresetState
 class PresetCodec
 {
 public:
-    static constexpr int kSchemaVersion = 1;
+    static constexpr int kSchemaVersion = 2;
     static constexpr const char* kFormatTag = "ampforge.preset";
 
     static juce::String toJson (const PresetState& s);

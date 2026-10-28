@@ -1,0 +1,37 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 2,
+  "name": "RAT Grunge",
+  "category": "Classic Rock",
+  "description": "RAT pedal into a clean amp: fuzzy, raw and wide.",
+  "author": "Z.AMP Factory",
+  "parameters": {
+    "amp.model": 1,
+    "amp.gain": 0.5,
+    "amp.bass": 0.5,
+    "amp.mid": 0.5,
+    "amp.treble": 0.5,
+    "amp.master": 0.6,
+    "drive.enabled": 1,
+    "drive.type": 1,
+    "drive.drive": 0.6,
+    "drive.tone": 0.45,
+    "drive.level": 0.0,
+    "gate.enabled": 1,
+    "gate.threshold": -62,
+    "amp.preampValve": 3,
+    "amp.powerValve": 4,
+    "amp.depth": 0.0,
+    "out.level": -1.0
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-2x12-open-cap",
+      "irName": "US 2x12 Open \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

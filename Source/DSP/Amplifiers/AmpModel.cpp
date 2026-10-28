@@ -11,6 +11,9 @@ namespace
     constexpr ToneStackComponents tsBritish { 220e3, 1e6, 25e3, 33e3, 470e-12, 22e-9, 22e-9 };
     constexpr ToneStackComponents tsModernLead { 250e3, 250e3, 10e3, 100e3, 470e-12, 100e-9, 47e-9 };
     constexpr ToneStackComponents tsModernHeavy { 250e3, 1e6, 25e3, 47e3, 500e-12, 22e-9, 22e-9 };
+    constexpr ToneStackComponents tsSolidState { 250e3, 250e3, 10e3, 47e3, 470e-12, 47e-9, 47e-9 };
+    constexpr ToneStackComponents tsTopBoost { 1e6, 1e6, 10e3, 100e3, 56e-12, 22e-9, 22e-9 };
+    constexpr ToneStackComponents tsScooped { 250e3, 250e3, 6.8e3, 100e3, 500e-12, 100e-9, 47e-9 };
 
     constexpr BlockSpec triode (int i) { return { BlockKind::triode, i, 0.0f }; }
     constexpr BlockSpec gainPot() { return { BlockKind::gainPot, 0, 0.0f }; }
@@ -37,38 +40,16 @@ namespace
     {
         std::array<AmpVoicing, kNumAmpModels> v {};
 
-        // ---------------- American family ----------------
+        // Owner's line-up (private build; names refer to the amps each voicing is modelled on).
         {
             auto& a = v[0];
-            a.id = "american.clean";
-            a.defaultPreampValve = 0; // 12AX7
-            a.defaultPowerValve = 0;
-            a.name = "Lacquer Clean";
-            a.shortDescription = "American clean: big headroom, glassy top, scooped and articulate.";
-            a.family = AmpFamily::american;
-            a.gainLabel = "Volume";
-            a.controls = ctlGain | ctlBass | ctlMid | ctlTreble | ctlMaster | ctlBright;
-            a.inputHpHz = 20.0f;
-            a.triodes[0] = tri (40.0f, 20.0f, 0, 0, 16000.0f, 0.0f, 1.7f, 0.15f);
-            a.triodes[1] = tri (40.0f, 30.0f, 0, 0, 14000.0f, 0.0f, 1.6f, 0.25f);
-            a.chain = { triode (0), toneStack(), gainPot(), triode (1) };
-            a.toneStack = tsAmericanClean;
-            a.bright = { true, 1800.0f, 8.0f };
-            a.power = { 0.22f, 3.0f, 0.03f, 0.30f, 150.0f, 4000.0f, 5.0f, 90.0f, 0.0f, 0.35f, 40.0f, 11000.0f, 0.30f };
-            a.powerDriveDb = -2.0f;
-            a.outputTrimDb = 3.0f;
-            a.defaultIrId = "factory:am-2x12-open-cap";
-        }
-        {
-            auto& a = v[1];
-            a.id = "american.tweed";
+            a.id = "tweed";
             a.defaultPreampValve = 2; // 12AY7
-            a.defaultPowerValve = 2;
-            a.name = "Lacquer Tweed";
-            a.shortDescription = "Vintage American drive: touch-sensitive breakup, loose and warm.";
+            a.defaultPowerValve = 2;  // 6V6
+            a.name = "Tweed";
+            a.shortDescription = "1950s American tweed: touch-sensitive breakup, loose, warm and hairy.";
             a.family = AmpFamily::american;
             a.gainLabel = "Volume";
-            a.controls = ctlGain | ctlBass | ctlMid | ctlTreble | ctlPresence | ctlMaster;
             a.inputHpHz = 20.0f;
             a.triodes[0] = tri (40.0f, 20.0f, 0, 0, 14000.0f, 0.0f, 1.6f, 0.2f);
             a.triodes[1] = tri (40.0f, 25.0f, 0, 0, 10000.0f, -0.1f, 1.5f, 0.35f);
@@ -79,62 +60,86 @@ namespace
             a.powerDriveDb = 3.0f;
             a.defaultIrId = "factory:am-1x12-open-cap";
         }
-
-        // ---------------- British family ----------------
         {
+            // Solid-state stereo clean: very linear preamp, hard and abrupt transistor power
+            // clipping, no supply sag, wide and bright (its built-in chorus is the Chorus effect).
+            auto& a = v[1];
+            a.id = "jc120";
+            a.defaultPreampValve = 3; // 12AT7 (most headroom)
+            a.defaultPowerValve = 4;  // KT88 (stiffest)
+            a.name = "JC120";
+            a.shortDescription = "Solid-state stereo clean: huge headroom, crystal top, no valve sag.";
+            a.family = AmpFamily::solidState;
+            a.gainLabel = "Volume";
+            a.inputHpHz = 25.0f;
+            a.triodes[0] = tri (12.0f, 25.0f, 0, 0, 19000.0f, 0.0f, 1.0f, 0.0f);
+            a.triodes[0].headroom = 5.0f;
+            a.triodes[1] = tri (14.0f, 30.0f, 0, 0, 17000.0f, 0.0f, 1.0f, 0.0f);
+            a.triodes[1].headroom = 6.0f;
+            a.chain = { triode (0), toneStack(), gainPot(), triode (1) };
+            a.toneStack = tsSolidState;
+            a.bright = { true, 3000.0f, 6.0f };
+            a.power = { 0.03f, 9.0f, 0.0f, 0.02f, 60.0f, 4500.0f, 6.0f, 90.0f, 0.0f, 0.5f, 30.0f, 15000.0f, 0.10f };
+            a.powerDriveDb = 6.0f;
+            a.outputTrimDb = 7.0f;
+            a.defaultIrId = "factory:am-2x12-open-cap";
+        }
+        {
+            // British class-A chime: Top Boost stage and cathode follower into a bright two-knob
+            // stack, then the volume and an EL84 output stage without negative feedback (soft
+            // knee, rectifier sag, follows the speaker): breaks up early and sweetly.
             auto& a = v[2];
-            a.id = "british.plexi";
+            a.id = "ac30";
             a.defaultPreampValve = 0; // 12AX7
-            a.defaultPowerValve = 1;
-            a.name = "Plexi";
-            a.shortDescription = "Vintage British: chewy upper mids, crunch that grows with the volume.";
+            a.defaultPowerValve = 3;  // EL84
+            a.name = "AC30";
+            a.shortDescription = "British class-A chime: jangly Top Boost highs, early, sweet EL84 breakup.";
             a.family = AmpFamily::british;
             a.gainLabel = "Volume";
-            a.controls = ctlGain | ctlBass | ctlMid | ctlTreble | ctlPresence | ctlMaster | ctlBright;
-            a.inputHpHz = 25.0f;
-            a.triodes[0] = tri (40.0f, 25.0f, 400.0f, -6.0f, 14000.0f, 0.0f, 1.6f, 0.25f);
-            a.triodes[1] = tri (40.0f, 30.0f, 150.0f, -4.0f, 11000.0f, -0.05f, 1.5f, 0.35f);
-            a.chain = { triode (0), gainPot(), triode (1), follower(), toneStack() };
+            a.inputHpHz = 35.0f;
+            a.triodes[0] = tri (40.0f, 30.0f, 0, 0, 15000.0f, 0.0f, 1.6f, 0.2f);
+            a.triodes[1] = tri (30.0f, 40.0f, 0, 0, 12000.0f, -0.05f, 1.5f, 0.3f);
+            a.chain = { triode (0), follower(), toneStack(), gainPot(), triode (1) };
+            a.toneStack = tsTopBoost;
+            a.cathodeFollower = { 0.03f, 0.8f, 2.5f, 20.0f };
+            a.bright = { true, 2600.0f, 6.0f };
+            a.power = { 0.40f, 1.8f, 0.07f, 0.45f, 160.0f, 3000.0f, 6.0f, 100.0f, 0.0f, 0.5f, 65.0f, 9000.0f, 0.80f };
+            a.powerDriveDb = 9.0f;
+            a.outputTrimDb = -2.5f;
+            a.defaultIrId = "factory:am-2x12-open-room";
+        }
+        {
+            // British hot-rodded lead: cascaded gain with a cold-clipping second stage.
+            auto& a = v[3];
+            a.id = "jcm800";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 1;  // EL34
+            a.name = "JCM800";
+            a.shortDescription = "1980s British lead: cold-clipped cascade, tight lows, aggressive bite.";
+            a.family = AmpFamily::british;
+            a.gainLabel = "Pre-amp";
+            a.inputHpHz = 30.0f;
+            a.triodes[0] = tri (40.0f, 30.0f, 500.0f, -8.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
+            a.triodes[1] = tri (32.0f, 60.0f, 0, 0, 10000.0f, -0.45f, 1.4f, 0.4f);
+            a.triodes[2] = tri (40.0f, 40.0f, 200.0f, -3.0f, 9000.0f, 0.0f, 1.6f, 0.3f);
+            a.chain = { triode (0), gainPot(), triode (1), pad (-9.0f), triode (2), follower(), toneStack() };
             a.toneStack = tsBritish;
-            a.cathodeFollower = { 0.03f, 0.75f, 2.5f, 20.0f };
-            a.bright = { true, 2200.0f, 6.0f };
-            a.power = { 0.30f, 2.3f, 0.05f, 0.30f, 140.0f, 3500.0f, 8.0f, 90.0f, 0.0f, 0.5f, 50.0f, 8500.0f, 0.70f };
-            a.powerDriveDb = 2.0f;
+            a.cathodeFollower = { 0.025f, 0.8f, 2.5f, 20.0f };
+            a.power = { 0.34f, 2.5f, 0.05f, 0.25f, 120.0f, 3800.0f, 8.0f, 90.0f, 0.0f, 0.5f, 55.0f, 8500.0f, 0.60f };
+            a.powerDriveDb = 0.0f;
             a.defaultIrId = "factory:br-4x12-v25-cap";
         }
         {
-            auto& a = v[3];
-            a.id = "british.lead";
-            a.defaultPreampValve = 0; // 12AX7
-            a.defaultPowerValve = 1;
-            a.name = "Albion Lead";
-            a.shortDescription = "Hot-rodded British: cascaded gain, tight lows, aggressive classic rock.";
-            a.family = AmpFamily::british;
-            a.gainLabel = "Gain";
-            a.controls = ctlGain | ctlBass | ctlMid | ctlTreble | ctlPresence | ctlMaster;
-            a.inputHpHz = 30.0f;
-            a.triodes[0] = tri (40.0f, 30.0f, 500.0f, -8.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
-            a.triodes[1] = tri (30.0f, 60.0f, 0, 0, 10000.0f, -0.35f, 1.4f, 0.4f);
-            a.triodes[2] = tri (40.0f, 40.0f, 200.0f, -3.0f, 9000.0f, 0.0f, 1.6f, 0.3f);
-            a.chain = { triode (0), gainPot(), triode (1), pad (-10.0f), triode (2), follower(), toneStack() };
-            a.toneStack = tsBritish;
-            a.cathodeFollower = { 0.025f, 0.8f, 2.5f, 20.0f };
-            a.power = { 0.32f, 2.6f, 0.05f, 0.25f, 120.0f, 3500.0f, 8.0f, 90.0f, 0.0f, 0.5f, 55.0f, 8500.0f, 0.60f };
-            a.powerDriveDb = 0.0f;
-            a.defaultIrId = "factory:br-4x12-h75-cap";
-        }
-
-        // ---------------- Modern family ----------------
-        {
+            // High-power American lead: tone stack before the gain, cascading stages, graphic EQ
+            // territory, and a big, stiff 6L6 power section with plenty of headroom.
             auto& a = v[4];
-            a.id = "modern.lead";
+            a.id = "coliseum";
             a.defaultPreampValve = 0; // 12AX7
-            a.defaultPowerValve = 0;
-            a.name = "Cascade Lead";
-            a.shortDescription = "Focused singing lead: tone stack before the gain, vocal mids, graphic EQ.";
+            a.defaultPowerValve = 0;  // 6L6
+            a.name = "Coliseum";
+            a.shortDescription = "High-power American lead: tone stack before the gain, singing mids, huge clean power.";
             a.family = AmpFamily::modern;
             a.gainLabel = "Drive";
-            a.controls = ctlGain | ctlBass | ctlMid | ctlTreble | ctlPresence | ctlDepth | ctlMaster;
             a.inputHpHz = 35.0f;
             a.triodes[0] = tri (40.0f, 30.0f, 120.0f, -3.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
             a.triodes[1] = tri (40.0f, 100.0f, 700.0f, -10.0f, 9000.0f, -0.3f, 1.4f, 0.35f);
@@ -143,33 +148,59 @@ namespace
             a.chain = { triode (0), toneStack(), gainPot(), triode (1), pad (-6.0f), triode (2), pad (-14.0f), triode (3) };
             a.gainFloorDb = -55.0f;
             a.toneStack = tsModernLead;
-            a.power = { 0.25f, 3.2f, 0.03f, 0.12f, 90.0f, 4500.0f, 7.0f, 85.0f, 6.0f, 0.5f, 55.0f, 9500.0f, 0.35f };
-            a.powerDriveDb = -12.0f;
+            a.power = { 0.22f, 3.6f, 0.03f, 0.10f, 90.0f, 4500.0f, 7.0f, 85.0f, 6.0f, 0.5f, 50.0f, 9500.0f, 0.30f };
+            a.powerDriveDb = -14.0f;
+            a.outputTrimDb = 1.5f;
             a.defaultIrId = "factory:bt-1x12-closed-cap";
         }
         {
+            // 1980s rack valve preamp: very tight input, three cascaded high-gain stages, a
+            // scooped stack after the distortion and a clean, stiff power amp: thrash rhythm.
             auto& a = v[5];
-            a.id = "modern.heavy";
+            a.id = "mp1";
             a.defaultPreampValve = 0; // 12AX7
-            a.defaultPowerValve = 0;
-            a.name = "Cascade Heavy";
-            a.shortDescription = "Tight modern high gain: firm low end, defined chords, deep resonance.";
+            a.defaultPowerValve = 0;  // 6L6
+            a.name = "MP1";
+            a.shortDescription = "1980s rack valve preamp: tight, scooped and saturated, into a clean power amp.";
+            a.family = AmpFamily::modern;
+            a.gainLabel = "Drive";
+            a.inputHpHz = 110.0f;
+            a.triodes[0] = tri (40.0f, 60.0f, 600.0f, -9.0f, 13000.0f, 0.0f, 1.6f, 0.2f);
+            a.triodes[1] = tri (40.0f, 150.0f, 900.0f, -10.0f, 8000.0f, -0.35f, 1.4f, 0.4f);
+            a.triodes[2] = tri (40.0f, 90.0f, 400.0f, -6.0f, 6500.0f, -0.2f, 1.5f, 0.3f);
+            a.triodes[3] = tri (12.0f, 40.0f, 0, 0, 9000.0f, 0.0f, 1.2f, 0.1f);
+            a.triodes[3].headroom = 3.0f;
+            a.chain = { triode (0), gainPot(), triode (1), pad (-4.0f), triode (2), toneStack(), triode (3) };
+            a.gainFloorDb = -55.0f;
+            a.toneStack = tsScooped;
+            a.power = { 0.12f, 4.5f, 0.02f, 0.06f, 80.0f, 4500.0f, 7.0f, 85.0f, 6.0f, 0.5f, 50.0f, 10000.0f, 0.25f };
+            a.powerDriveDb = -12.0f;
+            a.outputTrimDb = -2.0f;
+            a.defaultIrId = "factory:md-2x12-closed-cap";
+        }
+        {
+            // Modern American high gain: cascaded cold stages, stack after the distortion, loose
+            // and huge low end, with more supply sag (rectifier) for its bloom.
+            auto& a = v[6];
+            a.id = "triple";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 0;  // 6L6
+            a.name = "Triple";
+            a.shortDescription = "Modern American high gain: thick, saturated and heavy, huge low end.";
             a.family = AmpFamily::modern;
             a.gainLabel = "Gain";
-            a.controls = ctlGain | ctlBass | ctlMid | ctlTreble | ctlPresence | ctlDepth | ctlMaster;
-            a.inputHpHz = 60.0f;
-            a.triodes[0] = tri (40.0f, 40.0f, 300.0f, -6.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
-            a.triodes[1] = tri (40.0f, 120.0f, 800.0f, -10.0f, 9000.0f, -0.4f, 1.4f, 0.4f);
-            a.triodes[2] = tri (40.0f, 60.0f, 250.0f, -6.0f, 8000.0f, -0.2f, 1.5f, 0.3f);
+            a.inputHpHz = 45.0f;
+            a.triodes[0] = tri (40.0f, 35.0f, 300.0f, -6.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
+            a.triodes[1] = tri (40.0f, 110.0f, 800.0f, -10.0f, 9000.0f, -0.45f, 1.4f, 0.4f);
+            a.triodes[2] = tri (40.0f, 60.0f, 250.0f, -6.0f, 7500.0f, -0.2f, 1.5f, 0.3f);
             a.triodes[3] = tri (30.0f, 40.0f, 0, 0, 7000.0f, 0.0f, 1.6f, 0.3f);
             a.chain = { triode (0), gainPot(), triode (1), pad (-12.0f), triode (2), pad (-14.0f), triode (3), follower(), toneStack() };
             a.gainFloorDb = -60.0f;
             a.toneStack = tsModernHeavy;
             a.cathodeFollower = { 0.025f, 0.9f, 2.5f, 20.0f };
-            a.power = { 0.28f, 3.0f, 0.03f, 0.15f, 100.0f, 4000.0f, 8.0f, 80.0f, 9.0f, 0.5f, 50.0f, 9000.0f, 0.45f };
+            a.power = { 0.30f, 2.8f, 0.03f, 0.25f, 140.0f, 4000.0f, 8.0f, 75.0f, 10.0f, 0.5f, 45.0f, 8500.0f, 0.50f };
             a.powerDriveDb = -4.0f;
             a.outputTrimDb = 2.0f;
-            a.prePowerEQDefault = true;
             a.defaultIrId = "factory:md-4x12-heavy-cap";
         }
         // Every control works on every model (owner's request): give voicings that had no
