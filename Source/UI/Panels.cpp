@@ -424,9 +424,10 @@ void EffectModule::paint (juce::Graphics& g)
 EffectsPanel::EffectsPanel (AppController& a)
     : app (a),
       gate (a, "Gate", pGateOn, { pGateThreshold, pGateRelease }),
-      comp (a, "Comp", pCompOn, { pCompSustain, pCompAttack, pCompTone, pCompLevel }),
+      comp (a, "CS-3", pCompOn, { pCompSustain, pCompAttack, pCompTone, pCompLevel }),
       wah (a, "Auto-Wah", pWahOn, { pWahSens, pWahRange, pWahPeak, pWahMix }),
       drive (a, "Drive", pDriveOn, { pDriveDrive, pDriveTone, pDriveLevel }),
+      studioComp (a, "Studio Comp", pStudioCompOn, { pStudioCompAmount, pStudioCompAttack, pStudioCompTone, pStudioCompLevel }),
       smooth (a, "Smooth", pSmoothOn, { pSmoothAmount }),
       pitch (a, "Pitch", pPitchOn, { pPitchMix }),
       chorus (a, "Chorus", pChorusOn, { pChorusRate, pChorusDepth, pChorusMix }),
@@ -434,13 +435,10 @@ EffectsPanel::EffectsPanel (AppController& a)
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
       output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
       delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode),
-      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType),
-      compType (a, pCompType), compPosition (a, pCompPosition), smoothLight (a)
+      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a)
 {
-    for (auto* m : { &gate, &comp, &wah, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &comp, &wah, &drive, &studioComp, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
-    comp.setHeaderExtra (&compType, 84);
-    comp.addExtra (&compPosition);
     drive.setHeaderExtra (&driveType, 96);
     delay.setHeaderExtra (&delayType, 84);
     reverb.setHeaderExtra (&reverbType, 96);
@@ -500,11 +498,10 @@ void ProcessLight::paint (juce::Graphics& g)
 
 void EffectsPanel::refresh()
 {
-    for (auto* m : { &gate, &comp, &wah, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &comp, &wah, &drive, &studioComp, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         m->refresh();
-    for (auto* c : { &driveType, &delayType, &reverbType, &compType, &compPosition })
+    for (auto* c : { &driveType, &delayType, &reverbType })
         c->refresh();
-    compPosition.setEnabled (app.params().getInt (pCompType) == 0); // CS-3 is always before the amp
     smoothLight.refresh();
     delaySync.refresh();
     delayDivision.refresh();
@@ -539,15 +536,15 @@ void EffectsPanel::resized()
     auto top = r.removeFromTop ((r.getHeight() - gap) / 2);
     r.removeFromTop (gap);
     layoutRow (top, { { &gate, 1.0f }, { &comp, 1.6f }, { &wah, 1.6f }, { &drive, 1.4f } });
-    layoutRow (r, { { &smooth, 0.75f }, { &pitch, 0.7f }, { &chorus, 1.3f }, { &delay, 1.55f }, { &reverb, 1.35f }, { &output, 1.25f } });
+    layoutRow (r, { { &studioComp, 1.5f }, { &smooth, 0.75f }, { &pitch, 0.7f }, { &chorus, 1.3f }, { &delay, 1.55f }, { &reverb, 1.35f }, { &output, 1.25f } });
 }
 
 void EffectsPanel::paint (juce::Graphics& g)
 {
     // Signal-flow strip: the fixed processing order, lit where a stage is active.
     struct Stage { const char* name; int param; };
-    const Stage stages[] = { { "IN", -1 }, { "GATE", pGateOn }, { "COMP", pCompOn }, { "WAH", pWahOn }, { "DRIVE", pDriveOn }, { "AMP", -1 },
-                             { "EQ", pEqOn }, { "CAB", pCabOn }, { "SMOOTH", pSmoothOn }, { "PITCH", pPitchOn }, { "CHORUS", pChorusOn }, { "DELAY", pDelayOn },
+    const Stage stages[] = { { "IN", -1 }, { "GATE", pGateOn }, { "CS-3", pCompOn }, { "WAH", pWahOn }, { "DRIVE", pDriveOn }, { "AMP", -1 },
+                             { "EQ", pEqOn }, { "CAB", pCabOn }, { "COMP", pStudioCompOn }, { "SMOOTH", pSmoothOn }, { "PITCH", pPitchOn }, { "CHORUS", pChorusOn }, { "DELAY", pDelayOn },
                              { "REVERB", pReverbOn }, { "OUT", -1 } };
     auto r = flowArea.toFloat().reduced (2.0f, 2.0f);
     const int n = (int) std::size (stages);
@@ -564,8 +561,6 @@ void EffectsPanel::paint (juce::Graphics& g)
         juce::String label = stages[i].name;
         if (stages[i].param == pChorusOn && app.params().getInt (pChorusMode) == 1)
             label = "FLANGER";
-        if (stages[i].param == pCompOn && app.params().getInt (pCompType) == 0 && app.params().getInt (pCompPosition) == 1)
-            label = "COMP (post)";
         if (stages[i].param == pEqOn && app.params().getBool (pEqOn))
             label << (app.params().getInt (pEqPosition) == 0 ? " (pre-PA)" : " (post)");
         g.drawFittedText (label, cell.toNearestInt(), juce::Justification::centred, 1);

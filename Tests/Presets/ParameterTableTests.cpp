@@ -10,7 +10,7 @@ TEST_CASE ("Parameter table rows line up with the ParamIndex enum")
     const std::pair<int, const char*> expected[] = {
         { pInTrim, "in.trim" }, { pBypass, "engine.bypass" },
         { pGateOn, "gate.enabled" }, { pGateThreshold, "gate.threshold" }, { pGateRelease, "gate.release" },
-        { pCompOn, "comp.enabled" }, { pCompType, "comp.type" }, { pCompPosition, "comp.position" }, { pCompSustain, "comp.sustain" },
+        { pCompOn, "comp.enabled" }, { pCompSustain, "comp.sustain" },
         { pCompAttack, "comp.attack" }, { pCompTone, "comp.tone" }, { pCompLevel, "comp.level" },
         { pWahOn, "wah.enabled" }, { pWahSens, "wah.sens" }, { pWahRange, "wah.range" }, { pWahPeak, "wah.peak" }, { pWahMix, "wah.mix" },
         { pDriveOn, "drive.enabled" }, { pDriveDrive, "drive.drive" }, { pDriveTone, "drive.tone" }, { pDriveLevel, "drive.level" }, { pDriveType, "drive.type" },
@@ -22,6 +22,8 @@ TEST_CASE ("Parameter table rows line up with the ParamIndex enum")
         { pEq750, "eq.b750" }, { pEq2200, "eq.b2200" }, { pEq6600, "eq.b6600" },
         { pCabOn, "cab.enabled" }, { pCabDual, "cab.dual" }, { pCabALevel, "cab.a.level" }, { pCabAPan, "cab.a.pan" },
         { pCabBLevel, "cab.b.level" }, { pCabBPan, "cab.b.pan" },
+        { pStudioCompOn, "studiocomp.enabled" }, { pStudioCompAmount, "studiocomp.amount" }, { pStudioCompAttack, "studiocomp.attack" },
+        { pStudioCompTone, "studiocomp.tone" }, { pStudioCompLevel, "studiocomp.level" },
         { pSmoothOn, "smooth.enabled" }, { pSmoothAmount, "smooth.amount" },
         { pPitchOn, "pitch.enabled" }, { pPitchMix, "pitch.mix" },
         { pChorusOn, "chorus.enabled" }, { pChorusMode, "chorus.mode" }, { pChorusRate, "chorus.rate" },

@@ -94,8 +94,8 @@ Status: items 1–14 are implemented (see CHANGELOG).
 12. **Selectable reverb types:** *Room*, *Hall*, *Spring*, *Chamber* (`reverb.type`).
 13. **Delay type selector:** *Studio* (clean digital) and *Tape* (wow/flutter, saturation,
     darkening repeats) (`delay.type`).
-14. **Compressor** (types *Studio* — with a Pre/Post-cab position — and *CS-3* pedal style) and an
-    **auto-wah**.
+14. **Compressors** — a *CS-3* style pedal before the amp and a *Studio* compressor after the
+    cabinet — and an **auto-wah**.
 
 ## AU and VST3 plugins
 

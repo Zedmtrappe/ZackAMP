@@ -224,3 +224,22 @@ TEST_CASE ("Version 1 presets are moved to the closest model of the new line-up"
         CHECK ((int) out.values[(size_t) pAmpPowerValve] == dsp::getAmpVoicing (m).defaultPowerValve);
     }
 }
+
+TEST_CASE ("Single-compressor presets move to the CS-3 pedal or the Studio Comp")
+{
+    PresetState out;
+    juce::String err;
+    juce::StringArray w;
+    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":2,"name":"Studio",
+        "parameters":{"comp.enabled":1,"comp.type":0,"comp.position":1,"comp.sustain":0.8,"comp.level":3}})", out, err, w));
+    CHECK (w.isEmpty());
+    CHECK (out.values[(size_t) pStudioCompOn] == 1.0f);
+    CHECK (out.values[(size_t) pStudioCompAmount] == doctest::Approx (0.8f));
+    CHECK (out.values[(size_t) pStudioCompLevel] == doctest::Approx (3.0f));
+    CHECK (out.values[(size_t) pCompOn] == 0.0f);
+    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":2,"name":"Pedal",
+        "parameters":{"comp.enabled":1,"comp.type":1,"comp.sustain":0.7}})", out, err, w));
+    CHECK (out.values[(size_t) pCompOn] == 1.0f);
+    CHECK (out.values[(size_t) pCompSustain] == doctest::Approx (0.7f));
+    CHECK (out.values[(size_t) pStudioCompOn] == 0.0f);
+}

@@ -269,12 +269,8 @@ void AmpForgeEngine::snapAll() noexcept
     activeDriveType = p.getInt (pDriveType);
     drive.setType (activeDriveType);
     smoothMix.snap (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
-    {
-        const bool compOn = p.getBool (pCompOn);
-        const bool post = p.getInt (pCompType) == 0 && p.getInt (pCompPosition) == 1;
-        compPreMix.snap (compOn && ! post ? 1.0f : 0.0f);
-        compPostMix.snap (compOn && post ? 1.0f : 0.0f);
-    }
+    compPreMix.snap (p.getBool (pCompOn) ? 1.0f : 0.0f);
+    compPostMix.snap (p.getBool (pStudioCompOn) ? 1.0f : 0.0f);
     wahMix.snap (p.getBool (pWahOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     eqPreMix.snap (eqOn && p.getInt (pEqPosition) == 0 ? 1.0f : 0.0f);
@@ -340,18 +336,12 @@ void AmpForgeEngine::updateControls (int n) noexcept
     }
     driveMix.target (p.getBool (pDriveOn) && driveType == activeDriveType ? 1.0f : 0.0f);
     smoothMix.target (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
-    {
-        // Studio can sit before the amp or after the cabinet; CS-3 is always a pedal. Moving it
-        // cross-fades between the two positions (separate instances, no clicks).
-        const bool compOn = p.getBool (pCompOn);
-        const int compType = p.getInt (pCompType);
-        const bool post = compType == 0 && p.getInt (pCompPosition) == 1;
-        compPreMix.target (compOn && ! post ? 1.0f : 0.0f);
-        compPostMix.target (compOn && post ? 1.0f : 0.0f);
-        const float sus = p.get (pCompSustain), att = p.get (pCompAttack), tone = p.get (pCompTone), lvl = p.get (pCompLevel);
-        compPre.setControls (compType, sus, att, tone, lvl);
-        compPost.setControls (compType, sus, att, tone, lvl);
-    }
+    // Two compressors: a CS-3 style pedal before the amp, a studio compressor after the cabinet.
+    compPreMix.target (p.getBool (pCompOn) ? 1.0f : 0.0f);
+    compPostMix.target (p.getBool (pStudioCompOn) ? 1.0f : 0.0f);
+    compPre.setControls (dsp::Compressor::cs3, p.get (pCompSustain), p.get (pCompAttack), p.get (pCompTone), p.get (pCompLevel));
+    compPost.setControls (dsp::Compressor::studio, p.get (pStudioCompAmount), p.get (pStudioCompAttack), p.get (pStudioCompTone),
+                          p.get (pStudioCompLevel));
     wahMix.target (p.getBool (pWahOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     const int eqPos = p.getInt (pEqPosition);

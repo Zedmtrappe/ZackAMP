@@ -88,6 +88,8 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
         for (const auto& prop : params->getProperties())
         {
             const int idx = findParamIndex (prop.name.toString().toStdString());
+            if (prop.name.toString() == "comp.type" || prop.name.toString() == "comp.position")
+                continue; // retired: the single compressor became two (handled below)
             if (idx < 0)
             {
                 warnings.add ("Unknown parameter ignored: " + prop.name.toString());
@@ -130,6 +132,22 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
         const auto& voicing = dsp::getAmpVoicing (newModel);
         s.values[(size_t) pAmpPreampValve] = (float) voicing.defaultPreampValve;
         s.values[(size_t) pAmpPowerValve] = (float) voicing.defaultPowerValve;
+    }
+
+    // Presets from the short-lived single compressor with a type switch: a "Studio" compressor
+    // moves to the new Studio Comp after the cabinet; a "CS-3" stays as the pedal.
+    if (const auto* params3 = root["parameters"].getDynamicObject())
+    {
+        if (params3->hasProperty ("comp.type") && (int) params3->getProperty ("comp.type") == 0)
+        {
+            s.values[(size_t) pStudioCompOn] = s.values[(size_t) pCompOn];
+            s.values[(size_t) pStudioCompAmount] = s.values[(size_t) pCompSustain];
+            s.values[(size_t) pStudioCompAttack] = s.values[(size_t) pCompAttack];
+            s.values[(size_t) pStudioCompTone] = s.values[(size_t) pCompTone];
+            s.values[(size_t) pStudioCompLevel] = s.values[(size_t) pCompLevel];
+            for (int p : { (int) pCompOn, (int) pCompSustain, (int) pCompAttack, (int) pCompTone, (int) pCompLevel })
+                s.values[(size_t) p] = paramDef (p).def;
+        }
     }
 
     const auto cab = root["cabinet"];

@@ -23,8 +23,9 @@
 - Reverb types **Room**, **Hall** (the original), **Spring** and **Chamber**; type changes fade
   the tail out and back in.
 
-- **Compressor**: *Studio* (clean 4:1 soft knee, Pre = before the amp or Post = after the cabinet,
-  stereo-linked) and *CS-3* (pedal sustainer: squash, attack, tone); Sustain/Attack/Tone/Level.
+- Two compressors: **CS-3** (pedal sustainer before the amp: squash, attack, tone) and
+  **Studio Comp** after the cabinet (clean 4:1 soft knee, stereo-linked); each with its own
+  on/off and Sustain or Amount, Attack, Tone and Level.
 - **Auto-wah** (envelope filter) before the amp: Sens, Range, Peak, Mix.
 - The Effects section now has two rows: pedals before the amp, then the effects after the cabinet.
 

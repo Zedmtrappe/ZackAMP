@@ -14,8 +14,6 @@ namespace
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger" };
     const char* const kDriveTypes[] = { "Screamer", "RAT" };
-    const char* const kCompTypes[] = { "Studio", "CS-3" };
-    const char* const kCompPositions[] = { "Pre", "Post" };
     const char* const kDelayTypes[] = { "Studio", "Tape" };
     const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
@@ -35,9 +33,7 @@ namespace
         { "gate.threshold", "Threshold", "dB", -96.f, -20.f, -62.f, LIN, 1.f, "Gate", "Input level below which the gate closes (with 6 dB hysteresis)." },
         { "gate.release", "Release", "ms", 10.f, 600.f, 120.f, LOG, 1.f, "Gate", "How gently the gate closes. Longer keeps more sustain." },
 
-        { "comp.enabled", "Comp", "", 0.f, 1.f, 0.f, TOG, 1.f, "Comp", "Compressor. Studio: clean 4:1 with soft knee. CS-3: squashy pedal sustainer." },
-        { "comp.type", "Type", "", 0.f, 1.f, 0.f, CHO, 1.f, "Comp", "Studio (clean, transparent) or CS-3 (pedal-style sustain and squash).", kCompTypes, 2 },
-        { "comp.position", "Position", "", 0.f, 1.f, 0.f, CHO, 1.f, "Comp", "Studio type only: Pre = before the amp (like a pedal), Post = after the cabinet (like a mix compressor). CS-3 is always before the amp.", kCompPositions, 2 },
+        { "comp.enabled", "CS-3", "", 0.f, 1.f, 0.f, TOG, 1.f, "Comp", "CS-3 style compressor pedal before the amp: squash and sustain." },
         { "comp.sustain", "Sustain", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Comp", "Amount of compression: lowers the threshold (make-up gain follows)." },
         { "comp.attack", "Attack", "", 0.f, 1.f, 0.4f, LIN, 10.f, "Comp", "Low: squashes the pick attack. High: lets the pick through before compressing." },
         { "comp.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Comp", "Treble shelf after the compressor (centre = flat)." },
@@ -84,6 +80,12 @@ namespace
         { "cab.a.pan", "Cab A Pan", "", -1.f, 1.f, 0.f, LIN, 1.f, "Cabinet", "Cabinet A pan (dual mode)." },
         { "cab.b.level", "Cab B Level", "dB", -30.f, 6.f, -3.f, LIN, 1.f, "Cabinet", "Cabinet B level (dual mode)." },
         { "cab.b.pan", "Cab B Pan", "", -1.f, 1.f, 0.f, LIN, 1.f, "Cabinet", "Cabinet B pan (dual mode)." },
+
+        { "studiocomp.enabled", "Studio Comp", "", 0.f, 1.f, 0.f, TOG, 1.f, "StudioComp", "Clean studio compressor after the cabinet (4:1, soft knee, stereo-linked), like a mix compressor." },
+        { "studiocomp.amount", "Amount", "", 0.f, 1.f, 0.4f, LIN, 10.f, "StudioComp", "Amount of compression: lowers the threshold (make-up gain follows)." },
+        { "studiocomp.attack", "Attack", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "1 ms (smooth, catches every transient) to 30 ms (punchy)." },
+        { "studiocomp.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "Gentle treble tilt after the compressor (centre = flat)." },
+        { "studiocomp.level", "Level", "dB", -12.f, 12.f, 0.f, LIN, 1.f, "StudioComp", "Output level." },
 
         { "smooth.enabled", "Smooth", "", 0.f, 1.f, 0.f, TOG, 1.f, "Smooth", "Dynamic 2 kHz tamer: compresses only the harsh upper-mid band (3:1) when it gets loud, after the cabinet." },
         { "smooth.amount", "Smooth", "", 0.f, 1.f, 0.4f, LIN, 10.f, "Smooth", "Threshold: turn clockwise to start smoothing at lower levels (more smoothing). Up to 9 dB of cut." },
