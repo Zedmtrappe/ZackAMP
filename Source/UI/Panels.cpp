@@ -384,6 +384,8 @@ void EffectModule::resized()
 {
     auto r = getLocalBounds().reduced (8);
     auto header = r.removeFromTop (24);
+    if (headerExtra != nullptr)
+        headerExtra->setBounds (header.removeFromRight (std::min (headerExtraWidth, header.getWidth() / 2)).reduced (0, 1));
     if (enable != nullptr)
         enable->setBounds (header);
     if (! extras.empty())
@@ -418,15 +420,21 @@ EffectsPanel::EffectsPanel (AppController& a)
     : app (a),
       gate (a, "Gate", pGateOn, { pGateThreshold, pGateRelease }),
       drive (a, "Drive", pDriveOn, { pDriveDrive, pDriveTone, pDriveLevel }),
+      smooth (a, "Smooth", pSmoothOn, { pSmoothAmount }),
       pitch (a, "Pitch", pPitchOn, { pPitchMix }),
       chorus (a, "Chorus", pChorusOn, { pChorusRate, pChorusDepth, pChorusMix }),
       delay (a, "Delay", pDelayOn, { pDelayTime, pDelayFeedback, pDelayMix, pDelayTone }),
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
       output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
-      delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode)
+      delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode),
+      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a)
 {
-    for (auto* m : { &gate, &drive, &pitch, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
+    drive.setHeaderExtra (&driveType, 96);
+    delay.setHeaderExtra (&delayType, 84);
+    reverb.setHeaderExtra (&reverbType, 96);
+    smooth.setHeaderExtra (&smoothLight, 22);
     chorus.addExtra (&chorusMode);
     delay.addExtra (&delaySync);
     delay.addExtra (&delayDivision);
@@ -450,10 +458,43 @@ EffectsPanel::EffectsPanel (AppController& a)
     };
 }
 
+void ProcessLight::refresh()
+{
+    const bool on = app.params().getBool (pSmoothOn);
+    const float target = on ? juce::jlimit (0.0f, 1.0f, app.engine.getSmoothReductionDb() / 6.0f) : 0.0f;
+    // Fast rise, slower fall, so short bursts of smoothing stay visible.
+    const float next = target > shown ? target : shown + (target - shown) * 0.15f;
+    if (std::abs (next - shown) > 0.004f || (next == 0.0f && shown != 0.0f))
+    {
+        shown = next < 0.004f ? 0.0f : next;
+        repaint();
+    }
+}
+
+void ProcessLight::paint (juce::Graphics& g)
+{
+    const auto r = getLocalBounds().toFloat().withSizeKeepingCentre (14.0f, 14.0f);
+    const auto colour = juce::Colour (0xffffb020);
+    if (shown > 0.0f)
+    {
+        g.setColour (colour.withAlpha (0.35f * shown));
+        g.fillEllipse (r.expanded (4.0f * shown));
+    }
+    juce::ColourGradient grad (Colours::ledOff.interpolatedWith (colour.brighter (0.6f), shown), r.getCentreX() - 2.0f, r.getY() + 2.0f,
+                               Colours::ledOff.darker (0.5f).interpolatedWith (colour.darker (0.2f), shown), r.getCentreX(), r.getBottom(), true);
+    g.setGradientFill (grad);
+    g.fillEllipse (r);
+    g.setColour (juce::Colours::black.withAlpha (0.6f));
+    g.drawEllipse (r, 1.0f);
+}
+
 void EffectsPanel::refresh()
 {
-    for (auto* m : { &gate, &drive, &pitch, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         m->refresh();
+    for (auto* c : { &driveType, &delayType, &reverbType })
+        c->refresh();
+    smoothLight.refresh();
     delaySync.refresh();
     delayDivision.refresh();
     chorusMode.refresh();
@@ -472,13 +513,13 @@ void EffectsPanel::resized()
     flowArea = r.removeFromTop (22);
     r.removeFromTop (4);
     // Width weights by module complexity.
-    const float weights[] = { 1.0f, 1.3f, 0.7f, 1.3f, 1.55f, 1.3f, 1.3f };
+    const float weights[] = { 1.0f, 1.35f, 0.75f, 0.7f, 1.3f, 1.55f, 1.35f, 1.25f };
     float total = 0;
     for (float w : weights) total += w;
     const int gap = 8;
-    const float unit = (float) (r.getWidth() - gap * 6) / total;
+    const float unit = (float) (r.getWidth() - gap * 7) / total;
     int i = 0;
-    for (auto* m : { &gate, &drive, &pitch, &chorus, &delay, &reverb, &output })
+    for (auto* m : { &gate, &drive, &smooth, &pitch, &chorus, &delay, &reverb, &output })
     {
         m->setBounds (r.removeFromLeft ((int) (unit * weights[i++])));
         r.removeFromLeft (gap);
@@ -490,7 +531,7 @@ void EffectsPanel::paint (juce::Graphics& g)
     // Signal-flow strip: the fixed processing order, lit where a stage is active.
     struct Stage { const char* name; int param; };
     const Stage stages[] = { { "IN", -1 }, { "GATE", pGateOn }, { "DRIVE", pDriveOn }, { "AMP", -1 },
-                             { "EQ", pEqOn }, { "CAB", pCabOn }, { "PITCH", pPitchOn }, { "CHORUS", pChorusOn }, { "DELAY", pDelayOn },
+                             { "EQ", pEqOn }, { "CAB", pCabOn }, { "SMOOTH", pSmoothOn }, { "PITCH", pPitchOn }, { "CHORUS", pChorusOn }, { "DELAY", pDelayOn },
                              { "REVERB", pReverbOn }, { "OUT", -1 } };
     auto r = flowArea.toFloat().reduced (2.0f, 2.0f);
     const int n = (int) std::size (stages);

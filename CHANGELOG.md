@@ -14,6 +14,20 @@
   Changing the model resets them to that model's usual valves; the default valves reproduce the
   calibrated sound exactly. Older presets load with the model's usual valves.
 
+### Added (effects)
+- **Smooth**: dynamic 2 kHz tamer after the cabinet (3:1, up to 9 dB of cut); the knob sets the
+  threshold (clockwise = more smoothing); a process light glows with the amount of cut.
+- Drive types **Screamer** (the original mid-hump overdrive) and **RAT** (op-amp distortion with
+  hard diode clipping; Tone acts as its Filter).
+- Delay types **Studio** and **Tape** (wow/flutter, saturated and darkening repeats).
+- Reverb types **Room**, **Hall** (the original), **Spring** and **Chamber**; type changes fade
+  the tail out and back in.
+
+### Added (amp head)
+- Photo-realistic amp interior behind the glass: valves, transformers and chassis rendered in
+  Blender Cycles as light layers that the app mixes live (heat colour per model, valve type,
+  transformer glow, LED light). Falls back to the drawn interior if the images are missing.
+
 ### Changed
 - The app is now called **Z.AMP** (download `Z.AMP-macOS.zip`, installer `Install Z.AMP.command`).
   Presets, IRs and settings stay where they were (`~/Library/Application Support/ZackAMP`).

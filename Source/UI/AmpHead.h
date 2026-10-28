@@ -38,6 +38,16 @@ private:
     void drawLit (juce::Graphics&) const;
     juce::Path makeLogoPath() const;
 
+    // Photo-realistic interior: rendered light layers mixed in linear light (see Tools/Render3D).
+    void prepareLayers (int pixelW, int pixelH);
+    void compositeLayers();
+    bool photo = false;
+    enum Layer { baseLayer, powerGlow, preGlow, trafoLayer, ledLayer, numLayers };
+    std::array<juce::Image, numLayers> layers;  // cropped and scaled to the glass, in pixels
+    juce::Image composite;
+    int layersValve = -1;
+    bool compositeDirty = true;
+
     AppController& app;
     juce::Rectangle<float> glass, ptRect, otRect;
     std::vector<Valve> valves;

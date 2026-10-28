@@ -26,6 +26,7 @@
 #include "../DSP/Effects/OutputLimiter.h"
 #include "../DSP/Effects/Overdrive.h"
 #include "../DSP/Effects/Reverb.h"
+#include "../DSP/Effects/Smooth.h"
 #include "../DSP/GraphicEQ/GraphicEQ.h"
 #include "../DSP/Utilities/Oversampler.h"
 #include "../Parameters/Parameters.h"
@@ -109,6 +110,9 @@ public:
     /** Group delay of the oversampling filters at low frequencies (samples, informational). */
     double getProcessingLatencySamples() const noexcept;
 
+    /** Current gain reduction of the Smooth (2 kHz) compressor in dB, for its "process" light. */
+    float getSmoothReductionDb() const noexcept { return smooth.getReductionDb(); }
+
 private:
     struct Smoothed
     {
@@ -146,6 +150,8 @@ private:
     dsp::GraphicEQ eqPre, eqPost;
     dsp::CabinetSection cabinet { garbage };
     dsp::MicroPitch pitch;
+    dsp::Smooth smooth;
+    int activeDriveType = 0;
     dsp::Chorus chorus;
     dsp::StereoDelay delay;
     dsp::Reverb reverb;
@@ -154,7 +160,7 @@ private:
 
     // smoothed controls
     Smoothed inTrim, outGain, bypassMix, driveMix, eqPreMix, eqPostMix, gateMix;
-    Smoothed chorusMix, pitchMix, delayIn, reverbIn;
+    Smoothed chorusMix, pitchMix, delayIn, reverbIn, smoothMix;
     dsp::LinearSmoother ampGain, ampBass, ampMid, ampTreble, ampPresence, ampDepth, ampMaster;
     dsp::LinearSmoother ampPull, powerSag, powerVariac;
     dsp::LinearSmoother driveDrive, driveTone, driveLevel, chorusRate, chorusDepth, delayFb, delayMix, reverbMix;

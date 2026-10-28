@@ -19,7 +19,7 @@
 
 ## Requested features (owner)
 
-Status: items 1–4 are implemented (see CHANGELOG); items 5–7 are in progress.
+Status: items 1–8 are implemented (see CHANGELOG); 9–13 are next.
 
 1. **Single fixed row of amp controls** instead of the model buttons + per-model faceplate:
    * first knob: a **switched (detented) model selector** across the six models;
@@ -76,6 +76,24 @@ Status: items 1–4 are implemented (see CHANGELOG); items 5–7 are in progress
    cheap; any animation (gentle flicker, glow transitions when switching models) runs at a modest
    frame rate on the UI thread only, never affecting audio. Knobs keep their current size and
    behaviour. Works at the minimum window size and on Retina displays.
+
+8. **Photo-realistic amp interior** (done): valves, transformers, caps and chassis modelled
+   and rendered in Blender Cycles (`Tools/Render3D/amp_interior.py`) as separate light layers
+   (base, preamp heaters, power heaters per valve type, transformer glow, purple LED spill) that the
+   app mixes in linear light, so heat colour, valve type and on/off stay live.
+9. **New amp line-up** replacing the six current models (owner's working names; each a new
+   voicing modelled on the circuit family it refers to):
+   *Tweed*, *JC120* (solid-state clean, built-in stereo chorus character), *AC30* (EL84 class-A
+   chime, Top Boost), *JCM800* (single-channel British hot-rodded lead), *Coliseum* (Mesa/Boogie
+   high-power Mark-series: cascading lead preamp, 5-band GEQ, big 6L6 power section), *MP1* (rack MOSFET/valve preamp), *Triple* (modern triple-channel high gain).
+   Private build: the owner's names are used as-is (they are trademarks of their makers).
+10. **Knob edge lighting follows the model:** the ring light around the control knobs shifts from
+    cool green (cleanest model) through to orange (highest gain).
+11. **Selectable drive types:** *RAT* (op-amp hard clipping, Filter control) and *Screamer*
+    (mid-hump soft clipping), selected in the Drive module (`drive.type`).
+12. **Selectable reverb types:** *Room*, *Hall*, *Spring*, *Chamber* (`reverb.type`).
+13. **Delay type selector:** *Studio* (clean digital) and *Tape* (wow/flutter, saturation,
+    darkening repeats) (`delay.type`).
 
 ## AU and VST3 plugins
 

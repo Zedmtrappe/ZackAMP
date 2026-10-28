@@ -60,6 +60,7 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
     eqPre.prepare (osRate);
     eqPost.prepare (sampleRate);
     pitch.prepare (sampleRate);
+    smooth.prepare (sampleRate);
     chorus.prepare (sampleRate);
     delay.prepare (sampleRate);
     reverb.prepare (sampleRate);
@@ -87,7 +88,7 @@ void AmpForgeEngine::prepare (double newSampleRate, int /*maxBlockSize: irreleva
 
     for (auto* s : { &inTrim, &outGain })
         s->prepare (sampleRate, 0.03);
-    for (auto* s : { &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn })
+    for (auto* s : { &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn, &smoothMix })
         s->prepare (sampleRate, 0.02);
     for (auto* s : { &ampGain, &ampBass, &ampMid, &ampTreble, &ampPresence, &ampDepth, &ampMaster,
                      &driveDrive, &driveTone, &driveLevel, &chorusRate, &chorusDepth, &delayFb, &delayMix, &reverbMix })
@@ -262,6 +263,9 @@ void AmpForgeEngine::snapAll() noexcept
     outGain.snap (dbToGain (p.get (pOutLevel)));
     bypassMix.snap (p.getBool (pBypass) ? 1.0f : 0.0f);
     driveMix.snap (p.getBool (pDriveOn) ? 1.0f : 0.0f);
+    activeDriveType = p.getInt (pDriveType);
+    drive.setType (activeDriveType);
+    smoothMix.snap (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     eqPreMix.snap (eqOn && p.getInt (pEqPosition) == 0 ? 1.0f : 0.0f);
     eqPostMix.snap (eqOn && p.getInt (pEqPosition) == 1 ? 1.0f : 0.0f);
@@ -298,6 +302,7 @@ void AmpForgeEngine::resetDsp() noexcept
     eqPost.reset();
     cabinet.reset();
     pitch.reset();
+    smooth.reset();
     chorus.reset();
     delay.reset();
     reverb.reset();
@@ -312,7 +317,16 @@ void AmpForgeEngine::updateControls (int n) noexcept
     inTrim.target (dbToGain (p.get (pInTrim)));
     outGain.target (dbToGain (p.get (pOutLevel)));
     bypassMix.target (p.getBool (pBypass) ? 1.0f : 0.0f);
-    driveMix.target (p.getBool (pDriveOn) ? 1.0f : 0.0f);
+    // A drive-type change fades the pedal out, switches while silent, then fades back in.
+    const int driveType = p.getInt (pDriveType);
+    if (driveType != activeDriveType && driveMix.from == 0.0f && driveMix.to == 0.0f)
+    {
+        activeDriveType = driveType;
+        drive.setType (driveType);
+        drive.reset();
+    }
+    driveMix.target (p.getBool (pDriveOn) && driveType == activeDriveType ? 1.0f : 0.0f);
+    smoothMix.target (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     const int eqPos = p.getInt (pEqPosition);
     eqPreMix.target (eqOn && eqPos == 0 ? 1.0f : 0.0f);
@@ -323,7 +337,7 @@ void AmpForgeEngine::updateControls (int n) noexcept
     delayIn.target (p.getBool (pDelayOn) ? 1.0f : 0.0f);
     reverbIn.target (p.getBool (pReverbOn) ? 1.0f : 0.0f);
 
-    for (auto* s : { &inTrim, &outGain, &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn })
+    for (auto* s : { &inTrim, &outGain, &bypassMix, &driveMix, &eqPreMix, &eqPostMix, &gateMix, &chorusMix, &pitchMix, &delayIn, &reverbIn, &smoothMix })
         s->advance (n);
 
     ampGain.setTarget (p.get (pAmpGain));
@@ -381,7 +395,7 @@ void AmpForgeEngine::updateControls (int n) noexcept
 
     reverbMix.setTarget (p.get (pReverbMix));
     reverbMix.skip (n);
-    reverb.setControls (p.get (pReverbDecay), p.get (pReverbTone));
+    reverb.setControls (p.get (pReverbDecay), p.get (pReverbTone), p.getInt (pReverbType));
 }
 
 void AmpForgeEngine::process (const float* in, float* outL, float* outR, int numSamples) noexcept
@@ -530,6 +544,14 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
     cabinet.process (base.data(), L, R, n, cs);
 
     // ---- post effects ----
+    if (smoothMix.from > 0.0f || smoothMix.to > 0.0f)
+    {
+        if (smoothMix.from == 0.0f)
+            smooth.reset();
+        smooth.process (L, R, n, store.get (pSmoothAmount), smoothMix.from, smoothMix.to);
+    }
+    else
+        smooth.reset(); // idle: nothing to show on the process light
     if (pitchMix.from > 0.0f || pitchMix.to > 0.0f)
     {
         if (pitchMix.from == 0.0f)
@@ -543,7 +565,7 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
                               ? 60000.0f / store.get (pTempo) * delayDivisionBeats (store.getInt (pDelayDivision))
                               : store.get (pDelayTime);
     delay.process (L, R, n, std::min (delayMs, (float) (StereoDelay::kMaxSeconds * 1000.0 - 10.0)),
-                   delayFb.getCurrent(), delayMix.getCurrent(), delayIn.to);
+                   delayFb.getCurrent(), delayMix.getCurrent(), delayIn.to, store.getInt (pDelayType) == 1);
     reverb.process (L, R, n, reverbIn.to, reverbMix.getCurrent());
 
     // ---- output ----

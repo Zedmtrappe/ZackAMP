@@ -136,4 +136,12 @@ if(AMPFORGE_BUILD_APP)
     ampforge_add_core(ZackAMP)
     target_link_libraries(ZackAMP PRIVATE
         juce::juce_gui_basics juce::juce_gui_extra juce::juce_audio_devices juce::juce_audio_utils)
+
+    # Rendered amp-interior layers (Tools/Render3D). Without them the interior is drawn in code.
+    file(GLOB AF_INTERIOR_IMAGES CONFIGURE_DEPENDS Resources/Interior/*.jpg)
+    if(AF_INTERIOR_IMAGES)
+        juce_add_binary_data(zamp_interior NAMESPACE ZampInterior HEADER_NAME ZampInterior.h SOURCES ${AF_INTERIOR_IMAGES})
+        target_link_libraries(ZackAMP PRIVATE zamp_interior)
+        target_compile_definitions(ZackAMP PRIVATE ZAMP_HAS_INTERIOR=1)
+    endif()
 endif()

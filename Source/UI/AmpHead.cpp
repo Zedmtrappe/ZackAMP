@@ -1,5 +1,8 @@
 #include "AmpHead.h"
 #include "../DSP/Amplifiers/Valves.h"
+#if ZAMP_HAS_INTERIOR
+ #include "ZampInterior.h"
+#endif
 
 namespace af::ui
 {
@@ -56,6 +59,45 @@ namespace
         return juce::Font (opts).withExtraKerningFactor (0.04f);
     }
 
+    /** Loads one rendered interior layer, e.g. "base_6L6.jpg" (null if not bundled). */
+    juce::Image loadInterior (const juce::String& file)
+    {
+#if ZAMP_HAS_INTERIOR
+        int size = 0;
+        const auto resource = file.replaceCharacter ('.', '_');
+        if (const auto* data = ZampInterior::getNamedResource (resource.toRawUTF8(), size))
+            return juce::ImageCache::getFromMemory (data, size);
+#else
+        juce::ignoreUnused (file);
+#endif
+        return {};
+    }
+
+    struct LinearTables
+    {
+        std::array<float, 256> toLinear {};
+        std::array<juce::uint8, 4097> toSrgb {};
+        LinearTables()
+        {
+            for (int i = 0; i < 256; ++i)
+            {
+                const float c = (float) i / 255.0f;
+                toLinear[(size_t) i] = c <= 0.04045f ? c / 12.92f : std::pow ((c + 0.055f) / 1.055f, 2.4f);
+            }
+            for (int i = 0; i <= 4096; ++i)
+            {
+                const float l = (float) i / 4096.0f;
+                const float c = l <= 0.0031308f ? l * 12.92f : 1.055f * std::pow (l, 1.0f / 2.4f) - 0.055f;
+                toSrgb[(size_t) i] = (juce::uint8) juce::jlimit (0, 255, juce::roundToInt (c * 255.0f));
+            }
+        }
+    };
+    const LinearTables& tables()
+    {
+        static const LinearTables t;
+        return t;
+    }
+
     juce::Image makeTolex()
     {
         juce::Image img (juce::Image::RGB, 96, 96, false);
@@ -77,6 +119,7 @@ namespace
 //==============================================================================
 GlassWindow::GlassWindow (AppController& a) : app (a)
 {
+    photo = loadInterior ("base_6L6.jpg").isValid();
     setOpaque (true);
     setInterceptsMouseClicks (false, false);
 }
@@ -164,8 +207,8 @@ void GlassWindow::tick()
     ease (led, ledTarget, 0.18f);
     ease (trafoGlow, trafoTarget, 0.06f);
 
-    // Gentle heater flicker, updated at 10 Hz.
-    if (++tickCount % 3 == 0 && power > 0.05f)
+    // Gentle heater flicker, updated at 10 Hz (drawn interior only: the rendered one recomposites).
+    if (! photo && ++tickCount % 3 == 0 && power > 0.05f)
     {
         for (auto& v : valves)
             v.flicker = 0.75f * v.flicker + 0.25f * (0.95f + 0.07f * rng.nextFloat());
@@ -179,7 +222,10 @@ void GlassWindow::tick()
         changed = true;
     }
     if (changed)
+    {
+        compositeDirty = true;
         repaint();
+    }
 }
 
 //==============================================================================
@@ -195,8 +241,11 @@ void GlassWindow::renderLayers (float scale)
         g.addTransform (juce::AffineTransform::scale (scale));
         fn (g);
     };
-    render (backLayer, true, [this] (juce::Graphics& g) { drawBackWall (g); });
-    render (partsLayer, false, [this] (juce::Graphics& g) { drawParts (g); });
+    if (! photo)
+    {
+        render (backLayer, true, [this] (juce::Graphics& g) { drawBackWall (g); });
+        render (partsLayer, false, [this] (juce::Graphics& g) { drawParts (g); });
+    }
     render (frontLayer, false, [this] (juce::Graphics& g) { drawFront (g); });
     render (litLayer, false, [this] (juce::Graphics& g) { drawLit (g); });
 }
@@ -352,10 +401,10 @@ juce::Path GlassWindow::makeLogoPath() const
 
 void GlassWindow::drawFront (juce::Graphics& g) const
 {
-    // Glass envelopes of the valves, with printed type names.
+    // Glass envelopes of the valves, with printed type names (drawn interior only).
     g.saveState();
     g.setOrigin (glass.getPosition().toInt());
-    for (size_t i = 0; i < valves.size(); ++i)
+    for (size_t i = 0; i < (photo ? 0 : valves.size()); ++i)
     {
         const auto& v = valves[i];
         const auto env = v.envelope.getBounds();
@@ -462,10 +511,92 @@ void GlassWindow::drawLit (juce::Graphics& g) const
     g.strokePath (logo, juce::PathStrokeType (0.8f));
 }
 
+void GlassWindow::prepareLayers (int pixelW, int pixelH)
+{
+    const auto* valveName = dsp::kPowerValves[(size_t) juce::jlimit (0, dsp::kNumPowerValves - 1, shownPowValve)].name;
+    const juce::String files[numLayers] = { juce::String ("base_") + valveName + ".jpg", juce::String ("pow_") + valveName + ".jpg",
+                                            "pre.jpg", "trafo.jpg", "led.jpg" };
+    for (int i = 0; i < numLayers; ++i)
+    {
+        auto src = loadInterior (files[i]);
+        if (! src.isValid())
+        {
+            layers[(size_t) i] = {};
+            continue;
+        }
+        // Cover the glass: crop the render to the glass aspect ratio (keeping the chassis deck in
+        // view), then scale to the glass size in physical pixels.
+        const float aspect = (float) pixelW / (float) pixelH;
+        auto crop = src.getBounds();
+        if ((float) crop.getWidth() / (float) crop.getHeight() > aspect)
+            crop = crop.withSizeKeepingCentre (juce::roundToInt ((float) crop.getHeight() * aspect), crop.getHeight());
+        else // the render is centred on the valves, with spare wall above and deck below
+            crop = crop.withSizeKeepingCentre (crop.getWidth(), juce::roundToInt ((float) crop.getWidth() / aspect));
+        layers[(size_t) i] = src.getClippedImage (crop).rescaled (pixelW, pixelH, juce::Graphics::highResamplingQuality)
+                                 .convertedToFormat (juce::Image::RGB);
+    }
+    composite = juce::Image (juce::Image::RGB, pixelW, pixelH, false);
+    layersValve = shownPowValve;
+    compositeDirty = true;
+}
+
+void GlassWindow::compositeLayers()
+{
+    compositeDirty = false;
+    if (! layers[baseLayer].isValid())
+        return;
+    const auto& t = tables();
+    const auto lin = [] (juce::Colour c, float k)
+    {
+        const auto& tl = tables().toLinear;
+        return std::array<float, 3> { tl[c.getRed()] * k, tl[c.getGreen()] * k, tl[c.getBlue()] * k };
+    };
+    // Heater light: the render is white light; tint it by the model's heat colour.
+    const float heaterGain = (0.35f + 1.4f * heat) * power;
+    const auto glow = lin (heatColour (heat), heaterGain);
+    const auto trafo = lin (juce::Colours::white, trafoGlow * power * 1.6f);
+    const auto purple = lin (juce::Colours::white, led);
+
+    struct Src { const juce::Image* img; std::array<float, 3> k; };
+    std::vector<Src> adds;
+    auto addLayer = [&] (int index, std::array<float, 3> k)
+    {
+        if (layers[(size_t) index].isValid() && (k[0] > 0.0f || k[1] > 0.0f || k[2] > 0.0f))
+            adds.push_back ({ &layers[(size_t) index], k });
+    };
+    addLayer (powerGlow, glow);
+    addLayer (preGlow, glow);
+    addLayer (trafoLayer, trafo);
+    addLayer (ledLayer, purple);
+
+    const int w = composite.getWidth(), h = composite.getHeight();
+    juce::Image::BitmapData out (composite, juce::Image::BitmapData::writeOnly);
+    juce::Image::BitmapData in (layers[baseLayer], juce::Image::BitmapData::readOnly);
+    std::vector<std::unique_ptr<juce::Image::BitmapData>> addData;
+    for (auto& a : adds)
+        addData.push_back (std::make_unique<juce::Image::BitmapData> (*const_cast<juce::Image*> (a.img), juce::Image::BitmapData::readOnly));
+
+    for (int y = 0; y < h; ++y)
+        for (int x = 0; x < w; ++x)
+        {
+            const auto* b = reinterpret_cast<const juce::PixelRGB*> (in.getPixelPointer (x, y));
+            float r = t.toLinear[b->getRed()], gr = t.toLinear[b->getGreen()], bl = t.toLinear[b->getBlue()];
+            for (size_t i = 0; i < adds.size(); ++i)
+            {
+                const auto* p = reinterpret_cast<const juce::PixelRGB*> (addData[i]->getPixelPointer (x, y));
+                r += t.toLinear[p->getRed()] * adds[i].k[0];
+                gr += t.toLinear[p->getGreen()] * adds[i].k[1];
+                bl += t.toLinear[p->getBlue()] * adds[i].k[2];
+            }
+            auto enc = [&t] (float v) { return t.toSrgb[(size_t) juce::jlimit (0, 4096, (int) (v * 4096.0f))]; };
+            reinterpret_cast<juce::PixelRGB*> (out.getPixelPointer (x, y))->setARGB (255, enc (r), enc (gr), enc (bl));
+        }
+}
+
 void GlassWindow::paint (juce::Graphics& g)
 {
     const float scale = g.getInternalContext().getPhysicalPixelScaleFactor();
-    if (std::abs (scale - cacheScale) > 0.01f || backLayer.isNull())
+    if (std::abs (scale - cacheScale) > 0.01f || frontLayer.isNull())
         renderLayers (scale);
     const auto bounds = getLocalBounds().toFloat();
     auto drawLayer = [&] (const juce::Image& img, float opacity)
@@ -473,6 +604,24 @@ void GlassWindow::paint (juce::Graphics& g)
         g.setOpacity (opacity);
         g.drawImage (img, bounds, juce::RectanglePlacement::stretchToFit);
     };
+
+    if (photo)
+    {
+        const int pw = std::max (1, juce::roundToInt (glass.getWidth() * scale));
+        const int ph = std::max (1, juce::roundToInt (glass.getHeight() * scale));
+        if (composite.getWidth() != pw || composite.getHeight() != ph || layersValve != shownPowValve)
+            prepareLayers (pw, ph);
+        if (compositeDirty)
+            compositeLayers();
+        g.fillAll (juce::Colours::black);
+        g.setOpacity (1.0f);
+        g.drawImage (composite, glass, juce::RectanglePlacement::stretchToFit);
+        drawLayer (frontLayer, 1.0f);
+        if (led > 0.005f)
+            drawLayer (litLayer, led);
+        return;
+    }
+
     drawLayer (backLayer, 1.0f);
 
     const float lvl = power;

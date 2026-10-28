@@ -105,6 +105,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void addExtra (juce::Component* c) { extras.push_back (c); addAndMakeVisible (c); }
+    /** A control shown at the right of the module's header (e.g. a type selector or a light). */
+    void setHeaderExtra (juce::Component* c, int width) { headerExtra = c; headerExtraWidth = width; addAndMakeVisible (c); }
     ParamKnob* knob (int i) { return knobs[(size_t) i]; }
 
 private:
@@ -114,7 +116,22 @@ private:
     std::unique_ptr<ParamToggle> enable;
     juce::OwnedArray<ParamKnob> knobs;
     std::vector<juce::Component*> extras;
+    juce::Component* headerExtra = nullptr;
+    int headerExtraWidth = 0;
     bool shownOn = false;
+};
+
+/** "Process" light: glows brighter the more gain reduction the Smooth compressor applies. */
+class ProcessLight final : public juce::Component, public juce::SettableTooltipClient
+{
+public:
+    explicit ProcessLight (AppController& a) : app (a) { setTooltip ("Lights up while Smooth is cutting: brighter = more smoothing."); }
+    void refresh();
+    void paint (juce::Graphics&) override;
+
+private:
+    AppController& app;
+    float shown = 0.0f;
 };
 
 class EffectsPanel final : public juce::Component, public Refreshable
@@ -127,9 +144,10 @@ public:
 
 private:
     AppController& app;
-    EffectModule gate, drive, pitch, chorus, delay, reverb, output;
+    EffectModule gate, drive, smooth, pitch, chorus, delay, reverb, output;
     ParamToggle delaySync;
-    ParamChoice delayDivision, chorusMode;
+    ParamChoice delayDivision, chorusMode, driveType, delayType, reverbType;
+    ProcessLight smoothLight;
     juce::TextButton tapTempo { "TAP" };
     std::vector<double> taps;
     juce::Rectangle<int> flowArea;

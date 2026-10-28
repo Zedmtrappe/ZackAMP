@@ -20,9 +20,39 @@ void Reverb::prepare (double fs)
         diffusers[(size_t) i].g = 0.62f;
     }
     preDelay.prepare ((int) (0.03 * fs));
+    for (auto& f : springLp)
+        f.setCoeffs (BiquadCoeffs::lowPass (fs, 4300.0, 0.9));
+    for (auto& f : springHp)
+        f.prepare (fs, OnePole::Type::highPass, 170.0);
+    fadeStep = (float) (1.0 / (0.012 * fs));
     lastDecay = lastTone = -1.0f;
-    setControls (1.8f, 0.5f);
+    pendingType = -1;
+    applyType (type);
+    setControls (1.8f, 0.5f, type);
     reset();
+}
+
+void Reverb::applyType (int t)
+{
+    type = clampv (t, 0, 3);
+    switch (type)
+    {
+        case room:    scale = 0.40f; preDelayMs = 3.0f;  modAmount = 0.4f; break;
+        case chamber: scale = 0.66f; preDelayMs = 7.0f;  modAmount = 0.5f; break;
+        case spring:  scale = 0.55f; preDelayMs = 2.0f;  modAmount = 0.0f; break;
+        default:      scale = 1.00f; preDelayMs = 12.0f; modAmount = 1.0f; break;
+    }
+    const float g = type == chamber ? 0.70f : type == room ? 0.66f : 0.62f;
+    for (auto& d : diffusers)
+        d.g = g;
+    updateDecay();
+}
+
+void Reverb::updateDecay()
+{
+    const float rt60 = clampv (lastDecay < 0.0f ? 1.8f : lastDecay, 0.1f, 20.0f);
+    for (int i = 0; i < N; ++i)
+        decayGain[(size_t) i] = std::pow (10.0f, -3.0f * baseDelay[(size_t) i] * scale / (rt60 * (float) sampleRate));
 }
 
 void Reverb::reset() noexcept
@@ -33,36 +63,68 @@ void Reverb::reset() noexcept
         d.line.reset();
     preDelay.reset();
     lpState.fill (0.0f);
+    for (auto& d : dispersion)
+        d = {};
+    for (auto& f : springLp)
+        f.reset();
+    for (auto& f : springHp)
+        f.reset();
     modPhase = 0.0;
 }
 
-void Reverb::setControls (float decaySeconds, float tone)
+void Reverb::setControls (float decaySeconds, float tone, int newType)
 {
+    newType = clampv (newType, 0, 3);
+    if (newType != type && newType != pendingType)
+        pendingType = newType; // switched in process() once the wet output has faded out
     if (decaySeconds != lastDecay)
     {
         lastDecay = decaySeconds;
-        const float rt60 = clampv (decaySeconds, 0.1f, 20.0f);
-        for (int i = 0; i < N; ++i)
-            decayGain[(size_t) i] = std::pow (10.0f, -3.0f * baseDelay[(size_t) i] / (rt60 * (float) sampleRate));
+        updateDecay();
     }
     if (tone != lastTone)
     {
         lastTone = tone;
         // One-pole damping coefficient: 0 = no damping. Brighter tone -> less damping.
-        const double cutoff = 1500.0 * std::pow (10.0, (double) clampv (tone, 0.0f, 1.0f)); // 1.5k..15k
-        damping = (float) std::exp (-kTwoPi * cutoff / sampleRate);
+        double cutoff = 1500.0 * std::pow (10.0, (double) clampv (tone, 0.0f, 1.0f)); // 1.5k..15k
+        if (type == chamber)
+            cutoff *= 1.4;
+        damping = (float) std::exp (-kTwoPi * std::min (cutoff, 0.45 * sampleRate) / sampleRate);
     }
 }
 
 void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noexcept
 {
     const double modInc = 0.7 / sampleRate;
-    const float modDepth = (float) (0.0008 * sampleRate);
+    const float modDepth = (float) (0.0008 * sampleRate) * modAmount;
+    const float pre = std::max (1.0f, preDelayMs * 0.001f * (float) sampleRate);
+    const bool isSpring = type == spring;
     for (int i = 0; i < n; ++i)
     {
+        // Type change: fade the wet output out, clear the tank, switch, fade back in.
+        if (pendingType >= 0)
+        {
+            fade -= fadeStep;
+            if (fade <= 0.0f)
+            {
+                fade = 0.0f;
+                reset();
+                const int t = pendingType;
+                pendingType = -1;
+                applyType (t);
+                lastTone = -1.0f; // re-derive damping for the new type on the next control update
+                return;           // rest of this block stays dry
+            }
+        }
+        else if (fade < 1.0f)
+            fade = std::min (1.0f, fade + fadeStep);
+
         float x = 0.5f * (l[i] + r[i]) * inputGain;
         preDelay.push (x);
-        x = preDelay.read ((float) (0.012 * sampleRate));
+        x = preDelay.read (pre);
+        if (isSpring)
+            for (auto& d : dispersion)
+                x = d.process (x, 0.62f, 3);
         for (auto& d : diffusers)
             x = d.process (x);
 
@@ -74,7 +136,7 @@ void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noe
         std::array<float, N> s {};
         for (int k = 0; k < N; ++k)
         {
-            float d = baseDelay[(size_t) k];
+            float d = baseDelay[(size_t) k] * scale;
             if (k == 1)
                 d += modDepth * m;
             else if (k == 5)
@@ -108,8 +170,13 @@ void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noe
             if ((k & 3) == 0)
                 outR -= tap * 0.3f;
         }
-        l[i] += outL * 0.25f * mix;
-        r[i] += outR * 0.25f * mix;
+        if (isSpring)
+        {
+            outL = springLp[0].process (springHp[0].process (outL)) * 1.4f;
+            outR = springLp[1].process (springHp[1].process (outR)) * 1.4f;
+        }
+        l[i] += outL * 0.25f * mix * fade;
+        r[i] += outR * 0.25f * mix * fade;
     }
 }
 

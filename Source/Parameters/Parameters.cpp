@@ -14,6 +14,9 @@ namespace
     const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger" };
+    const char* const kDriveTypes[] = { "Screamer", "RAT" };
+    const char* const kDelayTypes[] = { "Studio", "Tape" };
+    const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
     const char* const kDivisions[] = { "1/2", "1/4", "1/4 D", "1/4 T", "1/8", "1/8 D", "1/8 T", "1/16" }; // D = dotted, T = triplet
     constexpr float kDivisionBeats[] = { 2.0f, 1.0f, 1.5f, 2.0f / 3.0f, 0.5f, 0.75f, 1.0f / 3.0f, 0.25f };
@@ -35,6 +38,7 @@ namespace
         { "drive.drive", "Drive", "", 0.f, 1.f, 0.25f, LIN, 10.f, "Drive", "Pedal clipping amount. Near zero it works as a tightening mid boost." },
         { "drive.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Drive", "Pedal treble." },
         { "drive.level", "Level", "dB", -12.f, 12.f, 3.f, LIN, 1.f, "Drive", "Pedal output level: how hard it pushes the amp." },
+        { "drive.type", "Type", "", 0.f, 1.f, 0.f, CHO, 1.f, "Drive", "Screamer: mid-hump soft clipping, tight lows (great in front of a gainy amp). RAT: op-amp distortion into hard diode clipping, full lows; Tone works as its Filter.", kDriveTypes, 2 },
 
         { "amp.model", "Amp Model", "", 0.f, 5.f, 0.f, CHO, 1.f, "Amp", "Amplifier model.", kAmpModels, 6 },
         { "amp.gain", "Gain", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Preamp volume / gain pot." },
@@ -66,6 +70,9 @@ namespace
         { "cab.b.level", "Cab B Level", "dB", -30.f, 6.f, -3.f, LIN, 1.f, "Cabinet", "Cabinet B level (dual mode)." },
         { "cab.b.pan", "Cab B Pan", "", -1.f, 1.f, 0.f, LIN, 1.f, "Cabinet", "Cabinet B pan (dual mode)." },
 
+        { "smooth.enabled", "Smooth", "", 0.f, 1.f, 0.f, TOG, 1.f, "Smooth", "Dynamic 2 kHz tamer: compresses only the harsh upper-mid band (3:1) when it gets loud, after the cabinet." },
+        { "smooth.amount", "Smooth", "", 0.f, 1.f, 0.4f, LIN, 10.f, "Smooth", "Threshold: turn clockwise to start smoothing at lower levels (more smoothing). Up to 9 dB of cut." },
+
         { "pitch.enabled", "Pitch", "", 0.f, 1.f, 0.f, TOG, 1.f, "Pitch", "Micro-pitch doubler: adds copies of the amp+cab sound shifted 13 cents up (left) and 13 cents down (right)." },
         { "pitch.mix", "Mix", "%", 0.f, 1.f, 0.5f, LIN, 100.f, "Pitch", "Level of the pitched copies added to the dry sound." },
 
@@ -82,11 +89,13 @@ namespace
         { "delay.feedback", "Feedback", "%", 0.f, 0.95f, 0.3f, LIN, 100.f, "Delay", "Number of repeats." },
         { "delay.mix", "Mix", "%", 0.f, 1.f, 0.25f, LIN, 100.f, "Delay", "Level of the repeats." },
         { "delay.tone", "Tone", "Hz", 800.f, 12000.f, 4500.f, LOG, 1.f, "Delay", "Darkens each repeat." },
+        { "delay.type", "Type", "", 0.f, 1.f, 0.f, CHO, 1.f, "Delay", "Studio: clean digital repeats. Tape: wow and flutter, saturation and repeats that darken as they fade.", kDelayTypes, 2 },
 
         { "reverb.enabled", "Reverb", "", 0.f, 1.f, 0.f, TOG, 1.f, "Reverb", "Stereo reverb. Tails ring out naturally when switched off." },
         { "reverb.mix", "Mix", "%", 0.f, 1.f, 0.25f, LIN, 100.f, "Reverb", "Reverb level." },
         { "reverb.decay", "Decay", "s", 0.3f, 10.f, 1.8f, LOG, 1.f, "Reverb", "Reverb time (RT60)." },
         { "reverb.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Reverb", "Dark to bright." },
+        { "reverb.type", "Type", "", 0.f, 3.f, 1.f, CHO, 1.f, "Reverb", "Room: small and close. Hall: big and smooth. Spring: the classic amp tank, with its drip. Chamber: dense, bright and even.", kReverbTypes, 4 },
 
         { "out.level", "Output", "dB", -60.f, 12.f, 0.f, LIN, 1.f, "Output", "Final output level. A safety limiter at -1 dBFS protects your monitors." },
         { "global.tempo", "Tempo", "bpm", 40.f, 240.f, 120.f, LIN, 1.f, "Global", "Tempo for synced delay." },

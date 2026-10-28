@@ -138,6 +138,10 @@ public:
             d.prepare ((int) (kMaxSeconds * fs) + 8);
         for (auto& h : hp)
             h.prepare (fs, OnePole::Type::highPass, 90.0);
+        for (auto& t : tapeLp)
+            t.setCoeffs (BiquadCoeffs::lowPass (fs, 4200.0, 0.6));
+        for (auto& h : tapeHp)
+            h.prepare (fs, OnePole::Type::highPass, 160.0);
         timeSmooth.prepare (fs, 0.25); // smooth time changes glide like tape rather than click
         reset();
     }
@@ -150,6 +154,11 @@ public:
             f.reset();
         for (auto& h : hp)
             h.reset();
+        for (auto& t : tapeLp)
+            t.reset();
+        for (auto& h : tapeHp)
+            h.reset();
+        wowPhase = flutterPhase = 0.0;
         timeSmooth.snapToTarget();
     }
 
@@ -165,21 +174,39 @@ public:
     void snapTime (float ms) noexcept { timeSmooth.snap (ms); }
 
     /** Delay with feedback; wet signal is added to l/r. inputGain ramps to 0 when the
-        effect is switched off so existing repeats decay naturally. */
-    void process (float* l, float* r, int n, float timeMs, float feedback, float mix, float inputGain) noexcept
+        effect is switched off so existing repeats decay naturally.
+        tape = true: wow and flutter on the playback head, and each pass through the "tape" is
+        band-limited and saturated, so repeats get darker, thicker and smear slightly. */
+    void process (float* l, float* r, int n, float timeMs, float feedback, float mix, float inputGain, bool tape = false) noexcept
     {
         timeSmooth.setTarget (timeMs);
         feedback = clampv (feedback, 0.0f, 0.95f);
+        const double wowInc = 0.45 / sampleRate, flutterInc = 6.3 / sampleRate;
         for (int i = 0; i < n; ++i)
         {
-            const float d = std::max (1.0f, timeSmooth.next() * 0.001f * (float) sampleRate);
+            float d = std::max (1.0f, timeSmooth.next() * 0.001f * (float) sampleRate);
+            if (tape)
+            {
+                wowPhase += wowInc;
+                flutterPhase += flutterInc;
+                wowPhase -= std::floor (wowPhase);
+                flutterPhase -= std::floor (flutterPhase);
+                const float wow = (float) std::sin (kTwoPi * wowPhase), flutter = (float) std::sin (kTwoPi * flutterPhase);
+                d = std::max (1.0f, d * (1.0f + 0.0022f * wow + 0.0006f * flutter) + 0.0004f * (float) sampleRate * wow);
+            }
             const float wl = lines[0].read (d);
             const float wr = lines[1].read (d);
             // Feedback path is filtered (darker repeats) and soft-limited so it never runs away.
             const float fbL = tanhRational (hp[0].process (lp[0].process (wl)) * feedback);
             const float fbR = tanhRational (hp[1].process (lp[1].process (wr)) * feedback);
-            lines[0].push (l[i] * inputGain + fbL);
-            lines[1].push (r[i] * inputGain + fbR);
+            float inL = l[i] * inputGain + fbL, inR = r[i] * inputGain + fbR;
+            if (tape) // record head: band-limited, gently saturated
+            {
+                inL = 0.8f * tanhRational (1.25f * tapeLp[0].process (tapeHp[0].process (inL)));
+                inR = 0.8f * tanhRational (1.25f * tapeLp[1].process (tapeHp[1].process (inR)));
+            }
+            lines[0].push (inL);
+            lines[1].push (inR);
             l[i] += wl * mix;
             r[i] += wr * mix;
         }
@@ -188,9 +215,10 @@ public:
 private:
     double sampleRate = 48000.0;
     DelayLine lines[2];
-    Biquad lp[2];
-    OnePole hp[2];
+    Biquad lp[2], tapeLp[2];
+    OnePole hp[2], tapeHp[2];
     LinearSmoother timeSmooth;
+    double wowPhase = 0.0, flutterPhase = 0.0;
     float lastTone = -1.0f;
 };
 

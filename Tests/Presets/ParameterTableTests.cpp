@@ -10,7 +10,7 @@ TEST_CASE ("Parameter table rows line up with the ParamIndex enum")
     const std::pair<int, const char*> expected[] = {
         { pInTrim, "in.trim" }, { pBypass, "engine.bypass" },
         { pGateOn, "gate.enabled" }, { pGateThreshold, "gate.threshold" }, { pGateRelease, "gate.release" },
-        { pDriveOn, "drive.enabled" }, { pDriveDrive, "drive.drive" }, { pDriveTone, "drive.tone" }, { pDriveLevel, "drive.level" },
+        { pDriveOn, "drive.enabled" }, { pDriveDrive, "drive.drive" }, { pDriveTone, "drive.tone" }, { pDriveLevel, "drive.level" }, { pDriveType, "drive.type" },
         { pAmpModel, "amp.model" }, { pAmpGain, "amp.gain" }, { pAmpBass, "amp.bass" }, { pAmpMid, "amp.mid" },
         { pAmpTreble, "amp.treble" }, { pAmpPresence, "amp.presence" }, { pAmpDepth, "amp.depth" }, { pAmpMaster, "amp.master" },
         { pAmpBright, "amp.bright" }, { pAmpPull, "amp.pull" }, { pAmpPreampValve, "amp.preampValve" },
@@ -19,13 +19,14 @@ TEST_CASE ("Parameter table rows line up with the ParamIndex enum")
         { pEq750, "eq.b750" }, { pEq2200, "eq.b2200" }, { pEq6600, "eq.b6600" },
         { pCabOn, "cab.enabled" }, { pCabDual, "cab.dual" }, { pCabALevel, "cab.a.level" }, { pCabAPan, "cab.a.pan" },
         { pCabBLevel, "cab.b.level" }, { pCabBPan, "cab.b.pan" },
+        { pSmoothOn, "smooth.enabled" }, { pSmoothAmount, "smooth.amount" },
         { pPitchOn, "pitch.enabled" }, { pPitchMix, "pitch.mix" },
         { pChorusOn, "chorus.enabled" }, { pChorusMode, "chorus.mode" }, { pChorusRate, "chorus.rate" },
         { pChorusDepth, "chorus.depth" }, { pChorusMix, "chorus.mix" },
         { pDelayOn, "delay.enabled" }, { pDelayTime, "delay.time" }, { pDelaySync, "delay.sync" },
         { pDelayDivision, "delay.division" }, { pDelayFeedback, "delay.feedback" }, { pDelayMix, "delay.mix" },
-        { pDelayTone, "delay.tone" },
-        { pReverbOn, "reverb.enabled" }, { pReverbMix, "reverb.mix" }, { pReverbDecay, "reverb.decay" }, { pReverbTone, "reverb.tone" },
+        { pDelayTone, "delay.tone" }, { pDelayType, "delay.type" },
+        { pReverbOn, "reverb.enabled" }, { pReverbMix, "reverb.mix" }, { pReverbDecay, "reverb.decay" }, { pReverbTone, "reverb.tone" }, { pReverbType, "reverb.type" },
         { pOutLevel, "out.level" }, { pTempo, "global.tempo" },
     };
     CHECK ((int) std::size (expected) == kNumParams);
