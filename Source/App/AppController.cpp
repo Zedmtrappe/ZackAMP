@@ -111,8 +111,36 @@ void AppController::openAudioDevice()
         hadDevice = true;
         lastDeviceName = dev->getName();
     }
+    ensureInputChannelsActive();
     if (saved != nullptr && ! hasInputDevice())
         postMessage ("No guitar input is active. Open Audio Settings to choose your interface input.", true);
+}
+
+bool AppController::ensureInputChannelsActive()
+{
+    // Choosing an input device must actually switch its inputs on. The first launch opens
+    // outputs only (so a built-in microphone is never opened by surprise), which means a
+    // device chosen afterwards would otherwise start with zero active input channels.
+    juce::AudioDeviceManager::AudioDeviceSetup setup;
+    deviceManager.getAudioDeviceSetup (setup);
+    auto* dev = deviceManager.getCurrentAudioDevice();
+    if (dev == nullptr || setup.inputDeviceName.isEmpty() || ! setup.inputChannels.isZero())
+        return false;
+    const int available = dev->getInputChannelNames().size();
+    if (available <= 0 || autoEnabledInputDevice == setup.inputDeviceName)
+        return false; // nothing to enable, or already tried for this device (no loops)
+    autoEnabledInputDevice = setup.inputDeviceName;
+    setup.useDefaultInputChannels = false;
+    setup.inputChannels.clear();
+    setup.inputChannels.setRange (0, std::min (2, available), true);
+    const auto error = deviceManager.setAudioDeviceSetup (setup, true);
+    if (error.isNotEmpty())
+    {
+        postMessage ("Could not enable the inputs of " + setup.inputDeviceName + ": " + error, true);
+        return false;
+    }
+    postMessage ("Enabled the inputs of " + setup.inputDeviceName + ". If your guitar is on another input, choose it in Audio Settings.");
+    return true;
 }
 
 void AppController::enableMidiInputs()
@@ -132,6 +160,8 @@ void AppController::handleIncomingMidiMessage (juce::MidiInput*, const juce::Mid
 
 void AppController::changeListenerCallback (juce::ChangeBroadcaster*)
 {
+    if (ensureInputChannelsActive())
+        return; // the device restarts; another change message follows
     if (auto* dev = deviceManager.getCurrentAudioDevice())
     {
         if (! hadDevice || dev->getName() != lastDeviceName)

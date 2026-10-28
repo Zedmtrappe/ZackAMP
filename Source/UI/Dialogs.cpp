@@ -557,7 +557,7 @@ void MidiSettings::paint (juce::Graphics& g) { g.fillAll (Colours::background); 
 
 //==============================================================================
 AudioSettings::AudioSettings (AppController& a)
-    : app (a), selector (a.deviceManager, 0, 2, 1, 2, true, false, false, false)
+    : app (a), selector (a.deviceManager, 1, 2, 1, 2, true, false, false, false)
 {
     guitarInput.onChange = [this] { app.setGuitarInputChannel (guitarInput.getSelectedId() - 1); };
     guitarInput.setTooltip ("Which active input channel carries your guitar.");

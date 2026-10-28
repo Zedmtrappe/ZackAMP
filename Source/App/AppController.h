@@ -106,6 +106,7 @@ private:
     void handleIncomingMidiMessage (juce::MidiInput*, const juce::MidiMessage&) override;
 
     void openAudioDevice();
+    bool ensureInputChannelsActive();
     void enableMidiInputs();
     void saveSession();
     void restoreSession();
@@ -126,7 +127,7 @@ private:
     std::map<int, float> gestureStart;
     int pcOffset = 0;
     bool hadDevice = false;
-    juce::String lastDeviceName;
+    juce::String lastDeviceName, autoEnabledInputDevice;
     int reconnectCountdown = 0;
     std::unique_ptr<juce::MidiDeviceListConnection> midiListConnection;
 
