@@ -202,10 +202,6 @@ void AmpPanel::paint (juce::Graphics& g)
     // Engraved model name, description and pilot lamp
     auto title = titleArea.toFloat();
     g.setColour (style.plateText);
-    g.setFont (ForgeLookAndFeel::labelFont (13.0f));
-    const float knobCentreX = (float) (model.getX() + model.getKnobBounds().getCentreX());
-    g.drawText ("MODEL", juce::Rectangle<float> (120.0f, title.getHeight()).withCentre ({ knobCentreX, title.getCentreY() + 4.0f }),
-                juce::Justification::centred);
     const bool live = ! app.params().getBool (pBypass);
     drawLed (g, juce::Rectangle<float> (14, 14).withCentre ({ title.getRight() - 8.0f, title.getCentreY() }), juce::Colour (0xffff3b2f), live);
 }
