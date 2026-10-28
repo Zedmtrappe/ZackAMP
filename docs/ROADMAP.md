@@ -37,6 +37,21 @@
      and sag together; level-compensate so it is not just a volume control).
    New parameter IDs (`power.sag`, `power.variac`), added to presets with defaults that reproduce
    today's sound.
+4. **Valve selectors (drop-downs in the amp section):**
+   * **Preamp valve:** e.g. 12AX7 / ECC83 (high gain), 5751 (~30 % less gain), 12AY7 (vintage,
+     lower gain, earlier "soft" compression), 12AT7 (low gain, more headroom).
+   * **Power valve:** e.g. 6L6 (big clean headroom, tight lows), EL34 (mid-forward, earlier
+     breakup), 6V6 (small-amp sweetness, early breakup), EL84 (chimey, compressed), KT88/6550
+     (huge headroom, very tight).
+   * **Changing the amp model resets both to that model's usual valves** (Lacquer Clean 12AX7/6L6,
+     Lacquer Tweed 12AY7/6V6, Albion Plexi and Albion Lead 12AX7/EL34, Cascade Lead and Cascade Heavy
+     12AX7/6L6); after that the user can swap freely. Stored in presets (`amp.preampValve`,
+     `amp.powerValve`).
+   * Engine: a preamp valve sets the stages' gain (mu-like `swing` scaling), headroom and transfer
+     asymmetry; a power valve sets the output stage's knee hardness, headroom, asymmetry, sag
+     interaction and a gentle frequency tilt. Output level is compensated so a swap changes
+     character, not just loudness. Implemented as parameter overrides of `TriodeSpec` /
+     `PowerAmpSpec`, so it combines with Sag/Variac (item 3).
 
 ## AU and VST3 plugins
 
