@@ -10,7 +10,7 @@ AmpPanel::AmpPanel (AppController& a)
       model (a, pAmpModel, "Model"), gain (a, pAmpGain), bass (a, pAmpBass), mid (a, pAmpMid), treble (a, pAmpTreble),
       presence (a, pAmpPresence), depth (a, pAmpDepth, "Resonance"), master (a, pAmpMaster),
       sag (a, pPowerSag), variac (a, pPowerVariac),
-      pull (a, pAmpPull, "PULL"), bright (a, pAmpBright, "BRIGHT"),
+      pull (a, pAmpPull, "PULL SAT"), bright (a, pAmpBright, "BRIGHT"),
       preampValve (a, pAmpPreampValve), powerValve (a, pAmpPowerValve)
 {
     for (auto* c : std::initializer_list<juce::Component*> { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master,
@@ -97,7 +97,7 @@ void AmpPanel::resized()
     powerArea = sagCol.getUnion (variacCol).expanded (10, 0).withTop (titleArea.getBottom() + 2).withBottom (strip.getBottom());
 
     auto under = [&] (int from, int to) { return strip.withX (cols[(size_t) from].getX()).withRight (cols[(size_t) to].getRight()); };
-    pull.setBounds (under (0, 0).withSizeKeepingCentre (std::min (w, 84), 24));
+    pull.setBounds (under (0, 0).withSizeKeepingCentre (std::min (w + 12, 112), 24));
     bright.setBounds (under (3, 3).withSizeKeepingCentre (std::min (w, 96), 24));
     auto pre = under (4, 6).reduced (4, 2);
     preampLabel = pre.removeFromLeft (70);
