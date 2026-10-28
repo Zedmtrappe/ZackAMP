@@ -128,6 +128,11 @@ if(AMPFORGE_BUILD_APP)
         ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Resources/Images/AppIcon.png")
     file(GLOB_RECURSE AF_APP_SOURCES CONFIGURE_DEPENDS Source/App/*.cpp Source/UI/*.cpp)
     target_sources(ZackAMP PRIVATE ${AF_APP_SOURCES})
+    if(APPLE)
+        # Objective-C++: audio-input ("Microphone") permission status via AVFoundation.
+        target_sources(ZackAMP PRIVATE Source/App/MicPermission.mm)
+        target_link_libraries(ZackAMP PRIVATE "-framework AVFoundation")
+    endif()
     ampforge_add_core(ZackAMP)
     target_link_libraries(ZackAMP PRIVATE
         juce::juce_gui_basics juce::juce_gui_extra juce::juce_audio_devices juce::juce_audio_utils)

@@ -80,6 +80,8 @@ public:
 
     // ---- audio / MIDI settings ----
     void setOversampling (OversamplingMode m);
+    /** Closes and reopens the current audio device (e.g. after input permission was granted). */
+    void restartAudio();
     OversamplingMode getOversampling() const noexcept { return engine.getOversamplingMode(); }
     void setGuitarInputChannel (int indexAmongActive);
     int getGuitarInputChannel() const noexcept { return audioHost.getInputChannel(); }

@@ -516,6 +516,16 @@ void AppController::setOversampling (OversamplingMode m)
     }
 }
 
+void AppController::restartAudio()
+{
+    if (deviceManager.getCurrentAudioDevice() != nullptr)
+    {
+        deviceManager.closeAudioDevice();
+        deviceManager.restartLastAudioDevice();
+        postMessage ("Audio input access granted - audio restarted.");
+    }
+}
+
 void AppController::setGuitarInputChannel (int index)
 {
     audioHost.setInputChannel (index);

@@ -1,4 +1,5 @@
 #include "Dialogs.h"
+#include "../App/MicPermission.h"
 
 namespace af::ui
 {
@@ -574,7 +575,8 @@ AudioSettings::AudioSettings (AppController& a)
     guidance.setText ("Tips: choose your audio interface, enable the input your guitar is plugged into (an instrument / Hi-Z input), "
                       "and use 64 or 128 samples for responsive playing. Total latency = converter + driver + buffers; "
                       "ZackAMP itself adds no buffering. Set the interface gain so hard picking peaks around -12 dBFS on the IN meter. "
-                      "Avoid built-in microphone + speakers: loud feedback is likely.",
+                      "Avoid built-in microphone + speakers: loud feedback is likely. "
+                      "macOS calls every audio input \"Microphone\": ZackAMP needs that permission to hear your interface.",
                       juce::dontSendNotification);
     addAndMakeVisible (selector);
     addAndMakeVisible (guitarInput);
@@ -582,7 +584,7 @@ AudioSettings::AudioSettings (AppController& a)
     addAndMakeVisible (guidance);
     app.deviceManager.addChangeListener (this);
     refreshInputs();
-    setSize (620, 640);
+    setSize (620, 670);
 }
 
 AudioSettings::~AudioSettings() { app.deviceManager.removeChangeListener (this); }
@@ -604,7 +606,7 @@ void AudioSettings::refreshInputs()
 void AudioSettings::resized()
 {
     auto r = getLocalBounds().reduced (12);
-    guidance.setBounds (r.removeFromBottom (86));
+    guidance.setBounds (r.removeFromBottom (112));
     r.removeFromBottom (6);
     oversampling.setBounds (r.removeFromBottom (30));
     r.removeFromBottom (6);
@@ -626,7 +628,7 @@ Onboarding::Onboarding (AppController& a) : app (a)
 
 void Onboarding::resized()
 {
-    card = getLocalBounds().withSizeKeepingCentre (std::min (620, getWidth() - 40), std::min (440, getHeight() - 40));
+    card = getLocalBounds().withSizeKeepingCentre (std::min (620, getWidth() - 40), std::min (500, getHeight() - 40));
     auto buttons = card.reduced (24).removeFromBottom (36);
     done.setBounds (buttons.removeFromRight (150));
     buttons.removeFromRight (10);
@@ -644,7 +646,8 @@ void Onboarding::paint (juce::Graphics& g)
     r.removeFromTop (8);
     const char* steps[] = {
         "1.  Plug your guitar into an instrument (Hi-Z) input on your audio interface.",
-        "2.  Open Audio Settings: choose the interface, tick the guitar input, and pick a 64 or 128 sample buffer.",
+        "2.  Open Audio Settings: choose the interface, tick the guitar input, and pick a 64 or 128 sample buffer. "
+        "macOS will then ask for \"Microphone\" access - that means your interface input: click Allow.",
         "3.  Set the interface gain so strong picking peaks around -12 dBFS on the IN meter (bottom left).",
         "4.  Start quietly: lower your monitors, then raise them while playing. Use headphones or the interface outputs.",
         "5.  Choose a preset at the top, or pick an amp, cabinet and effects. Right-click any knob for MIDI Learn.",
@@ -653,9 +656,16 @@ void Onboarding::paint (juce::Graphics& g)
     for (auto* s : steps)
     {
         g.setColour (Colours::text);
-        g.drawFittedText (s, r.removeFromTop (44), juce::Justification::centredLeft, 2);
+        const int height = std::strlen (s) > 110 ? 64 : 44; // long steps wrap to three lines
+        g.drawFittedText (s, r.removeFromTop (height), juce::Justification::centredLeft, 3);
     }
-    if (! app.hasInputDevice())
+    if (getMicPermission() == MicPermission::denied)
+    {
+        g.setColour (Colours::warn);
+        g.drawFittedText ("macOS is blocking audio input: allow ZackAMP under System Settings > Privacy & Security > Microphone.",
+                          r.removeFromTop (30), juce::Justification::centredLeft, 2);
+    }
+    else if (! app.hasInputDevice())
     {
         g.setColour (Colours::warn);
         g.drawFittedText ("No guitar input is active yet - open Audio Settings to choose one.", r.removeFromTop (30), juce::Justification::centredLeft, 2);

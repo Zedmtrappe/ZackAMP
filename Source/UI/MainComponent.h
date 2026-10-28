@@ -6,6 +6,18 @@
 
 namespace af::ui
 {
+/** Shown while macOS denies audio-input ("Microphone") access: the guitar input is silent. */
+class PermissionBanner final : public juce::Component
+{
+public:
+    PermissionBanner();
+    void paint (juce::Graphics&) override;
+    void resized() override;
+
+private:
+    juce::TextButton openSettings { "Open System Settings" };
+};
+
 class MainComponent final : public juce::Component, public juce::MenuBarModel, private juce::Timer, private juce::ChangeListener
 {
 public:
@@ -46,6 +58,9 @@ private:
     juce::Component content;
     juce::Viewport viewport;
     std::unique_ptr<Onboarding> onboarding;
+    PermissionBanner permissionBanner;
+    bool micDenied = false;
+    int permissionPollCountdown = 0;
     std::unique_ptr<juce::FileChooser> chooser;
     juce::TooltipWindow tooltips { this, 600 };
     std::vector<Refreshable*> refreshables;

@@ -1,4 +1,5 @@
 #include "MainComponent.h"
+#include "../App/MicPermission.h"
 #include "../Platform/FileUtils.h"
 
 namespace af::ui
@@ -16,6 +17,29 @@ namespace
     constexpr int kMinContentHeight = 700;
 } // namespace
 
+PermissionBanner::PermissionBanner()
+{
+    openSettings.onClick = [] { openMicPrivacySettings(); };
+    addAndMakeVisible (openSettings);
+}
+
+void PermissionBanner::resized()
+{
+    openSettings.setBounds (getLocalBounds().reduced (10, 7).removeFromRight (190));
+}
+
+void PermissionBanner::paint (juce::Graphics& g)
+{
+    g.fillAll (Colours::warn.withAlpha (0.18f));
+    g.setColour (Colours::warn);
+    g.fillRect (getLocalBounds().removeFromLeft (4));
+    g.setFont (ForgeLookAndFeel::labelFont (13.0f));
+    auto r = getLocalBounds().reduced (14, 0).withTrimmedRight (210);
+    g.drawFittedText ("ZackAMP can't hear your guitar: macOS is blocking audio input. macOS calls every audio input "
+                      "\"Microphone\", including your interface. Allow ZackAMP under Privacy & Security > Microphone.",
+                      r, juce::Justification::centredLeft, 2);
+}
+
 MainComponent::MainComponent (AppController& a) : app (a)
 {
     setLookAndFeel (&lnf);
@@ -29,6 +53,7 @@ MainComponent::MainComponent (AppController& a) : app (a)
     addAndMakeVisible (topBar);
     addAndMakeVisible (viewport);
     addAndMakeVisible (statusBar);
+    addChildComponent (permissionBanner);
     refreshables = { &topBar, &ampPanel, &eqPanel, &cabPanel, &fxPanel, &statusBar };
 
     topBar.onPresetBrowser = [this] { openPresetBrowser(); };
@@ -76,6 +101,8 @@ void MainComponent::resized()
     auto r = getLocalBounds();
     topBar.setBounds (r.removeFromTop (56));
     statusBar.setBounds (r.removeFromBottom (30));
+    if (permissionBanner.isVisible())
+        permissionBanner.setBounds (r.removeFromTop (46));
     viewport.setBounds (r);
 
     // Content scrolls vertically only when the window is shorter than the minimum layout.
@@ -99,6 +126,24 @@ void MainComponent::timerCallback()
 {
     for (auto* r : refreshables)
         r->refresh();
+
+    // Poll the macOS audio-input permission about twice a second (cheap system call).
+    if (--permissionPollCountdown <= 0)
+    {
+        permissionPollCountdown = 15;
+        const bool denied = getMicPermission() == MicPermission::denied;
+        if (denied != micDenied)
+        {
+            const bool justGranted = micDenied && ! denied;
+            micDenied = denied;
+            permissionBanner.setVisible (denied);
+            if (onboarding != nullptr)
+                onboarding->toFront (false); // the setup guide stays on top of the banner
+            resized();
+            if (justGranted)
+                app.restartAudio(); // reopen the input now that macOS delivers real samples
+        }
+    }
 }
 
 void MainComponent::changeListenerCallback (juce::ChangeBroadcaster*)
