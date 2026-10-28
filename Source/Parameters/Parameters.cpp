@@ -9,7 +9,7 @@ namespace af
 {
 namespace
 {
-    const char* const kAmpModels[] = { "Lacquer Clean", "Lacquer Tweed", "Albion Plexi",
+    const char* const kAmpModels[] = { "Lacquer Clean", "Lacquer Tweed", "Plexi",
                                        "Albion Lead", "Cascade Lead", "Cascade Heavy" };
     const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };

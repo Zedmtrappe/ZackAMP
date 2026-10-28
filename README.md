@@ -1,4 +1,4 @@
-# ZackAMP
+# Z.AMP
 
 A standalone guitar amplifier application for macOS, built around a shared, framework-independent
 real-time engine that is designed to become AU and VST3 plugins later.
@@ -19,7 +19,7 @@ studio-quality effects, presets and live MIDI control.
 
 | Area | What is implemented |
 |---|---|
-| **Amp models** | 6 original models in 3 families: *Lacquer Clean*, *Lacquer Tweed* (American); *Albion Plexi*, *Albion Lead* (British); *Cascade Lead*, *Cascade Heavy* (modern high gain). Each has its own preamp topology (triode stages with grid-conduction bias shift, cathode-bypass shelving, coupling/Miller filtering, cathode followers), a passive TMB tone stack at its model-specific position, and a power amp with phase-inverter saturation, supply sag, presence/depth NFB shaping, output-transformer band limits and speaker-load interaction. One fixed row of controls for every model: a detented MODEL knob, Gain (with PULL for extra saturation), Bass, Middle, Treble, Presence, Resonance, Master and Bright, plus a POWER section with Sag and Variac, and preamp (V1) and power valve selectors that reset to each model's usual valves when the model changes. |
+| **Amp models** | 6 original models in 3 families: *Lacquer Clean*, *Lacquer Tweed* (American); *Plexi*, *Albion Lead* (British); *Cascade Lead*, *Cascade Heavy* (modern high gain). Each has its own preamp topology (triode stages with grid-conduction bias shift, cathode-bypass shelving, coupling/Miller filtering, cathode followers), a passive TMB tone stack at its model-specific position, and a power amp with phase-inverter saturation, supply sag, presence/depth NFB shaping, output-transformer band limits and speaker-load interaction. One fixed row of controls for every model: a detented MODEL knob, Gain (with PULL for extra saturation), Bass, Middle, Treble, Presence, Resonance, Master and Bright, plus a POWER section with Sag and Variac, and preamp (V1) and power valve selectors that reset to each model's usual valves when the model changes. |
 | **Oversampling** | Low-latency polyphase IIR half-band oversampling around all nonlinear stages. Automatic: 8x at 44.1/48 kHz, 4x at 88.2/96 kHz, 2x above; selectable 2x/4x/8x. |
 | **Graphic EQ** | 80 / 240 / 750 / 2200 / 6600 Hz, ±12 dB, band-interaction-corrected so the response hits the slider values; positioned between preamp and power amp (default, classic position) or post-amp. The curve shown is computed from the actual filter coefficients. Factory curves, flat reset. |
 | **Cabinet** | Zero-latency partitioned convolution (direct 64-tap head + FFT tail). 12 original factory cabinet IRs + a flat utility IR. Dual-cab mode with level/pan. Click-free crossfaded IR switching, IR auditioning, cab bypass. |
@@ -43,11 +43,11 @@ Every change pushed to `main` is built automatically by GitHub (universal app, t
 and published as the **latest** release.
 
 1. Open https://github.com/Zedmtrappe/ZackAMP/releases (signed in to GitHub) and download
-   **ZackAMP-macOS.zip** from "ZackAMP - latest build".
-2. Unzip it (double-click). You get a `ZackAMP` folder with the app, an installer script and
+   **Z.AMP-macOS.zip** from "Z.AMP - latest build".
+2. Unzip it (double-click). You get a `Z.AMP` folder with the app, an installer script and
    `READ ME FIRST.txt`.
-3. Open **Terminal**, type `bash ` (with a space), drag **Install ZackAMP.command** into the
-   window and press Return. It quits a running ZackAMP, replaces `/Applications/ZackAMP.app`,
+3. Open **Terminal**, type `bash ` (with a space), drag **Install Z.AMP.command** into the
+   window and press Return. It quits a running Z.AMP, replaces `/Applications/Z.AMP.app`,
    removes macOS's "downloaded from the internet" block and starts the new version.
 
 Updating is the same three steps. Presets, imported IRs, MIDI mappings and audio settings live in
@@ -59,19 +59,19 @@ you approve it under *System Settings → Privacy & Security → Open Anyway*.
 
 **Microphone permission:** macOS treats any audio input (including an interface) as "microphone".
 Approve the prompt; because each unsigned build looks new to macOS it may ask again after an
-update. If you declined, enable ZackAMP under *System Settings → Privacy & Security → Microphone*.
+update. If you declined, enable Z.AMP under *System Settings → Privacy & Security → Microphone*.
 
 ## Building on macOS yourself (optional)
 
 ```bash
 git clone https://github.com/Zedmtrappe/ZackAMP.git
-cd ZackAMP
+cd Z.AMP
 Scripts/build_macos.sh            # fetches JUCE, builds a universal Release app, runs the tests
-open "build/macos/ZackAMP_artefacts/Release/ZackAMP.app"
+open "build/macos/ZackAMP_artefacts/Release/Z.AMP.app"
 ```
 
 Faster Apple-Silicon-only build: `ARCHS=arm64 Scripts/build_macos.sh`.
-Xcode project: `cmake --preset xcode && open build/xcode/ZackAMP.xcodeproj`.
+Xcode project: `cmake --preset xcode && open build/xcode/Z.AMP.xcodeproj`.
 
 **macOS build status:** builds and passes all automated tests on GitHub's macOS runners
 (Intel `macos-15-intel`, cross-compiled universal arm64 + x86_64) and launches/quits cleanly there.
@@ -110,9 +110,9 @@ listening checklist.
 4. Start with monitors low. Presets are levelled to similar loudness, peaking around -4 to -10 dBFS.
 5. **Bypass** passes your dry signal, useful for checking routing and latency.
 
-On first launch ZackAMP only opens audio outputs: inputs stay off until you choose the
+On first launch Z.AMP only opens audio outputs: inputs stay off until you choose the
 interface, so a laptop's built-in microphone and speakers can never start howling at you.
-If the saved interface is missing, ZackAMP waits for it (and reconnects automatically) rather than
+If the saved interface is missing, Z.AMP waits for it (and reconnects automatically) rather than
 switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LATENCY.md).
 
 ## Impulse responses
@@ -120,11 +120,11 @@ switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LAT
 * Click the IR name in the cabinet panel to open the browser. Clicking an IR loads it
   immediately so you can audition while playing; **Revert** goes back, **Keep** keeps it.
 * **Import IR…** or drag WAV/AIFF files onto the cabinet panel. Choose:
-  * **Copy** (recommended): the file is copied into ZackAMP's library, so presets keep working
+  * **Copy** (recommended): the file is copied into Z.AMP's library, so presets keep working
     if you move or delete the original.
-  * **Reference**: ZackAMP remembers where the file is. If you move it, the entry shows as
+  * **Reference**: Z.AMP remembers where the file is. If you move it, the entry shows as
     *missing* and presets that use it fall back to the amp's default cabinet with a warning.
-* Removing an IR from the library never deletes your original file (only ZackAMP's own copy).
+* Removing an IR from the library never deletes your original file (only Z.AMP's own copy).
 * Limits and formats: [docs/IR_FORMATS.md](docs/IR_FORMATS.md).
 * **Dual Cab**: enable it to blend cabinets A and B with independent level and pan.
 * **CABINET off** bypasses the cab simulation for a real cabinet / external cab sim.
@@ -182,6 +182,6 @@ switching to another device. Latency: see [docs/AUDIO_LATENCY.md](docs/AUDIO_LAT
 [Roadmap](docs/ROADMAP.md) · [Third-party notices](docs/THIRD_PARTY_NOTICES.md) · [Licences](LICENSES.md) ·
 [Changelog](CHANGELOG.md)
 
-ZackAMP's amplifier models are original designs that take inspiration from the general design
+Z.AMP's amplifier models are original designs that take inspiration from the general design
 principles of classic American, British and modern high-gain amplifiers. They are not affiliated
 with, endorsed by, or claimed to reproduce any manufacturer's products.

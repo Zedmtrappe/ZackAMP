@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds ZackAMP on macOS (universal arm64 + x86_64 by default) and runs the tests.
+# Builds Z.AMP on macOS (universal arm64 + x86_64 by default) and runs the tests.
 #   Scripts/build_macos.sh            Release build + tests
 #   Scripts/build_macos.sh --no-tests skip tests
 #   ARCHS="arm64" Scripts/build_macos.sh   Apple Silicon only (faster build)
@@ -25,7 +25,7 @@ if [ "${1:-}" != "--no-tests" ]; then
   (cd build/macos && ctest --output-on-failure)
 fi
 
-APP="build/macos/ZackAMP_artefacts/Release/ZackAMP.app"
+APP="build/macos/ZackAMP_artefacts/Release/Z.AMP.app"
 echo
 echo "Built: $APP"
 echo "Run:   open \"$APP\""

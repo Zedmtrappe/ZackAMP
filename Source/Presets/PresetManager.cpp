@@ -61,7 +61,7 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
     }
     if (root["format"].toString() != kFormatTag)
     {
-        error = "This file is not an ZackAMP preset.";
+        error = "This file is not a Z.AMP preset.";
         return false;
     }
     const int version = (int) root["schemaVersion"];
@@ -71,7 +71,7 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
         return false;
     }
     if (version > kSchemaVersion)
-        warnings.add ("This preset was made by a newer version of ZackAMP; some settings may not load.");
+        warnings.add ("This preset was made by a newer version of Z.AMP; some settings may not load.");
 
     PresetState s; // defaults for anything missing
     s.name = root["name"].toString().trim();

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Dialogs.h"
-#include "Panels.h"
+#include "AmpHead.h"
 
 namespace af::ui
 {
@@ -46,11 +46,16 @@ private:
     void timerCallback() override;
     void changeListenerCallback (juce::ChangeBroadcaster*) override;
     juce::PopupMenu buildMenu (int index);
+    void toggleSection (SectionHeader& header, const char* settingsKey);
+    void applySectionVisibility();
+    int idealHeight() const;
 
     AppController& app;
     ForgeLookAndFeel lnf;
     TopBar topBar { app };
-    AmpPanel ampPanel { app };
+    AmpHead ampHead { app };
+    SectionHeader eqCabHeader { "EQ & Cabinet", "Graphic EQ, speaker cabinet / IRs" };
+    SectionHeader fxHeader { "Effects", "Gate, drive, pitch, chorus, delay, reverb" };
     EQPanel eqPanel { app };
     CabinetPanel cabPanel { app };
     EffectsPanel fxPanel { app };

@@ -33,19 +33,6 @@ private:
 };
 
 //==============================================================================
-class EQResponse final : public juce::Component
-{
-public:
-    explicit EQResponse (AppController& a) : app (a) {}
-    void paint (juce::Graphics&) override;
-    void update();
-
-private:
-    AppController& app;
-    std::array<float, 5> last { 99, 99, 99, 99, 99 };
-    bool lastOn = false;
-};
-
 class EQPanel final : public juce::Component, public Refreshable
 {
 public:
@@ -60,7 +47,27 @@ private:
     ParamChoice position;
     juce::TextButton flat { "Flat" }, curves { "Curves" };
     juce::OwnedArray<ParamFader> faders;
-    EQResponse response;
+};
+
+//==============================================================================
+/** Clickable bar with an arrow that shows/hides a section of the window. */
+class SectionHeader final : public juce::Component
+{
+public:
+    SectionHeader (const juce::String& title, const juce::String& hint);
+    void setOpen (bool shouldBeOpen);
+    bool isOpen() const noexcept { return open; }
+    std::function<void()> onToggle;
+
+    void paint (juce::Graphics&) override;
+    void mouseUp (const juce::MouseEvent&) override;
+    void mouseEnter (const juce::MouseEvent&) override { repaint(); }
+    void mouseExit (const juce::MouseEvent&) override { repaint(); }
+    bool keyPressed (const juce::KeyPress&) override;
+
+private:
+    juce::String title, hint;
+    bool open = false;
 };
 
 //==============================================================================

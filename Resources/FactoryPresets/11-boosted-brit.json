@@ -4,7 +4,7 @@
   "name": "Boosted Brit",
   "category": "British Crunch",
   "description": "Overdrive used as a boost into a Plexi-style amp for an 80s edge.",
-  "author": "ZackAMP Factory",
+  "author": "Z.AMP Factory",
   "parameters": {
     "amp.model": 2,
     "amp.gain": 0.7,

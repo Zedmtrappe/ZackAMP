@@ -14,6 +14,11 @@
   Changing the model resets them to that model's usual valves; the default valves reproduce the
   calibrated sound exactly. Older presets load with the model's usual valves.
 
+### Changed
+- The app is now called **Z.AMP** (download `Z.AMP-macOS.zip`, installer `Install Z.AMP.command`).
+  Presets, IRs and settings stay where they were (`~/Library/Application Support/ZackAMP`).
+- "Albion Plexi" is now called "Plexi"; every model uses the black faceplate.
+
 ### Fixed
 - Audio from the interface now actually reaches the amp (the audio callback was not registered).
 - macOS audio-input ("Microphone") permission is explained before the prompt; a banner with an

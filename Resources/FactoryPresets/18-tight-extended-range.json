@@ -4,7 +4,7 @@
   "name": "Tight Extended Range",
   "category": "Modern Metal",
   "description": "Very tight low end for drop tunings; graphic EQ trims the boom.",
-  "author": "ZackAMP Factory",
+  "author": "Z.AMP Factory",
   "parameters": {
     "amp.model": 5,
     "amp.gain": 0.55,

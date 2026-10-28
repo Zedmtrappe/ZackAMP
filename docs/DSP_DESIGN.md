@@ -112,7 +112,7 @@ factory presets keep them at neutral settings, so the calibrated sound is unchan
 |---|---|---|---|
 | Lacquer Clean | American | V1 → TMB (250k/250k/10k/100k, 250p/100n/47n) → Volume (+bright cap) → V2 | Big headroom, scooped; NFB power amp; Volume, Treble, Middle, Bass, Master, Bright |
 | Lacquer Tweed | American | V1 → Volume → V2 (slightly cold) → CF → TMB (250k/1M/25k/56k, 250p/20n/20n) | Early breakup, loose, warm; tube-rectifier sag; + Presence |
-| Albion Plexi | British | V1 (cathode shelf) → Volume (+bright) → V2 → CF → TMB (220k/1M/25k/33k, 470p/22n/22n) | Crunch grows with volume, upper-mid push; EL34-style softer knee; + Presence, Bright |
+| Plexi | British | V1 (cathode shelf) → Volume (+bright) → V2 → CF → TMB (220k/1M/25k/33k, 470p/22n/22n) | Crunch grows with volume, upper-mid push; EL34-style softer knee; + Presence, Bright |
 | Albion Lead | British | V1 (tight shelf) → Gain → cold V2 → divider → V3 → CF → TMB | Cascaded classic-rock gain, tight lows |
 | Cascade Lead | Modern | V1 → TMB (*before the gain*) → Drive → cold V2 → V3 → divider → V4 → [EQ] | Treble/bass shape what distorts (a hallmark of this design family); vocal mids; Presence, Depth |
 | Cascade Heavy | Modern | V1 (tight) → Gain → cold V2 → divider → V3 → divider → V4 → CF → TMB → [EQ] | Modern high gain with firm lows, deep resonance (Depth up to +9 dB) |
@@ -128,7 +128,7 @@ THD (%) at two input levels — *-24 dBFS ≈ single coil, -12 dBFS ≈ hot humb
 | Lacquer Clean | 0.0 | 0.0 | 0.1 | 0.4 | 7.3 | -24 dBFS |
 |  | 0.7 | 0.7 | 1.4 | 7.4 | 31 | -12 dBFS |
 | Lacquer Tweed | 0.4 | 1.0 | 3.0 | 9.2 | 24 | -24 |
-| Albion Plexi | 0.1 | 0.3 | 1.2 | 5.0 | 22 | -24 |
+| Plexi | 0.1 | 0.3 | 1.2 | 5.0 | 22 | -24 |
 |  | 0.8 | 2.6 | 9.1 | 22 | 36 | -12 |
 | Albion Lead | 0.4 | 2.5 | 11 | 23 | 33 | -24 |
 | Cascade Lead | 0.4 | 1.5 | 6.0 | 22 | 40 | -24 |

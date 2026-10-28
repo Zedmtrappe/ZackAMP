@@ -1,5 +1,4 @@
 #include "Panels.h"
-#include "../DSP/GraphicEQ/GraphicEQ.h"
 
 namespace af::ui
 {
@@ -50,7 +49,7 @@ void AmpPanel::refresh()
 
 void AmpPanel::resized()
 {
-    plateArea = getLocalBounds().reduced (10);
+    plateArea = getLocalBounds();
     auto r = plateArea.reduced (20, 12);
     titleArea = r.removeFromTop (30);
     auto strip = r.removeFromBottom (30);
@@ -85,15 +84,12 @@ void AmpPanel::resized()
 
 void AmpPanel::paint (juce::Graphics& g)
 {
-    drawPanel (g, getLocalBounds().toFloat());
     const int m = shownModel < 0 ? 0 : shownModel;
     const auto& v = getAmpVoicing (m);
     const auto style = getFamilyStyle ((int) v.family);
 
     // Faceplate (family-coloured)
     auto plate = plateArea.toFloat();
-    g.setColour (juce::Colours::black.withAlpha (0.5f));
-    g.fillRoundedRectangle (plate.translated (0, 3), 10.0f);
     juce::ColourGradient grad (style.plateTop, plate.getX(), plate.getY(), style.plateBottom, plate.getX(), plate.getBottom(), false);
     g.setGradientFill (grad);
     g.fillRoundedRectangle (plate, 10.0f);
@@ -135,87 +131,8 @@ void AmpPanel::paint (juce::Graphics& g)
 }
 
 //==============================================================================
-void EQResponse::update()
-{
-    std::array<float, 5> v {};
-    for (int i = 0; i < 5; ++i)
-        v[(size_t) i] = app.params().get (pEq80 + i);
-    const bool on = app.params().getBool (pEqOn);
-    if (v != last || on != lastOn)
-    {
-        last = v;
-        lastOn = on;
-        repaint();
-    }
-}
-
-void EQResponse::paint (juce::Graphics& g)
-{
-    auto r = getLocalBounds().toFloat();
-    g.setColour (juce::Colour (0xff111215));
-    g.fillRoundedRectangle (r, 6.0f);
-    const auto plot = r.reduced (8.0f, 6.0f);
-    auto xOf = [&] (double f) { return plot.getX() + plot.getWidth() * (float) (std::log (f / 20.0) / std::log (1000.0)); };
-    auto yOf = [&] (double db) { return plot.getCentreY() - plot.getHeight() * 0.5f * (float) (db / 15.0); };
-
-    g.setFont (ForgeLookAndFeel::labelFont (10.0f, false));
-    for (double f : { 50.0, 100.0, 200.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0 })
-    {
-        g.setColour (Colours::panelEdge.withAlpha (0.6f));
-        g.drawVerticalLine ((int) xOf (f), plot.getY(), plot.getBottom());
-        g.setColour (Colours::textDim.withAlpha (0.7f));
-        g.drawText (f >= 1000 ? juce::String ((int) (f / 1000)) + "k" : juce::String ((int) f), (int) xOf (f) + 2, (int) plot.getBottom() - 12, 30, 12, juce::Justification::left);
-    }
-    for (double db : { -12.0, -6.0, 0.0, 6.0, 12.0 })
-    {
-        g.setColour (Colours::panelEdge.withAlpha (db == 0.0 ? 1.0f : 0.5f));
-        g.drawHorizontalLine ((int) yOf (db), plot.getX(), plot.getRight());
-    }
-
-    // The curve is computed from the same designer the audio engine uses.
-    dsp::GraphicEQDesigner designer (48000.0);
-    std::array<dsp::BiquadCoeffs, 5> c;
-    designer.design (last, c);
-    juce::Path p;
-    for (int i = 0; i <= 200; ++i)
-    {
-        const double f = 20.0 * std::pow (1000.0, i / 200.0);
-        const float y = yOf (juce::jlimit (-15.0, 15.0, dsp::GraphicEQDesigner::responseDb (c, f, 48000.0)));
-        if (i == 0)
-            p.startNewSubPath (xOf (f), y);
-        else
-            p.lineTo (xOf (f), y);
-    }
-    const auto col = lastOn ? Colours::accent : Colours::textDim.withAlpha (0.5f);
-    juce::Path fill (p);
-    fill.lineTo (plot.getRight(), yOf (0));
-    fill.lineTo (plot.getX(), yOf (0));
-    fill.closeSubPath();
-    g.setColour (col.withAlpha (0.12f));
-    g.fillPath (fill);
-    g.setColour (col);
-    if (lastOn)
-        g.strokePath (p, juce::PathStrokeType (2.0f));
-    else
-    {
-        juce::Path dashed;
-        const float dashes[] = { 4.0f, 4.0f };
-        juce::PathStrokeType (1.5f).createDashedStroke (dashed, p, dashes, 2);
-        g.fillPath (dashed);
-        g.setColour (Colours::textDim);
-        g.setFont (ForgeLookAndFeel::labelFont (11.0f));
-        g.drawText ("EQ BYPASSED", plot.reduced (6.0f), juce::Justification::topRight);
-    }
-    for (size_t i = 0; i < 5; ++i)
-    {
-        const double f = dsp::GraphicEQDesigner::kCentres[i];
-        g.setColour (col);
-        g.fillEllipse (juce::Rectangle<float> (6, 6).withCentre ({ xOf (f), yOf (last[i]) }));
-    }
-}
-
 EQPanel::EQPanel (AppController& a)
-    : app (a), enable (a, pEqOn, "GRAPHIC EQ"), position (a, pEqPosition), response (a)
+    : app (a), enable (a, pEqOn, "GRAPHIC EQ"), position (a, pEqPosition)
 {
     const char* labels[] = { "80", "240", "750", "2.2k", "6.6k" };
     for (int i = 0; i < 5; ++i)
@@ -224,7 +141,6 @@ EQPanel::EQPanel (AppController& a)
     addAndMakeVisible (position);
     addAndMakeVisible (flat);
     addAndMakeVisible (curves);
-    addAndMakeVisible (response);
     flat.setTooltip ("Reset all five bands to 0 dB.");
     curves.setTooltip ("Factory EQ curves.");
     flat.onClick = [this]
@@ -271,7 +187,6 @@ void EQPanel::refresh()
         f->refresh();
         f->setAlpha (on ? 1.0f : 0.55f);
     }
-    response.update();
 }
 
 void EQPanel::resized()
@@ -285,8 +200,8 @@ void EQPanel::resized()
     header.removeFromRight (6);
     position.setBounds (header.removeFromRight (140).reduced (0, 1));
     r.removeFromTop (8);
-    response.setBounds (r.removeFromLeft (r.getWidth() * 45 / 100));
-    r.removeFromLeft (10);
+    // Sliders only: the five faders and their dB readouts are the whole EQ.
+    r = r.withSizeKeepingCentre (std::min (r.getWidth(), 5 * 110), r.getHeight());
     const int w = r.getWidth() / 5;
     for (auto* f : faders)
         f->setBounds (r.removeFromLeft (w));
@@ -414,7 +329,7 @@ void CabinetPanel::filesDropped (const juce::StringArray& files, int, int y)
             list.add (juce::File (f));
     auto options = juce::MessageBoxOptions::makeOptionsYesNoCancel (
         juce::MessageBoxIconType::QuestionIcon, "Import impulse response",
-        "Copy into the ZackAMP IR library (recommended: presets keep working if you move the original), "
+        "Copy into the Z.AMP IR library (recommended: presets keep working if you move the original), "
         "or reference the file where it is?",
         "Copy", "Reference", "Cancel", this);
     juce::Component::SafePointer<CabinetPanel> safe (this);
@@ -761,7 +676,7 @@ void StatusBar::paint (juce::Graphics& g)
     lamp ("LIMIT", Colours::bad, limiting, 60);
     lamp ("GATE", Colours::warn, app.params().getBool (pGateOn) && ! gateOpen, 58);
     g.setColour (cpu > 70.0f ? Colours::bad : Colours::textDim);
-    g.drawText ("CPU " + juce::String (cpu, 0) + "%", r.removeFromRight (70), juce::Justification::centredLeft);
+    g.drawText ("CPU " + juce::String (juce::roundToInt (cpu)) + "%", r.removeFromRight (70), juce::Justification::centredLeft);
 
     g.setColour (Colours::textDim);
     const auto dev = app.getDeviceSummary();
@@ -772,5 +687,63 @@ void StatusBar::paint (juce::Graphics& g)
         g.setColour (messageIsWarning ? Colours::warn : Colours::text);
         g.drawText (message, r.reduced (6, 0), juce::Justification::centredLeft, true);
     }
+}
+} // namespace af::ui
+
+namespace af::ui
+{
+//==============================================================================
+SectionHeader::SectionHeader (const juce::String& t, const juce::String& h) : title (t), hint (h)
+{
+    setMouseCursor (juce::MouseCursor::PointingHandCursor);
+    setWantsKeyboardFocus (true);
+    setTitle (t);
+}
+
+void SectionHeader::setOpen (bool shouldBeOpen)
+{
+    open = shouldBeOpen;
+    repaint();
+}
+
+void SectionHeader::mouseUp (const juce::MouseEvent& e)
+{
+    if (getLocalBounds().contains (e.getPosition()) && onToggle)
+        onToggle();
+}
+
+bool SectionHeader::keyPressed (const juce::KeyPress& k)
+{
+    if ((k == juce::KeyPress::returnKey || k == juce::KeyPress::spaceKey) && onToggle)
+    {
+        onToggle();
+        return true;
+    }
+    return false;
+}
+
+void SectionHeader::paint (juce::Graphics& g)
+{
+    auto r = getLocalBounds().toFloat();
+    const bool over = isMouseOver();
+    g.setColour (over ? Colours::panelLight : Colours::panel);
+    g.fillRoundedRectangle (r, 6.0f);
+    g.setColour (Colours::panelEdge);
+    g.drawRoundedRectangle (r.reduced (0.5f), 6.0f, 1.0f);
+
+    auto arrowArea = r.removeFromLeft (r.getHeight()).reduced (r.getHeight() * 0.32f);
+    juce::Path arrow;
+    arrow.addTriangle (arrowArea.getX(), arrowArea.getY(), arrowArea.getRight(), arrowArea.getCentreY(), arrowArea.getX(), arrowArea.getBottom());
+    if (open)
+        arrow.applyTransform (juce::AffineTransform::rotation (juce::MathConstants<float>::halfPi, arrowArea.getCentreX(), arrowArea.getCentreY()));
+    g.setColour (open ? Colours::accent : Colours::text.withAlpha (0.8f));
+    g.fillPath (arrow);
+
+    g.setColour (Colours::text.withAlpha (0.9f));
+    g.setFont (ForgeLookAndFeel::labelFont (13.0f));
+    g.drawText (title.toUpperCase(), r.withTrimmedLeft (4.0f), juce::Justification::centredLeft);
+    g.setColour (Colours::textDim);
+    g.setFont (ForgeLookAndFeel::labelFont (11.5f, false));
+    g.drawText (open ? "click to hide" : hint, r.withTrimmedRight (12.0f), juce::Justification::centredRight);
 }
 } // namespace af::ui

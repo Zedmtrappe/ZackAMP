@@ -151,7 +151,7 @@ std::shared_ptr<dsp::IRData> IRLibrary::decode (std::unique_ptr<juce::InputStrea
     std::unique_ptr<juce::AudioFormatReader> reader (fm.createReaderFor (std::move (stream)));
     if (reader == nullptr)
     {
-        error = "Unsupported or damaged audio file. ZackAMP reads WAV (PCM 16/24/32-bit or 32-bit float) and AIFF.";
+        error = "Unsupported or damaged audio file. Z.AMP reads WAV (PCM 16/24/32-bit or 32-bit float) and AIFF.";
         return nullptr;
     }
     if (reader->numChannels < 1 || (int) reader->numChannels > lim.maxChannels)
@@ -172,7 +172,7 @@ std::shared_ptr<dsp::IRData> IRLibrary::decode (std::unique_ptr<juce::InputStrea
     const double seconds = (double) reader->lengthInSamples / reader->sampleRate;
     if (seconds > lim.maxSeconds)
     {
-        error = "The file is " + juce::String (seconds, 1) + " s long; the limit is " + juce::String (lim.maxSeconds, 0)
+        error = "The file is " + juce::String (seconds, 1) + " s long; the limit is " + juce::String (juce::roundToInt (lim.maxSeconds))
                 + " s. This looks like a recording or reverb, not a cabinet IR.";
         return nullptr;
     }

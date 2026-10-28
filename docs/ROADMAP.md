@@ -46,7 +46,7 @@ Status: items 1–4 are implemented (see CHANGELOG); items 5–7 are in progress
      breakup), 6V6 (small-amp sweetness, early breakup), EL84 (chimey, compressed), KT88/6550
      (huge headroom, very tight).
    * **Changing the amp model resets both to that model's usual valves** (Lacquer Clean 12AX7/6L6,
-     Lacquer Tweed 12AY7/6V6, Albion Plexi and Albion Lead 12AX7/EL34, Cascade Lead and Cascade Heavy
+     Lacquer Tweed 12AY7/6V6, Plexi and Albion Lead 12AX7/EL34, Cascade Lead and Cascade Heavy
      12AX7/6L6); after that the user can swap freely. Stored in presets (`amp.preampValve`,
      `amp.powerValve`).
    * Engine: a preamp valve sets the stages' gain (mu-like `swing` scaling), headroom and transfer
@@ -63,12 +63,12 @@ Status: items 1–4 are implemented (see CHANGELOG); items 5–7 are in progress
    shrinks/grows (or the space is reused) accordingly.
 7. **"Old-school amp head" look** for the main window:
    * cabinet-style head (tolex/piping/handle styling) instead of the flat panel look;
-   * a **glass front panel with "ZackAMP" etched into it**, **edge-lit with purple LEDs**, so the
+   * a **glass front panel with "Z.AMP" etched into it**, **edge-lit with purple LEDs**, so the
      etching glows purple when the amp is on (dims with Bypass / when audio is off);
    * **behind the glass, visible valves and transformers**;
    * **valve glow follows the amp model**: a subtle warm orange on the low-gain models, rising
      through brighter orange/yellow to **white-hot on the high-gain models** (Lacquer Clean →
-     Lacquer Tweed → Albion Plexi → Albion Lead → Cascade Lead → Cascade Heavy); could also track
+     Lacquer Tweed → Plexi → Albion Lead → Cascade Lead → Cascade Heavy); could also track
      the Gain knob and later the valve selectors (item 4);
    * **transformers glow slightly on the modern high-gain models** (artistic licence).
    Implementation notes: drawn in code and/or original rendered artwork (no third-party assets);

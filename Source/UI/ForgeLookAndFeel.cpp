@@ -4,18 +4,11 @@ namespace af::ui
 {
 FamilyStyle getFamilyStyle (int family)
 {
-    switch (family)
-    {
-        case 0: // American: warm ivory faceplate, black knobs, chrome-ish pointers
-            return { juce::Colour (0xffe3d7bd), juce::Colour (0xffc9b994), juce::Colour (0xff2a2116),
-                     juce::Colour (0xff1c1c1e), juce::Colour (0xfff2efe8), juce::Colour (0xffb5482b), "AMERICAN" };
-        case 1: // British: brushed copper faceplate, dark chocolate text, cream pointer knobs
-            return { juce::Colour (0xffc08a54), juce::Colour (0xff8e5d33), juce::Colour (0xff22140a),
-                     juce::Colour (0xff221a14), juce::Colour (0xfff0e2c4), juce::Colour (0xff3b1d0c), "BRITISH" };
-        default: // Modern: graphite with steel-blue accents
-            return { juce::Colour (0xff3a3d44), juce::Colour (0xff212328), juce::Colour (0xffd9dde4),
-                     juce::Colour (0xff121315), juce::Colour (0xff8fd0ff), juce::Colour (0xff5aa0d0), "MODERN" };
-    }
+    // Every model uses the same black/graphite faceplate (owner's choice); only the family name differs.
+    const char* names[] = { "AMERICAN", "BRITISH", "MODERN" };
+    return { juce::Colour (0xff3a3d44), juce::Colour (0xff212328), juce::Colour (0xffd9dde4),
+             juce::Colour (0xff121315), juce::Colour (0xff8fd0ff), juce::Colour (0xff5aa0d0),
+             names[juce::jlimit (0, 2, family)] };
 }
 
 ForgeLookAndFeel::ForgeLookAndFeel()

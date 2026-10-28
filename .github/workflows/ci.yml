@@ -1,9 +1,9 @@
-# ZackAMP build pipeline.
+# Z.AMP build pipeline.
 #  * Every push to main: universal macOS build + tests, then the app is published as the
-#    "latest" GitHub release (download: Releases page -> ZackAMP-macOS.zip).
-#  * Linux build + sanitizers only when started by hand (Actions -> Build ZackAMP -> Run
+#    "latest" GitHub release (download: Releases page -> Z.AMP-macOS.zip).
+#  * Linux build + sanitizers only when started by hand (Actions -> Build Z.AMP -> Run
 #    workflow, tick "full_checks"), to save the free plan's macOS minutes.
-name: Build ZackAMP
+name: Build Z.AMP
 on:
   push:
     branches: [main]
@@ -43,21 +43,21 @@ jobs:
         run: Scripts/package_macos.sh build/macos
       - name: Launch smoke test (fails if an audio device is open but no audio reaches the engine)
         run: |
-          perl -e 'alarm 60; exec @ARGV' "build/macos/ZackAMP_artefacts/Release/ZackAMP.app/Contents/MacOS/ZackAMP" --smoke-test 5
+          perl -e 'alarm 60; exec @ARGV' "build/macos/ZackAMP_artefacts/Release/Z.AMP.app/Contents/MacOS/Z.AMP" --smoke-test 5
       - name: Publish as the "latest" release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest dist/ZackAMP-macOS.zip \
+          gh release create latest dist/Z.AMP-macOS.zip \
             --target "${{ github.sha }}" \
-            --title "ZackAMP - latest build" \
-            --notes "Built from $(git log -1 --format='%h: %s') on $(date -u '+%Y-%m-%d %H:%M UTC'). Download ZackAMP-macOS.zip, unzip, then follow READ ME FIRST.txt."
+            --title "Z.AMP - latest build" \
+            --notes "Built from $(git log -1 --format='%h: %s') on $(date -u '+%Y-%m-%d %H:%M UTC'). Download Z.AMP-macOS.zip, unzip, then follow READ ME FIRST.txt."
       - uses: actions/upload-artifact@v4
         with:
-          name: ZackAMP-macOS
-          path: dist/ZackAMP-macOS.zip
+          name: Z.AMP-macOS
+          path: dist/Z.AMP-macOS.zip
 
   linux:
     if: github.event_name == 'workflow_dispatch' && inputs.full_checks
@@ -73,4 +73,4 @@ jobs:
       - name: Headless launch with a null audio device (checks audio reaches the engine)
         run: |
           printf 'pcm.!default {\n  type plug\n  slave.pcm "nulldev"\n}\npcm.nulldev {\n  type null\n}\n' > ~/.asoundrc
-          xvfb-run -a "build/release/ZackAMP_artefacts/Release/ZackAMP" --smoke-test 5
+          xvfb-run -a "build/release/ZackAMP_artefacts/Release/Z.AMP" --smoke-test 5

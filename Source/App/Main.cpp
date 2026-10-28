@@ -17,7 +17,7 @@ public:
         setUsingNativeTitleBar (true);
         setContentOwned (new ui::MainComponent (app), true);
         setResizable (true, false);
-        setResizeLimits (960, 640, 3000, 2000);
+        setResizeLimits (960, 560, 3000, 2000);
         const auto saved = app.getSettings().getValue ("windowState");
         if (saved.isEmpty() || ! restoreWindowStateFromString (saved))
             centreWithSize (1280, 840);

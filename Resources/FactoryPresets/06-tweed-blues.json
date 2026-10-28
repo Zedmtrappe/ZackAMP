@@ -4,7 +4,7 @@
   "name": "Tweed Blues",
   "category": "Blues",
   "description": "Fat, loose vintage drive for single-note blues.",
-  "author": "ZackAMP Factory",
+  "author": "Z.AMP Factory",
   "parameters": {
     "amp.model": 1,
     "amp.gain": 0.7,

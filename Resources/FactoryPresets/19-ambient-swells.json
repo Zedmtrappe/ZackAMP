@@ -4,7 +4,7 @@
   "name": "Ambient Swells",
   "category": "Ambient",
   "description": "Clean pads: long delay and lush reverb for volume swells.",
-  "author": "ZackAMP Factory",
+  "author": "Z.AMP Factory",
   "parameters": {
     "amp.model": 0,
     "amp.gain": 0.4,

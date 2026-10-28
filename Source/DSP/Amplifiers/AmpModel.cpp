@@ -86,7 +86,7 @@ namespace
             a.id = "british.plexi";
             a.defaultPreampValve = 0; // 12AX7
             a.defaultPowerValve = 1;
-            a.name = "Albion Plexi";
+            a.name = "Plexi";
             a.shortDescription = "Vintage British: chewy upper mids, crunch that grows with the volume.";
             a.family = AmpFamily::british;
             a.gainLabel = "Volume";

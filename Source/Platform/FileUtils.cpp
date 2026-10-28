@@ -21,7 +21,7 @@ juce::File getAppDataDirectory()
 #if JUCE_MAC
         .getChildFile ("Application Support")
 #endif
-        .getChildFile (AMPFORGE_PRODUCT_NAME);
+        .getChildFile ("ZackAMP"); // the app was first released as ZackAMP; keep its data folder
 }
 
 juce::File getUserPresetDirectory() { return getAppDataDirectory().getChildFile ("Presets"); }

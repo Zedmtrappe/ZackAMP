@@ -14,7 +14,9 @@ namespace
         idMidiSettings = 60,
         idSetupGuide = 80, idAbout,
     };
-    constexpr int kMinContentHeight = 700;
+    constexpr int kTopBarHeight = 56, kStatusHeight = 30, kBannerHeight = 46;
+    constexpr int kHeaderHeight = 34, kGap = 8, kMargin = 10;
+    constexpr int kEqCabHeight = 250, kFxHeight = 240;
 } // namespace
 
 PermissionBanner::PermissionBanner()
@@ -35,8 +37,8 @@ void PermissionBanner::paint (juce::Graphics& g)
     g.fillRect (getLocalBounds().removeFromLeft (4));
     g.setFont (ForgeLookAndFeel::labelFont (13.0f));
     auto r = getLocalBounds().reduced (14, 0).withTrimmedRight (210);
-    g.drawFittedText ("ZackAMP can't hear your guitar: macOS is blocking audio input. macOS calls every audio input "
-                      "\"Microphone\", including your interface. Allow ZackAMP under Privacy & Security > Microphone.",
+    g.drawFittedText ("Z.AMP can't hear your guitar: macOS is blocking audio input. macOS calls every audio input "
+                      "\"Microphone\", including your interface. Allow Z.AMP under Privacy & Security > Microphone.",
                       r, juce::Justification::centredLeft, 2);
 }
 
@@ -44,7 +46,9 @@ MainComponent::MainComponent (AppController& a) : app (a)
 {
     setLookAndFeel (&lnf);
     juce::LookAndFeel::setDefaultLookAndFeel (&lnf);
-    content.addAndMakeVisible (ampPanel);
+    content.addAndMakeVisible (ampHead);
+    content.addAndMakeVisible (eqCabHeader);
+    content.addAndMakeVisible (fxHeader);
     content.addAndMakeVisible (eqPanel);
     content.addAndMakeVisible (cabPanel);
     content.addAndMakeVisible (fxPanel);
@@ -54,7 +58,12 @@ MainComponent::MainComponent (AppController& a) : app (a)
     addAndMakeVisible (viewport);
     addAndMakeVisible (statusBar);
     addChildComponent (permissionBanner);
-    refreshables = { &topBar, &ampPanel, &eqPanel, &cabPanel, &fxPanel, &statusBar };
+    eqCabHeader.setOpen (app.getSettings().getBoolValue ("ui.showEqCab", false));
+    fxHeader.setOpen (app.getSettings().getBoolValue ("ui.showEffects", false));
+    eqCabHeader.onToggle = [this] { toggleSection (eqCabHeader, "ui.showEqCab"); };
+    fxHeader.onToggle = [this] { toggleSection (fxHeader, "ui.showEffects"); };
+    applySectionVisibility();
+    refreshables = { &topBar, &ampHead, &eqPanel, &cabPanel, &fxPanel, &statusBar };
 
     topBar.onPresetBrowser = [this] { openPresetBrowser(); };
     topBar.onSave = [this] { saveCurrent(); };
@@ -96,28 +105,82 @@ MainComponent::~MainComponent()
 
 void MainComponent::paint (juce::Graphics& g) { g.fillAll (Colours::background); }
 
+void MainComponent::applySectionVisibility()
+{
+    eqPanel.setVisible (eqCabHeader.isOpen());
+    cabPanel.setVisible (eqCabHeader.isOpen());
+    fxPanel.setVisible (fxHeader.isOpen());
+}
+
+int MainComponent::idealHeight() const
+{
+    return kTopBarHeight + kStatusHeight + (permissionBanner.isVisible() ? kBannerHeight : 0) + 2 * kMargin
+           + AmpHead::kPreferredHeight + 2 * (kGap + kHeaderHeight) + (eqCabHeader.isOpen() ? kGap + kEqCabHeight : 0)
+           + (fxHeader.isOpen() ? kGap + kFxHeight : 0);
+}
+
+void MainComponent::toggleSection (SectionHeader& header, const char* settingsKey)
+{
+    header.setOpen (! header.isOpen());
+    app.getSettings().setValue (settingsKey, header.isOpen());
+    applySectionVisibility();
+
+    // Grow or shrink the window to fit, within the screen; scroll if the screen is too small.
+    if (auto* window = findParentComponentOfClass<juce::ResizableWindow>())
+    {
+        if (! window->isFullScreen() && ! window->isMinimised())
+        {
+            auto bounds = window->getBounds();
+            bounds.setHeight (bounds.getHeight() + idealHeight() - getHeight());
+            if (const auto* display = juce::Desktop::getInstance().getDisplays().getDisplayForRect (window->getScreenBounds()))
+            {
+                const auto area = display->userArea;
+                bounds.setHeight (std::min (bounds.getHeight(), area.getHeight() - (window->getScreenBounds().getY() - bounds.getY()) - 4));
+                if (bounds.getBottom() > area.getBottom())
+                    bounds.setY (std::max (area.getY(), area.getBottom() - bounds.getHeight()));
+            }
+            window->setBounds (bounds);
+        }
+    }
+    resized();
+}
+
 void MainComponent::resized()
 {
     auto r = getLocalBounds();
-    topBar.setBounds (r.removeFromTop (56));
-    statusBar.setBounds (r.removeFromBottom (30));
+    topBar.setBounds (r.removeFromTop (kTopBarHeight));
+    statusBar.setBounds (r.removeFromBottom (kStatusHeight));
     if (permissionBanner.isVisible())
-        permissionBanner.setBounds (r.removeFromTop (46));
+        permissionBanner.setBounds (r.removeFromTop (kBannerHeight));
     viewport.setBounds (r);
 
-    // Content scrolls vertically only when the window is shorter than the minimum layout.
-    const int w = r.getWidth() - (r.getHeight() < kMinContentHeight ? viewport.getScrollBarThickness() : 0);
-    const int h = std::max (r.getHeight(), kMinContentHeight);
+    // The amp head takes the space left by the open sections, within its limits; content scrolls
+    // vertically when the window is too short even for the smallest head.
+    const int sections = 2 * kMargin + 2 * (kGap + kHeaderHeight) + (eqCabHeader.isOpen() ? kGap + kEqCabHeight : 0)
+                         + (fxHeader.isOpen() ? kGap + kFxHeight : 0);
+    const int headH = juce::jlimit (AmpHead::kMinHeight, AmpHead::kMaxHeight, r.getHeight() - sections);
+    const int h = std::max (r.getHeight(), headH + sections);
+    const int w = r.getWidth() - (h > r.getHeight() ? viewport.getScrollBarThickness() : 0);
     content.setSize (w, h);
-    auto c = content.getLocalBounds().reduced (10);
-    ampPanel.setBounds (c.removeFromTop (juce::roundToInt (h * 0.34)));
-    c.removeFromTop (10);
-    auto middle = c.removeFromTop (juce::roundToInt (h * 0.30));
-    eqPanel.setBounds (middle.removeFromLeft (middle.getWidth() * 55 / 100));
-    middle.removeFromLeft (10);
-    cabPanel.setBounds (middle);
-    c.removeFromTop (10);
-    fxPanel.setBounds (c);
+    auto c = content.getLocalBounds().reduced (kMargin);
+    ampHead.setBounds (c.removeFromTop (headH));
+    c.removeFromTop (kGap);
+    eqCabHeader.setBounds (c.removeFromTop (kHeaderHeight));
+    if (eqCabHeader.isOpen())
+    {
+        c.removeFromTop (kGap);
+        auto middle = c.removeFromTop (kEqCabHeight);
+        eqPanel.setBounds (middle.removeFromLeft (middle.getWidth() * 50 / 100));
+        middle.removeFromLeft (10);
+        cabPanel.setBounds (middle);
+    }
+    c.removeFromTop (kGap);
+    fxHeader.setBounds (c.removeFromTop (kHeaderHeight));
+    if (fxHeader.isOpen())
+    {
+        c.removeFromTop (kGap);
+        fxPanel.setBounds (c.removeFromTop (kFxHeight));
+    }
     if (onboarding != nullptr)
         onboarding->setBounds (getLocalBounds());
 }
@@ -274,7 +337,7 @@ void MainComponent::importIRs (int slot)
         juce::Component::SafePointer<MainComponent> safe (this);
         juce::AlertWindow::showAsync (juce::MessageBoxOptions::makeOptionsYesNoCancel (
                                           juce::MessageBoxIconType::QuestionIcon, "Import impulse responses",
-                                          "Copy the files into the ZackAMP IR library (recommended: presets keep working if you move or delete the originals), "
+                                          "Copy the files into the Z.AMP IR library (recommended: presets keep working if you move or delete the originals), "
                                           "or reference them where they are?", "Copy", "Reference", "Cancel", this),
                                       [safe, files, slot] (int result)
         {

@@ -4,7 +4,7 @@
   "name": "High Gain Rhythm",
   "category": "High Gain",
   "description": "Thick, defined high-gain rhythm with a firm low end.",
-  "author": "ZackAMP Factory",
+  "author": "Z.AMP Factory",
   "parameters": {
     "amp.model": 5,
     "amp.gain": 0.6,

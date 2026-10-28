@@ -183,7 +183,7 @@ void AppController::changeListenerCallback (juce::ChangeBroadcaster*)
     else if (hadDevice)
     {
         hadDevice = false;
-        postMessage ("Audio device disconnected. ZackAMP will reconnect when it returns, or choose another device in Audio Settings.", true);
+        postMessage ("Audio device disconnected. Z.AMP will reconnect when it returns, or choose another device in Audio Settings.", true);
         reconnectCountdown = 40;
     }
     sendChangeMessage();

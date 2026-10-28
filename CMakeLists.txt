@@ -4,7 +4,7 @@
 #   ampforge_dsp   : framework-independent C++17 DSP + engine + parameter model (no JUCE).
 #   core sources   : presets, IR library, MIDI mapping (use juce_core / juce_audio_formats);
 #                    compiled into each JUCE target via ampforge_add_core().
-#   ZackAMP        : the standalone application (JUCE GUI app).
+#   ZackAMP        : the standalone (shown to users as "Z.AMP") application (JUCE GUI app).
 #   tests / tools  : doctest suites, measurement, rendering, benchmarking, IR generation.
 cmake_minimum_required(VERSION 3.22)
 
@@ -15,8 +15,8 @@ endif()
 
 project(ZackAMP VERSION 0.1.0 LANGUAGES C CXX)
 
-set(AMPFORGE_PRODUCT_NAME "ZackAMP" CACHE STRING "Product name shown to users")
-set(AMPFORGE_COMPANY_NAME "ZackAMP" CACHE STRING "Company / vendor name")
+set(AMPFORGE_PRODUCT_NAME "Z.AMP" CACHE STRING "Product name shown to users")
+set(AMPFORGE_COMPANY_NAME "Z.AMP" CACHE STRING "Company / vendor name")
 set(AMPFORGE_BUNDLE_ID "com.zedmtrappe.zackamp" CACHE STRING "macOS bundle identifier")
 option(AMPFORGE_BUILD_APP "Build the standalone application" ON)
 option(AMPFORGE_BUILD_TESTS "Build automated tests" ON)
@@ -122,7 +122,7 @@ if(AMPFORGE_BUILD_APP)
         BUNDLE_ID "${AMPFORGE_BUNDLE_ID}"
         VERSION "${PROJECT_VERSION}"
         MICROPHONE_PERMISSION_ENABLED TRUE
-        MICROPHONE_PERMISSION_TEXT "ZackAMP needs audio input access to process your guitar signal from your audio interface."
+        MICROPHONE_PERMISSION_TEXT "Z.AMP needs audio input access to process your guitar signal from your audio interface."
         HARDENED_RUNTIME_ENABLED TRUE
         HARDENED_RUNTIME_OPTIONS com.apple.security.device.audio-input
         ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Resources/Images/AppIcon.png")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates ZackAMP factory presets (original settings, schema v1).
+"""Generates Z.AMP factory presets (original settings, schema v1).
 
 Each preset only lists parameters that differ from the parameter defaults; everything else
 is filled in with defaults so the files stay readable. Output levels ("out.level") are
@@ -10,7 +10,7 @@ import json, os, sys
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "Resources", "FactoryPresets")
 
-# Model indices: 0 Lacquer Clean, 1 Lacquer Tweed, 2 Albion Plexi, 3 Albion Lead, 4 Cascade Lead, 5 Cascade Heavy
+# Model indices: 0 Lacquer Clean, 1 Lacquer Tweed, 2 Plexi, 3 Albion Lead, 4 Cascade Lead, 5 Cascade Heavy
 P = [
  ("Glass Clean", "Clean", "Sparkling American clean with the bright switch on and a touch of room.", "factory:am-2x12-open-cap", None,
   {"amp.model":0,"amp.gain":0.38,"amp.bass":0.45,"amp.mid":0.5,"amp.treble":0.62,"amp.master":0.6,"amp.bright":1,
@@ -109,7 +109,7 @@ def main():
             params.setdefault("amp.depth", 0.0)
         params["out.level"] = LEVELS.get(name, 0.0)
         doc = {"format": "ampforge.preset", "schemaVersion": 1, "name": name, "category": cat,
-               "description": desc, "author": "ZackAMP Factory", "parameters": params,
+               "description": desc, "author": "Z.AMP Factory", "parameters": params,
                "cabinet": {"a": {"irId": ira, "irName": ir_names.get(ira, "")},
                            "b": {"irId": irb or "", "irName": ir_names.get(irb, "") if irb else ""}}}
         slug = "".join(c.lower() if c.isalnum() else "-" for c in name).strip("-")
