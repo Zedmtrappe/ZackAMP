@@ -109,6 +109,20 @@ void ForgeLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w,
 
     // Knob body: knurled skirt + domed cap
     const float bodyR = radius * 0.72f;
+
+    // Edge light: a soft LED ring glowing from under the skirt.
+    const auto ring = s.findColour (knobRingColourId);
+    if (! ring.isTransparent())
+    {
+        const float a = enabled ? 1.0f : 0.35f;
+        juce::ColourGradient glow (ring.withMultipliedAlpha (0.0f), centre.x, centre.y, ring.withMultipliedAlpha (0.0f),
+                                   centre.x + bodyR * 1.32f, centre.y, true);
+        glow.addColour (0.70, ring.withMultipliedAlpha (0.0f));
+        glow.addColour (0.78, ring.withMultipliedAlpha (0.85f * a));
+        glow.addColour (0.86, ring.withMultipliedAlpha (0.35f * a));
+        g.setGradientFill (glow);
+        g.fillEllipse (centre.x - bodyR * 1.32f, centre.y - bodyR * 1.32f, bodyR * 2.64f, bodyR * 2.64f);
+    }
     const auto cap = s.findColour (knobCapColourId);
     g.setColour (juce::Colours::black.withAlpha (0.45f));
     g.fillEllipse (centre.x - bodyR + 1.5f, centre.y - bodyR + 3.0f, bodyR * 2.0f, bodyR * 2.0f);

@@ -141,11 +141,12 @@ ParamKnob::ParamKnob (AppController& a, int paramIndex, const juce::String& l)
     refresh();
 }
 
-void ParamKnob::setFaceplateColours (juce::Colour cap, juce::Colour pointer, juce::Colour arc, juce::Colour text)
+void ParamKnob::setFaceplateColours (juce::Colour cap, juce::Colour pointer, juce::Colour arc, juce::Colour text, juce::Colour ring)
 {
     slider.setColour (ForgeLookAndFeel::knobCapColourId, cap);
     slider.setColour (ForgeLookAndFeel::knobPointerColourId, pointer);
     slider.setColour (ForgeLookAndFeel::knobArcColourId, arc);
+    slider.setColour (ForgeLookAndFeel::knobRingColourId, ring);
     slider.setColour (juce::Slider::textBoxTextColourId, text);
     textColour = text;
     repaint();

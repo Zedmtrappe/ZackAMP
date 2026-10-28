@@ -24,8 +24,13 @@ void AmpPanel::applyStyle (int m)
 {
     shownModel = m;
     const auto style = getFamilyStyle ((int) getAmpVoicing (m).family);
+    // Knob edge lighting follows the model: cool green on the cleanest amp through to orange on
+    // the highest-gain one (order: JC120, Tweed, AC30, JCM800, Coliseum, MP1, Triple).
+    constexpr int rank[] = { 1, 0, 2, 3, 4, 5, 6 };
+    const float t = (float) rank[juce::jlimit (0, 6, m)] / 6.0f;
+    const auto light = juce::Colour::fromHSV (juce::jmap (t, 0.42f, 0.075f), 0.85f, 1.0f, 1.0f);
     for (auto* k : { &model, &gain, &bass, &mid, &treble, &presence, &depth, &master, &sag, &variac })
-        k->setFaceplateColours (style.knobCap, style.knobPointer, style.accent.brighter (0.4f), style.plateText);
+        k->setFaceplateColours (style.knobCap, light.brighter (0.3f), light, style.plateText, light);
     for (auto* t : { &pull, &bright })
     {
         t->setColour (juce::ToggleButton::textColourId, style.plateText);

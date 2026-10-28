@@ -24,6 +24,7 @@
   the tail out and back in.
 
 ### Added (amp head)
+- Knob edge lighting follows the model: cool green on the JC120 through to orange on the Triple.
 - Photo-realistic amp interior behind the glass: valves, transformers and chassis rendered in
   Blender Cycles as light layers that the app mixes live (heat colour per model, valve type,
   transformer glow, LED light). Falls back to the drawn interior if the images are missing.

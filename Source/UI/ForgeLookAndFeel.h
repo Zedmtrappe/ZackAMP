@@ -54,6 +54,7 @@ public:
         knobCapColourId = 0x2201000,
         knobPointerColourId = 0x2201001,
         knobArcColourId = 0x2201002,
+        knobRingColourId = 0x2201003, // edge light around the knob (transparent = none)
     };
 };
 

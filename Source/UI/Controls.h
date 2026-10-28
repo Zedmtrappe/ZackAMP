@@ -34,7 +34,8 @@ public:
 
     void refresh();
     void setLabel (const juce::String& l) { label = l; repaint(); }
-    void setFaceplateColours (juce::Colour cap, juce::Colour pointer, juce::Colour arc, juce::Colour text);
+    void setFaceplateColours (juce::Colour cap, juce::Colour pointer, juce::Colour arc, juce::Colour text,
+                              juce::Colour ring = juce::Colours::transparentBlack);
     int getParamIndex() const noexcept { return index; }
 
     void paint (juce::Graphics&) override;

@@ -520,6 +520,8 @@ void GlassWindow::prepareLayers (int pixelW, int pixelH)
     for (int i = 0; i < numLayers; ++i)
     {
         auto src = loadInterior (files[i]);
+        if (! src.isValid() && (i == baseLayer || i == powerGlow)) // fall back to the 6L6 renders
+            src = loadInterior (files[i].replace (valveName, "6L6"));
         if (! src.isValid())
         {
             layers[(size_t) i] = {};
