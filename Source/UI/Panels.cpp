@@ -184,8 +184,6 @@ void AmpPanel::paint (juce::Graphics& g)
             const auto dot = centre + juce::Point<float> (std::sin (a), -std::cos (a)) * (radius - 10.0f);
             g.fillEllipse (juce::Rectangle<float> (3.0f, 3.0f).withCentre (dot));
         }
-        g.setFont (ForgeLookAndFeel::labelFont (12.0f));
-        engrave ("MODEL", juce::Rectangle<float> (80.0f, 16.0f).withCentre ({ centre.x, kb.getBottom() + 10.0f }), juce::Justification::centred, false);
 
         // Engraved divider between the selector and the amp controls.
         const float top = (float) titleArea.getBottom() + 6.0f, bottom = (float) plateArea.getBottom() - 16.0f;
@@ -204,8 +202,10 @@ void AmpPanel::paint (juce::Graphics& g)
     // Engraved model name, description and pilot lamp
     auto title = titleArea.toFloat();
     g.setColour (style.plateText);
-    g.setFont (ForgeLookAndFeel::labelFont (20.0f));
-    g.drawText (juce::String (v.name).toUpperCase(), title, juce::Justification::centredLeft);
+    g.setFont (ForgeLookAndFeel::labelFont (13.0f));
+    const float knobCentreX = (float) (model.getX() + model.getKnobBounds().getCentreX());
+    g.drawText ("MODEL", juce::Rectangle<float> (120.0f, title.getHeight()).withCentre ({ knobCentreX, title.getCentreY() + 4.0f }),
+                juce::Justification::centred);
     const bool live = ! app.params().getBool (pBypass);
     drawLed (g, juce::Rectangle<float> (14, 14).withCentre ({ title.getRight() - 8.0f, title.getCentreY() }), juce::Colour (0xffff3b2f), live);
 }
