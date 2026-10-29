@@ -313,3 +313,116 @@ TEST_CASE ("Compressor meter reports gain reduction and clears")
     c.clearMeter();
     CHECK (c.getMeterDb() == 0.0f);
 }
+
+#include "../../Source/DSP/Effects/ClassicCompressor.h"
+
+TEST_CASE ("Classic compressor models: all compress, are stable, and Amount 0 equals off")
+{
+    const double fs = 48000;
+    const char* names[] = { "Studio", "LA-2A", "1176", "SSL", "Fairchild", "dbx" };
+    for (int m = 0; m < dsp::ClassicCompressor::numModels; ++m)
+    {
+        INFO ("model " << m << " " << std::string (names[m]));
+        auto run = [&] (float amp, float amount, std::vector<float>* outL = nullptr, int extra = 0)
+        {
+            dsp::ClassicCompressor c;
+            c.prepare (fs);
+            dsp::ClassicCompressor::Controls ctl;
+            ctl.model = m;
+            ctl.amount = amount;
+            ctl.ratio1176 = extra;
+            ctl.fairchildTc = extra;
+            ctl.sslAuto = extra > 0;
+            auto l = test::sine (220.0, fs, (int) fs, amp), r = l;
+            const auto dry = l;
+            for (size_t p = 0; p + 64 <= l.size(); p += 64)
+            {
+                c.setControls (ctl);
+                c.process (l.data() + p, r.data() + p, 64, 1.0f, 1.0f, 1.0f);
+            }
+            CHECK (test::allFinite (l));
+            CHECK (test::peak (l) < 8.0f);
+            if (outL != nullptr)
+                *outL = l;
+            if (amount == 0.0f)
+                for (size_t i = 64; i < l.size(); ++i)
+                    REQUIRE (l[i] == dry[i]);
+            return std::pair<double, float> (test::db (test::rms (l, (int) fs / 2)), c.getMeterDb());
+        };
+        // 24 dB more input -> clearly less than 24 dB more output, and the meter shows it.
+        const auto quiet = run (0.02f, 0.6f), loud = run (0.4f, 0.6f);
+        CHECK (loud.first - quiet.first < 18.0);
+        CHECK (loud.second > 1.0f);
+        run (0.4f, 0.0f); // bit-identical bypass at Amount 0
+        for (int extra : { 1, 4, 5 })
+            run (0.5f, 1.0f, nullptr, extra); // all buttons, TC5/TC6, auto release: stable at extremes
+    }
+}
+
+TEST_CASE ("LA-2A releases in two stages; dbx releases at a constant rate")
+{
+    const double fs = 48000;
+    auto releaseCurve = [&] (int model)
+    {
+        dsp::ClassicCompressor c;
+        c.prepare (fs);
+        dsp::ClassicCompressor::Controls ctl;
+        ctl.model = model;
+        ctl.amount = 0.8f;
+        std::vector<float> gr;
+        const int n = (int) fs * 3;
+        auto x = test::sine (220.0, fs, n, 0.5f);
+        for (int i = n / 2; i < n; ++i) x[(size_t) i] *= 0.01f; // loud for 1.5 s, then nearly silent
+        auto r = x;
+        for (int p = 0; p + 64 <= n; p += 64)
+        {
+            c.setControls (ctl);
+            c.process (x.data() + p, r.data() + p, 64, 1.0f, 1.0f, 1.0f);
+            gr.push_back (c.getMeterDb());
+        }
+        return gr;
+    };
+    const double blocksPerSec = fs / 64.0;
+    auto at = [&] (const std::vector<float>& g, double seconds) { return g[(size_t) (seconds * blocksPerSec)]; };
+    const auto la = releaseCurve (dsp::ClassicCompressor::la2a);
+    const float start = at (la, 1.49);
+    REQUIRE (start > 6.0f);
+    CHECK (at (la, 1.65) < 0.65f * start);  // fast stage: about half gone within ~0.15 s
+    CHECK (at (la, 1.65) > 0.2f * start);   // ...but the slow stage holds on
+    CHECK (at (la, 2.4) > 0.05f * start);   // still releasing almost a second later
+    const auto dbx = releaseCurve (dsp::ClassicCompressor::dbx160);
+    const float d0 = at (dbx, 1.49);
+    REQUIRE (d0 > 6.0f);
+    // 120 dB/s: 6 dB takes about 50 ms.
+    CHECK (at (dbx, 1.5 + 0.05) < d0 - 3.0f);
+}
+
+TEST_CASE ("Classic compressor models stay close to the dry level at default settings")
+{
+    // Plucked-note-like bursts at mixed levels; every model with its defaults (Amount 0.4).
+    const double fs = 48000;
+    std::vector<float> x ((size_t) fs * 4);
+    for (size_t i = 0; i < x.size(); ++i)
+    {
+        const double t = (double) (i % 24000) / fs;
+        const float amp = ((i / 24000) % 3 == 0) ? 0.5f : ((i / 24000) % 3 == 1 ? 0.15f : 0.05f);
+        x[i] = amp * (float) (std::exp (-t * 4.0) * std::sin (dsp::kTwoPi * 196.0 * (double) i / fs));
+    }
+    const double dry = test::db (test::rms (x, 0));
+    for (int m = 0; m < dsp::ClassicCompressor::numModels; ++m)
+    {
+        dsp::ClassicCompressor c;
+        c.prepare (fs);
+        dsp::ClassicCompressor::Controls ctl;
+        ctl.model = m;
+        auto l = x, r = x;
+        for (size_t p = 0; p + 64 <= l.size(); p += 64)
+        {
+            c.setControls (ctl);
+            c.process (l.data() + p, r.data() + p, 64, 1.0f, 1.0f, 1.0f);
+        }
+        const double wet = test::db (test::rms (l, 0));
+        MESSAGE ("model " << m << ": " << wet - dry << " dB vs dry");
+        CHECK (std::abs (wet - dry) < 3.0); // switching models must not jump the level
+    }
+}

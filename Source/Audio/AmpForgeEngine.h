@@ -27,6 +27,7 @@
 #include "../DSP/Effects/Overdrive.h"
 #include "../DSP/Effects/Reverb.h"
 #include "../DSP/Effects/Smooth.h"
+#include "../DSP/Effects/ClassicCompressor.h"
 #include "../DSP/Effects/Compressor.h"
 #include "../DSP/GraphicEQ/GraphicEQ.h"
 #include "../DSP/Utilities/Oversampler.h"
@@ -154,7 +155,9 @@ private:
     dsp::CabinetSection cabinet { garbage };
     dsp::MicroPitch pitch;
     dsp::Smooth smooth;
-    dsp::Compressor compPre, compPost;
+    dsp::Compressor compPre;
+    dsp::ClassicCompressor compPost;
+    int activeCompType = 0;
     dsp::AutoWah wah;
     int activeDriveType = 0;
     dsp::Chorus chorus;

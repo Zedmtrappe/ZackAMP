@@ -49,6 +49,8 @@ enum ParamIndex : int
     pEqOn, pEqPosition, pEq80, pEq240, pEq750, pEq2200, pEq6600,
     pCabOn, pCabDual, pCabALevel, pCabAPan, pCabBLevel, pCabBPan,
     pStudioCompOn, pStudioCompAmount, pStudioCompAttack, pStudioCompTone, pStudioCompLevel,
+    pStudioCompType, pStudioCompRelease, pStudioCompRatio, pStudioCompLa2aMode, pStudioComp1176Ratio, pStudioCompSslRatio,
+    pStudioCompSslAuto, pStudioCompFairchildTc, pStudioCompOverEasy, pStudioCompEmphasis, pStudioCompMix, pStudioCompScHpf,
     pSmoothOn, pSmoothAmount,
     pPitchOn, pPitchMix,
     pChorusOn, pChorusMode, pChorusRate, pChorusDepth, pChorusMix,

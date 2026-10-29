@@ -284,3 +284,20 @@ happens in one sample period (p99/mean ≈ 2 at 32-sample blocks). **Re-run on t
   following stage.
 * IR length cap 1 s; long IRs at 96 kHz in dual stereo cost ~25 % of a core on the test VM.
 * Non-uniform partitioning (larger partitions for late IR parts) would reduce long-IR cost further.
+
+## Studio Comp models (`Effects/ClassicCompressor.h`)
+
+One stereo-linked gain computer, with the behaviour that distinguishes each classic unit:
+
+| Model | Detector / topology | Ballistics | Character |
+|---|---|---|---|
+| Studio | peak, feed-forward | attack 1–30 ms, release 30–750 ms | clean, soft knee, ratio 2–20:1 |
+| LA-2A | peak, feedback (opto) | ~10 ms attack; two-stage release: half in ~60 ms, the rest over 0.5–5 s depending on how long it has worked | very soft knee; Compress / Limit; side-chain HF emphasis; even-harmonic valve make-up |
+| 1176 | peak, feedback (FET) | 20–800 µs attack, 50 ms–1.1 s release | Input drives a fixed threshold; 4/8/12/20 and All (harder grab, more distortion); odd FET distortion grows with GR |
+| SSL Bus | peak, feed-forward VCA | stepped 0.1–30 ms attack, 0.1–1.2 s release or Auto (program-dependent) | 2/4/10:1, firm knee, clean |
+| Fairchild 670 | peak, feed-forward vari-mu | TC1–TC4 fixed (0.3–5 s release), TC5/TC6 program-dependent (slow store up to 10/25 s) | 22 dB knee (ratio grows with level), valve colour |
+| dbx 160 | true RMS, feed-forward VCA | fast attack, constant 120 dB/s release | hard knee or OverEasy |
+
+Amount 0 is bit-identical to bypass on every model; default-setting output levels are matched within
+±1.5 dB; model changes fade out, switch while silent and fade back in. These are behavioural models
+built from the units' published characteristics, not circuit simulations.

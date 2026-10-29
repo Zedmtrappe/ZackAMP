@@ -84,6 +84,7 @@ class ParamChoice final : public juce::ComboBox
 public:
     ParamChoice (AppController& app, int paramIndex);
     void refresh();
+    int getParamIndex() const noexcept { return index; }
 
 private:
     AppController& app;

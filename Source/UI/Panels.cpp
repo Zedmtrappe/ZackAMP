@@ -1,4 +1,5 @@
 #include "Panels.h"
+#include "AdvancedPanels.h"
 
 namespace af::ui
 {
@@ -510,8 +511,11 @@ juce::String EffectModule::getBlockName() const { return title; }
 void EffectModule::resetBlockControls()
 {
     std::vector<std::pair<int, float>> d;
-    for (auto* k : knobs)
-        d.emplace_back (k->getParamIndex(), paramDef (k->getParamIndex()).def);
+    for (int p : resetParams)
+        d.emplace_back (p, paramDef (p).def);
+    if (resetParams.empty())
+        for (auto* k : knobs)
+            d.emplace_back (k->getParamIndex(), paramDef (k->getParamIndex()).def);
     if (! d.empty())
         resetBlock (app, d, title);
 }
@@ -546,6 +550,11 @@ void EffectModule::resized()
         const int w = ex.getWidth() / (int) extras.size();
         for (auto* c : extras)
             c->setBounds (ex.removeFromLeft (w).reduced (2, 1));
+    }
+    if (sideExtra != nullptr)
+    {
+        auto side = r.removeFromRight (juce::roundToInt ((float) r.getWidth() * sideFraction));
+        sideExtra->setBounds (side.withSizeKeepingCentre (side.getWidth(), std::min (side.getHeight(), juce::roundToInt ((float) side.getWidth() * 0.72f))).reduced (2));
     }
     const int n = knobs.size();
     if (n == 0)
@@ -582,7 +591,8 @@ EffectsPanel::EffectsPanel (AppController& a)
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
       output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
       delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode),
-      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a), studioCompMeter (a)
+      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a),
+      compHeader (std::make_unique<CompHeader> (a)), studioCompVu (std::make_unique<VuMeter>())
 {
     for (auto* m : { &gate, &comp, &wah, &drive, &studioComp, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
@@ -590,7 +600,12 @@ EffectsPanel::EffectsPanel (AppController& a)
     delay.setHeaderExtra (&delayType, 84);
     reverb.setHeaderExtra (&reverbType, 96);
     smooth.setHeaderExtra (&smoothLight, 22);
-    studioComp.addExtra (&studioCompMeter);
+    studioComp.setHeaderExtra (compHeader.get(), 150);
+    studioComp.setSideExtra (studioCompVu.get(), 0.42f);
+    studioComp.setResetParams (StudioCompAdvanced::resetParams());
+    studioCompVu->readGainReduction = [this] { return app.engine.getStudioCompReductionDb(); };
+    studioCompVu->isActive = [this] { return app.params().getBool (pStudioCompOn); };
+    compHeader->onAdvanced = [this] { showCompAdvanced(); };
     chorus.addExtra (&chorusMode);
     delay.addExtra (&delaySync);
     delay.addExtra (&delayDivision);
@@ -614,50 +629,14 @@ EffectsPanel::EffectsPanel (AppController& a)
     };
 }
 
-void GainReductionMeter::refresh()
-{
-    const float gr = app.params().getBool (pStudioCompOn) ? app.engine.getStudioCompReductionDb() : 0.0f;
-    const float next = gr > shownDb ? gr : shownDb + (gr - shownDb) * 0.2f; // fast attack, eased release
-    if (gr >= peakDb) { peakDb = gr; peakHold = 45; }
-    else if (--peakHold < 0) peakDb = std::max (gr, peakDb - 0.3f);
-    if (std::abs (next - shownDb) > 0.02f || peakHold == 0)
-    {
-        shownDb = next < 0.02f ? 0.0f : next;
-        repaint();
-    }
-}
+EffectsPanel::~EffectsPanel() = default;
 
-void GainReductionMeter::paint (juce::Graphics& g)
+void EffectsPanel::showCompAdvanced()
 {
-    auto r = getLocalBounds().toFloat().reduced (1.0f, 3.0f);
-    g.setFont (ForgeLookAndFeel::labelFont (10.0f));
-    g.setColour (Colours::textDim);
-    g.drawText ("GR", r.removeFromLeft (22.0f), juce::Justification::centredLeft);
-    auto readout = r.removeFromRight (44.0f);
-    g.drawText (juce::String (shownDb, 1) + " dB", readout, juce::Justification::centredRight);
-    r.removeFromRight (4.0f);
-    g.setColour (juce::Colour (0xff0d0e10));
-    g.fillRoundedRectangle (r, 2.0f);
-    constexpr float kRange = 12.0f;
-    const auto bar = r.reduced (1.5f);
-    // Segments light from the right (0 dB) towards the left as reduction grows.
-    const int segs = 24;
-    const float w = bar.getWidth() / (float) segs;
-    for (int i = 0; i < segs; ++i)
-    {
-        const float dbAt = kRange * (float) (i + 1) / (float) segs;
-        const auto cell = juce::Rectangle<float> (bar.getRight() - w * (float) (i + 1), bar.getY(), w - 1.0f, bar.getHeight());
-        const bool lit = shownDb >= dbAt - kRange / (float) segs * 0.5f;
-        const auto c = dbAt > 9.0f ? Colours::bad : dbAt > 5.0f ? Colours::warn : juce::Colour (0xffffb020);
-        g.setColour (lit ? c : c.withAlpha (0.12f));
-        g.fillRect (cell);
-    }
-    if (peakDb > 0.2f)
-    {
-        const float x = bar.getRight() - bar.getWidth() * std::min (peakDb, kRange) / kRange;
-        g.setColour (Colours::text);
-        g.fillRect (x, bar.getY(), 1.5f, bar.getHeight());
-    }
+    if (compWindow == nullptr)
+        compWindow = std::make_unique<AdvancedWindow> ("Studio Comp", new StudioCompAdvanced (app));
+    compWindow->setVisible (true);
+    compWindow->toFront (true);
 }
 
 void ProcessLight::refresh()
@@ -697,7 +676,23 @@ void EffectsPanel::refresh()
     for (auto* c : { &driveType, &delayType, &reverbType })
         c->refresh();
     smoothLight.refresh();
-    studioCompMeter.refresh();
+    compHeader->refresh();
+    studioCompVu->refresh();
+    // Front-panel knob names follow the compressor model; models without an attack knob grey it out.
+    const int cm = app.params().getInt (pStudioCompType);
+    if (cm != shownCompModel)
+    {
+        shownCompModel = cm;
+        const auto& ui = compModelUi (cm);
+        studioComp.knob (0)->setLabel (ui.amount);
+        studioComp.knob (3)->setLabel (ui.level);
+        studioComp.knob (1)->setEnabled (ui.attack);
+    }
+    if (! compModelUi (cm).attack)
+        studioComp.knob (1)->setAlpha (0.3f);
+    if (compWindow != nullptr && compWindow->isVisible())
+        if (auto* adv = dynamic_cast<StudioCompAdvanced*> (compWindow->getContentComponent()))
+            adv->refresh();
     delaySync.refresh();
     delayDivision.refresh();
     chorusMode.refresh();
@@ -731,7 +726,7 @@ void EffectsPanel::resized()
     auto top = r.removeFromTop ((r.getHeight() - gap) / 2);
     r.removeFromTop (gap);
     layoutRow (top, { { &gate, 1.0f }, { &comp, 1.6f }, { &wah, 1.6f }, { &drive, 1.4f } });
-    layoutRow (r, { { &studioComp, 2.1f }, { &smooth, 0.82f }, { &pitch, 0.6f }, { &chorus, 1.3f }, { &delay, 1.55f }, { &reverb, 1.35f }, { &output, 1.2f } });
+    layoutRow (r, { { &studioComp, 2.45f }, { &smooth, 0.78f }, { &pitch, 0.58f }, { &chorus, 1.25f }, { &delay, 1.5f }, { &reverb, 1.3f }, { &output, 1.15f } });
 }
 
 void EffectsPanel::paint (juce::Graphics& g)

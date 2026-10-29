@@ -419,3 +419,29 @@ TEST_CASE ("Default valves and supply settings reproduce the calibrated amp")
             REQUIRE (ya[i] == yb[i]);
     }
 }
+
+TEST_CASE ("Changing the Studio Comp model while playing does not click")
+{
+    // A steady clean tone through the engine; step through every compressor model mid-stream.
+    AmpForgeEngine e;
+    e.params().set (pAmpModel, 1); // clean
+    e.params().set (pCabOn, 0);
+    e.params().set (pStudioCompOn, 1);
+    e.params().set (pStudioCompAmount, 0.7f);
+    e.prepare (48000, 128);
+    const int n = 48000 * 3;
+    auto x = test::sine (330.0, 48000, n, 0.3f);
+    std::vector<float> l ((size_t) n), r ((size_t) n);
+    for (int p = 0; p < n; p += 128)
+    {
+        if (p % 24000 == 0 && p > 0)
+            e.params().set (pStudioCompType, (float) ((p / 24000) % 6));
+        e.process (x.data() + p, l.data() + p, r.data() + p, std::min (128, n - p));
+    }
+    CHECK (test::allFinite (l));
+    float normalStep = 0, maxStep = 0;
+    for (int i = 16000; i < 24000; ++i) normalStep = std::max (normalStep, std::abs (l[(size_t) i] - l[(size_t) i - 1]));
+    for (int i = 24000; i < n; ++i) maxStep = std::max (maxStep, std::abs (l[(size_t) i] - l[(size_t) i - 1]));
+    MESSAGE ("max sample step " << maxStep << " (steady " << normalStep << ")");
+    CHECK (maxStep < normalStep * 2.0f);
+}

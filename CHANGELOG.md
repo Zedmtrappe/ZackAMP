@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added (Studio Comp models)
+- Studio Comp model menu: **Studio**, **LA-2A**, **1176**, **SSL Bus**, **Fairchild 670**, **dbx 160**,
+  each with its characteristic detector, ballistics, knee and colour; front-panel knob names follow the
+  model.
+- **ADV** button opens a window with the model's full controls: release, ratio / mode / time
+  constant, SSL auto release, dbx OverEasy, LA-2A HF emphasis, parallel mix and side-chain high-pass.
+- The gain-reduction meter is now an analogue **VU meter** with VU ballistics.
+
 ### Added (Dual)
 - **Dual** amp model (8th position on the selector): the Triple's Rectifier-style preamp with the
   smaller 100 W four-6L6 power section — saggier, breaks up sooner, more mid grind. Factory preset

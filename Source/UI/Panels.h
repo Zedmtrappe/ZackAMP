@@ -124,6 +124,10 @@ public:
     void addExtra (juce::Component* c) { extras.push_back (c); addAndMakeVisible (c); }
     /** A control shown at the right of the module's header (e.g. a type selector or a light). */
     void setHeaderExtra (juce::Component* c, int width) { headerExtra = c; headerExtraWidth = width; addAndMakeVisible (c); }
+    /** A component filling the right-hand part of the module (e.g. a meter); knobs share the rest. */
+    void setSideExtra (juce::Component* c, float widthFraction) { sideExtra = c; sideFraction = widthFraction; addAndMakeVisible (c); }
+    /** Parameters reset by right-click (default: the module's knobs). */
+    void setResetParams (std::vector<int> params) { resetParams = std::move (params); }
     ParamKnob* knob (int i) { return knobs[(size_t) i]; }
 
 private:
@@ -135,21 +139,10 @@ private:
     std::vector<juce::Component*> extras;
     juce::Component* headerExtra = nullptr;
     int headerExtraWidth = 0;
+    juce::Component* sideExtra = nullptr;
+    float sideFraction = 0.0f;
+    std::vector<int> resetParams;
     bool shownOn = false;
-};
-
-/** Gain-reduction meter (0–12 dB, fills from the right like a studio compressor's GR meter). */
-class GainReductionMeter final : public juce::Component, public juce::SettableTooltipClient
-{
-public:
-    explicit GainReductionMeter (AppController& a) : app (a) { setTooltip ("Gain reduction of the Studio Comp."); }
-    void refresh();
-    void paint (juce::Graphics&) override;
-
-private:
-    AppController& app;
-    float shownDb = 0.0f, peakDb = 0.0f;
-    int peakHold = 0;
 };
 
 /** "Process" light: glows brighter the more gain reduction the Smooth compressor applies. */
@@ -165,10 +158,15 @@ private:
     float shown = 0.0f;
 };
 
+class CompHeader;
+class VuMeter;
+class AdvancedWindow;
+
 class EffectsPanel final : public juce::Component, public Refreshable
 {
 public:
     explicit EffectsPanel (AppController& app);
+    ~EffectsPanel() override;
     void refresh() override;
     void paint (juce::Graphics&) override;
     void resized() override;
@@ -179,7 +177,11 @@ private:
     ParamToggle delaySync;
     ParamChoice delayDivision, chorusMode, driveType, delayType, reverbType;
     ProcessLight smoothLight;
-    GainReductionMeter studioCompMeter;
+    std::unique_ptr<CompHeader> compHeader;
+    std::unique_ptr<VuMeter> studioCompVu;
+    std::unique_ptr<AdvancedWindow> compWindow;
+    int shownCompModel = -1;
+    void showCompAdvanced();
     juce::TextButton tapTempo { "TAP" };
     std::vector<double> taps;
     juce::Rectangle<int> flowArea;

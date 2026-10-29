@@ -271,6 +271,7 @@ void AmpForgeEngine::snapAll() noexcept
     smoothMix.snap (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
     compPreMix.snap (p.getBool (pCompOn) ? 1.0f : 0.0f);
     compPostMix.snap (p.getBool (pStudioCompOn) ? 1.0f : 0.0f);
+    activeCompType = p.getInt (pStudioCompType);
     wahMix.snap (p.getBool (pWahOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     eqPreMix.snap (eqOn && p.getInt (pEqPosition) == 0 ? 1.0f : 0.0f);
@@ -338,10 +339,35 @@ void AmpForgeEngine::updateControls (int n) noexcept
     smoothMix.target (p.getBool (pSmoothOn) ? 1.0f : 0.0f);
     // Two compressors: a CS-3 style pedal before the amp, a studio compressor after the cabinet.
     compPreMix.target (p.getBool (pCompOn) ? 1.0f : 0.0f);
-    compPostMix.target (p.getBool (pStudioCompOn) ? 1.0f : 0.0f);
+    // Changing the compressor model fades it out, switches while silent, and fades back in.
+    const int compType = p.getInt (pStudioCompType);
+    if (compType != activeCompType && compPostMix.from == 0.0f && compPostMix.to == 0.0f)
+    {
+        activeCompType = compType;
+        compPost.reset();
+    }
+    compPostMix.target (p.getBool (pStudioCompOn) && compType == activeCompType ? 1.0f : 0.0f);
     compPre.setControls (dsp::Compressor::cs3, p.get (pCompSustain), p.get (pCompAttack), p.get (pCompTone), p.get (pCompLevel));
-    compPost.setControls (dsp::Compressor::studio, p.get (pStudioCompAmount), p.get (pStudioCompAttack), p.get (pStudioCompTone),
-                          p.get (pStudioCompLevel));
+    {
+        dsp::ClassicCompressor::Controls c;
+        c.model = activeCompType;
+        c.amount = p.get (pStudioCompAmount);
+        c.attack = p.get (pStudioCompAttack);
+        c.release = p.get (pStudioCompRelease);
+        c.tone = p.get (pStudioCompTone);
+        c.levelDb = p.get (pStudioCompLevel);
+        c.mix = p.get (pStudioCompMix);
+        c.scHpfHz = p.get (pStudioCompScHpf);
+        c.emphasis = p.get (pStudioCompEmphasis);
+        c.ratio = p.getInt (pStudioCompRatio);
+        c.la2aMode = p.getInt (pStudioCompLa2aMode);
+        c.ratio1176 = p.getInt (pStudioComp1176Ratio);
+        c.sslRatio = p.getInt (pStudioCompSslRatio);
+        c.sslAuto = p.getBool (pStudioCompSslAuto);
+        c.fairchildTc = p.getInt (pStudioCompFairchildTc);
+        c.overEasy = p.getBool (pStudioCompOverEasy);
+        compPost.setControls (c);
+    }
     wahMix.target (p.getBool (pWahOn) ? 1.0f : 0.0f);
     const bool eqOn = p.getBool (pEqOn);
     const int eqPos = p.getInt (pEqPosition);

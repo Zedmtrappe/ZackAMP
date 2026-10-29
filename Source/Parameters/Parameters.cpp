@@ -15,6 +15,12 @@ namespace
     const char* const kModModes[] = { "Chorus", "Flanger", "Script Phaser", "Phase 90" };
     const char* const kDriveTypes[] = { "Screamer", "RAT" };
     const char* const kDelayTypes[] = { "Studio", "Tape" };
+    const char* const kCompTypes[] = { "Studio", "LA-2A", "1176", "SSL Bus", "Fairchild 670", "dbx 160" };
+    const char* const kCompRatios[] = { "2:1", "3:1", "4:1", "6:1", "10:1", "20:1" };
+    const char* const kLa2aModes[] = { "Compress", "Limit" };
+    const char* const k1176Ratios[] = { "4:1", "8:1", "12:1", "20:1", "All" };
+    const char* const kSslRatios[] = { "2:1", "4:1", "10:1" };
+    const char* const kFairchildTcs[] = { "TC 1", "TC 2", "TC 3", "TC 4", "TC 5", "TC 6" };
     const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber", "Plate" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
     const char* const kDivisions[] = { "1/2", "1/4", "1/4 D", "1/4 T", "1/8", "1/8 D", "1/8 T", "1/16" }; // D = dotted, T = triplet
@@ -86,6 +92,18 @@ namespace
         { "studiocomp.attack", "Attack", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "1 ms (smooth, catches every transient) to 30 ms (punchy)." },
         { "studiocomp.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "Gentle treble tilt after the compressor (centre = flat)." },
         { "studiocomp.level", "Level", "dB", -12.f, 12.f, 0.f, LIN, 1.f, "StudioComp", "Output level." },
+        { "studiocomp.type", "Model", "", 0.f, 5.f, 0.f, CHO, 1.f, "StudioComp", "Compressor model: Studio (clean VCA), LA-2A (opto), 1176 (FET), SSL Bus (VCA bus), Fairchild 670 (vari-mu valve), dbx 160 (RMS VCA).", kCompTypes, 6 },
+        { "studiocomp.release", "Release", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "Release time (Studio 30 ms-0.75 s, 1176 50 ms-1.1 s, SSL 0.1/0.3/0.6/1.2 s). LA-2A, Fairchild and dbx set their own." },
+        { "studiocomp.ratio", "Ratio", "", 0.f, 5.f, 2.f, CHO, 1.f, "StudioComp", "Compression ratio (Studio and dbx 160).", kCompRatios, 6 },
+        { "studiocomp.la2a", "Mode", "", 0.f, 1.f, 0.f, CHO, 1.f, "StudioComp", "LA-2A: Compress (gentle, about 3:1) or Limit (firm).", kLa2aModes, 2 },
+        { "studiocomp.1176ratio", "Ratio", "", 0.f, 4.f, 0.f, CHO, 1.f, "StudioComp", "1176 ratio buttons; All = all buttons in (aggressive, distorted, pumping).", k1176Ratios, 5 },
+        { "studiocomp.sslratio", "Ratio", "", 0.f, 2.f, 1.f, CHO, 1.f, "StudioComp", "SSL bus compressor ratio.", kSslRatios, 3 },
+        { "studiocomp.sslauto", "Auto Release", "", 0.f, 1.f, 0.f, TOG, 1.f, "StudioComp", "SSL: program-dependent release (fast on transients, slow on sustained material)." },
+        { "studiocomp.tc", "Time Constant", "", 0.f, 5.f, 1.f, CHO, 1.f, "StudioComp", "Fairchild time constant: 1-4 fixed attack/release (0.3 s to 5 s release), 5 and 6 program-dependent.", kFairchildTcs, 6 },
+        { "studiocomp.overeasy", "OverEasy", "", 0.f, 1.f, 1.f, TOG, 1.f, "StudioComp", "dbx 160: OverEasy soft knee (off = hard knee)." },
+        { "studiocomp.emphasis", "HF Emphasis", "", 0.f, 1.f, 0.f, LIN, 10.f, "StudioComp", "LA-2A: makes the gain cell react more to treble (the R37 trimmer), taming bright peaks." },
+        { "studiocomp.mix", "Mix", "%", 0.f, 1.f, 1.f, LIN, 100.f, "StudioComp", "Parallel compression: blend of the dry and compressed signal." },
+        { "studiocomp.schpf", "SC HPF", "Hz", 20.f, 300.f, 20.f, LOG, 1.f, "StudioComp", "Side-chain high-pass: stops low end from driving the compressor (20 Hz = off)." },
 
         { "smooth.enabled", "Smooth", "", 0.f, 1.f, 0.f, TOG, 1.f, "Smooth", "Dynamic 2 kHz tamer: compresses only the harsh upper-mid band (3:1) when it gets loud, after the cabinet." },
         { "smooth.amount", "Smooth", "", 0.f, 1.f, 0.4f, LIN, 10.f, "Smooth", "Threshold: turn clockwise to start smoothing at lower levels (more smoothing). Up to 9 dB of cut." },
