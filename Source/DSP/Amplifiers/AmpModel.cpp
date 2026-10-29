@@ -209,6 +209,26 @@ namespace
             a.outputTrimDb = 3.0f;
             a.defaultIrId = "factory:md-4x12-heavy-cap";
         }
+        {
+            // Same Rectifier-style preamp as the Triple, with the smaller four-6L6 power section:
+            // it sags more, breaks up sooner and grinds harder; the Triple is the stiffer, bigger one.
+            auto& a = v[7];
+            a = v[6];
+            a.id = "dual";
+            a.name = "Dual";
+            a.shortDescription = "Modern American high gain, 100 W: looser, saggier and rawer than the Triple.";
+            a.power.piDrive = 0.50f;
+            a.power.hardness = 2.4f;
+            a.power.sag = 0.48f;
+            a.power.sagReleaseMs = 210.0f;
+            a.power.otLpHz = 7600.0f;
+            a.powerDriveDb = 3.0f;
+            a.outputTrimDb = -2.6f;
+            // More mid grind: less scoop at noon, a slightly tighter and rawer clipper stage.
+            a.toneStack = tsModernHeavy;
+            a.triodes[1].couplingHpHz = 85.0f;
+            a.triodes[1].plateLpHz = 7500.0f;
+        }
         // Every control works on every model (owner's request): give voicings that had no
         // bright cap or depth/resonance control sensible ones. Defaults (bright off) keep the
         // calibrated sound; depth now also adds low-end resonance on the vintage models.

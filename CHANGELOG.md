@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added (Dual)
+- **Dual** amp model (8th position on the selector): the Triple's Rectifier-style preamp with the
+  smaller 100 W four-6L6 power section — saggier, breaks up sooner, more mid grind. Factory preset
+  "Dual Grind".
+
 ### Changed (Triple voicing)
 - Triple re-voiced along Rectifier lines: more low end reaches the gain stages (larger coupling and
   cathode-bypass corners; only the cold clipper stays a little tight), less fizz from the later

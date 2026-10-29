@@ -120,10 +120,11 @@ the circuits are built from this engine's blocks, not copied schematics).
 | Coliseum | V1 → TMB (*before the gain*) → Drive → V2..V4 cascade | 6L6, stiff, lots of headroom | Singing lead, vocal mids; pairs with the graphic EQ |
 | MP1 | V1 (110 Hz input HP) → Drive → V2..V3 → scooped stack → make-up stage | Clean, stiff 6L6 (rack power amp) | Tight, scooped, saturated 80s rack rhythm |
 | Triple | V1 → Gain → cold V2..V4 → CF → scooped stack (bass reaches the gain stages; only the cold clipper is a little tight) | 6L6, low NFB, rectifier sag | Thick, saturated, huge low end, scooped mids |
+| Dual | As Triple, with less mid scoop and a slightly tighter clipper stage | Four 6L6 (100 W): more sag, earlier phase-inverter and power breakup | Rawer, grindier, saggier than the Triple |
 
 Every model has every control (Presence, Resonance and Bright included); valve selectors are applied
 relative to each model's usual valves (Tweed 12AY7/6V6, JC120 12AT7/KT88, AC30 12AX7/EL84,
-JCM800 12AX7/EL34, Coliseum/MP1/Triple 12AX7/6L6).
+JCM800 12AX7/EL34, Coliseum/MP1/Triple/Dual 12AX7/6L6).
 
 The default cabinet differs per model (used for a fresh start or a missing IR); switching models leaves the cabinet alone and resets the valve selectors to the new model's usual valves (loading a preset does not).
 

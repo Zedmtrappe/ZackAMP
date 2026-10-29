@@ -13,7 +13,8 @@ namespace
 
     // Valve heat per amp model: faint orange on the cleanest model … white hot on the heaviest.
     // Order: Tweed, JC120, AC30, JCM800, Coliseum, MP1, Triple.
-    constexpr float kModelHeat[] = { 0.32f, 0.12f, 0.45f, 0.66f, 0.80f, 0.90f, 1.0f };
+    constexpr float kModelHeat[] = { 0.32f, 0.12f, 0.45f, 0.66f, 0.80f, 0.90f, 1.0f, 0.96f };
+    static_assert (std::size (kModelHeat) == dsp::kNumAmpModels);
 
     juce::Colour heatColour (float h)
     {
@@ -177,9 +178,9 @@ void GlassWindow::layoutParts()
 void GlassWindow::tick()
 {
     const auto& p = app.params();
-    const int model = juce::jlimit (0, 6, p.getInt (pAmpModel));
+    const int model = juce::jlimit (0, dsp::kNumAmpModels - 1, p.getInt (pAmpModel));
     heatTarget = kModelHeat[model] + 0.06f * (p.get (pAmpGain) - 0.5f) + (p.getBool (pAmpPull) ? 0.05f : 0.0f);
-    trafoTarget = model == 6 ? 1.0f : model == 5 ? 0.75f : model == 4 ? 0.5f : 0.0f;
+    trafoTarget = model == 6 ? 1.0f : model == 7 ? 0.9f : model == 5 ? 0.75f : model == 4 ? 0.5f : 0.0f;
 
     const auto callbacks = app.getAudioCallbackCount();
     idleTicks = callbacks != lastCallbacks ? 0 : idleTicks + 1;
