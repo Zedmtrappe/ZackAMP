@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Rich Plate Chime",
   "category": "Studio Reverb",
   "description": "Class-A chime through the bright, dense Rich Plate: instant, 1.6 s, no pre-delay.",
@@ -16,7 +16,7 @@
     "reverb.enabled": 1,
     "reverb.type": 5,
     "reverb.lexprog": 2,
-    "reverb.mix": 0.25,
+    "reverb.mix": 0.1489,
     "reverb.decay": 1.6,
     "reverb.tone": 0.7,
     "reverb.predelay": 0,

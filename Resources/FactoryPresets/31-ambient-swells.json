@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Ambient Swells",
   "category": "Ambient",
   "description": "Clean pads: long tape echo and a big hall for volume swells.",
@@ -23,7 +23,7 @@
     "delay.tone": 3000,
     "reverb.enabled": 1,
     "reverb.type": 1,
-    "reverb.mix": 0.45,
+    "reverb.mix": 0.2807,
     "reverb.decay": 6.0,
     "reverb.tone": 0.45,
     "amp.preampValve": 3,

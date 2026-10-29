@@ -454,7 +454,7 @@ TEST_CASE ("Lexicon and Bricasti: every program is stable, decays at the set tim
             if (b == 0)
                 l[0] = r[0] = 1.0f;
             rv.setControls (decay, 0.5f, type, c);
-            rv.process (l.data(), r.data(), 32, 1.0f, 1.0f);
+            rv.process (l.data(), r.data(), 32, 1.0f, 0.5f); // 50 %: full dry + the tail
             if (b == 0)
                 l[0] -= 1.0f;
             out.insert (out.end(), l.begin(), l.end());
@@ -490,7 +490,7 @@ TEST_CASE ("Lexicon and Bricasti: every program is stable, decays at the set tim
             MESSAGE ("type " << type << " program " << prog << ": RT60 " << t << " s, level " << test::db (test::rms (h, 0, (int) fs)) - hallLevel << " dB vs Hall");
             CHECK (t > 1.3);
             CHECK (t < 3.0);
-            CHECK (std::abs (test::db (test::rms (h, 0, (int) fs)) - hallLevel) < 5.0);
+            CHECK (std::abs (test::db (test::rms (h, 0, (int) fs)) - hallLevel) < 6.0); // impulse-based; loudness on playing is matched in EngineTests
         }
     // Bass Multiply lengthens the low-frequency decay.
     for (int type : { (int) dsp::Reverb::lexicon, (int) dsp::Reverb::bricasti })

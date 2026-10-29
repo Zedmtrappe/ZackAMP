@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Warm Jazz Clean",
   "category": "Clean",
   "description": "Round, dark clean for neck pickups and chord melodies.",
@@ -14,7 +14,7 @@
     "amp.master": 0.65,
     "reverb.enabled": 1,
     "reverb.type": 3,
-    "reverb.mix": 0.16,
+    "reverb.mix": 0.112,
     "reverb.decay": 1.4,
     "reverb.tone": 0.3,
     "amp.preampValve": 3,

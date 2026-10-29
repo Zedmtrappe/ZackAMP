@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Glass Clean",
   "category": "Clean",
   "description": "Crystal solid-state clean with the bright switch on and a touch of room.",
@@ -15,7 +15,7 @@
     "amp.bright": 1,
     "reverb.enabled": 1,
     "reverb.type": 0,
-    "reverb.mix": 0.22,
+    "reverb.mix": 0.1487,
     "reverb.decay": 1.4,
     "amp.preampValve": 3,
     "amp.powerValve": 4,

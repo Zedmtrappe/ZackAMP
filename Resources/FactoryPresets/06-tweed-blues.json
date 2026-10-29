@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Tweed Blues",
   "category": "Blues",
   "description": "Fat, loose vintage drive for single-note blues.",
@@ -15,7 +15,7 @@
     "amp.master": 0.7,
     "reverb.enabled": 1,
     "reverb.type": 2,
-    "reverb.mix": 0.2,
+    "reverb.mix": 0.1783,
     "reverb.decay": 1.6,
     "amp.preampValve": 2,
     "amp.powerValve": 2,

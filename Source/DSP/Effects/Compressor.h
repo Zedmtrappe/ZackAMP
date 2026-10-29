@@ -22,6 +22,11 @@ class Compressor
 {
 public:
     enum Type { studio = 0, cs3 = 1 };
+    /** Share of the CS-3's threshold drop given back as make-up (0.55 before preset schema 4). */
+    static constexpr float kCs3MakeupShare = 0.25f;
+    static constexpr float kCs3MakeupShareV3 = 0.55f;
+    /** CS-3 threshold (dB) for a Sustain setting. */
+    static float cs3ThresholdDb (float sustain) noexcept { return -14.0f - 34.0f * clampv (sustain, 0.0f, 1.0f); }
 
     void prepare (double fs)
     {
@@ -49,13 +54,15 @@ public:
         attack = clampv (attack, 0.0f, 1.0f);
         if (type == cs3)
         {
-            thresholdDb = -14.0f - 34.0f * sustain;
+            thresholdDb = cs3ThresholdDb (sustain);
             ratio = 12.0f;
             kneeDb = 3.0f;
             attackCoeff = onePoleCoeff (0.001 * std::pow (40.0, (double) attack), sampleRate); // 1..40 ms
             releaseCoeff = onePoleCoeff (0.35, sampleRate);
             detRelease = onePoleCoeff (0.06, sampleRate);
-            makeupDb = -thresholdDb * (1.0f - 1.0f / ratio) * 0.55f;
+            // Make-up tracks Sustain only partly: engaging the pedal at default settings gives a mild
+            // lift (as the pedal does around noon), not a jump; Level adds more.
+            makeupDb = -thresholdDb * (1.0f - 1.0f / ratio) * kCs3MakeupShare;
         }
         else
         {

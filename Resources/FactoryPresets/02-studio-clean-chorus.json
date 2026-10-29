@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Studio Clean Chorus",
   "category": "Clean",
   "description": "The classic stereo-chorus clean, with a subtle slap.",
@@ -20,7 +20,7 @@
     "delay.feedback": 0.1,
     "delay.mix": 0.12,
     "reverb.enabled": 1,
-    "reverb.mix": 0.15,
+    "reverb.mix": 0.0936,
     "amp.preampValve": 3,
     "amp.powerValve": 4,
     "amp.depth": 0.0,

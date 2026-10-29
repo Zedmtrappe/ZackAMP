@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "SD-1 Push",
   "category": "Classic Rock",
   "description": "SD-1 pushing a JCM800 at the edge: smooth, sweet and amp-like lift.",

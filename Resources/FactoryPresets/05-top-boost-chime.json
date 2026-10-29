@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Top Boost Chime",
   "category": "Edge of Breakup",
   "description": "Jangly class-A chime, just breaking up: ringing chords, spring reverb.",
@@ -16,7 +16,7 @@
     "amp.bright": 1,
     "reverb.enabled": 1,
     "reverb.type": 2,
-    "reverb.mix": 0.2,
+    "reverb.mix": 0.1783,
     "reverb.decay": 1.8,
     "amp.preampValve": 0,
     "amp.powerValve": 3,

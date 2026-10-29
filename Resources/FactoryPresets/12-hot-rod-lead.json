@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Hot Rod Lead",
   "category": "Lead",
   "description": "Saturated British lead with tape echo and room.",
@@ -22,7 +22,7 @@
     "delay.mix": 0.22,
     "reverb.enabled": 1,
     "reverb.type": 0,
-    "reverb.mix": 0.18,
+    "reverb.mix": 0.1217,
     "amp.preampValve": 0,
     "amp.powerValve": 1,
     "amp.depth": 0.0,

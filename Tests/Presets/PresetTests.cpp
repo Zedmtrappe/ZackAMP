@@ -295,3 +295,19 @@ TEST_CASE ("Version 2 presets keep their amp after the selector was reordered (s
     REQUIRE (PresetCodec::fromJson (PresetCodec::toJson (s), back, err, w));
     CHECK ((int) back.values[(size_t) pAmpModel] == 3);
 }
+
+TEST_CASE ("Version 3 presets keep their reverb amount and CS-3 level (schema 4)")
+{
+    PresetState out;
+    juce::String err;
+    juce::StringArray w;
+    REQUIRE (PresetCodec::fromJson (R"({"format":"ampforge.preset","schemaVersion":3,"name":"Old",
+        "parameters":{"reverb.enabled":1,"reverb.type":1,"reverb.mix":0.3,"comp.enabled":1,"comp.sustain":0.5,"comp.level":0}})", out, err, w));
+    // Hall tail is now 4.1 dB louder at the same Mix, so the Mix is lowered by that much.
+    CHECK (out.values[(size_t) pReverbMix] == doctest::Approx (0.3f * std::pow (10.0f, -4.1f / 20.0f)).epsilon (1e-3));
+    // CS-3 make-up dropped by (0.55 - 0.25) of 31 dB * 11/12 = 8.5 dB: Level gives it back.
+    CHECK (out.values[(size_t) pCompLevel] == doctest::Approx (8.525f).epsilon (1e-2));
+    // Current-version presets are untouched.
+    REQUIRE (PresetCodec::fromJson (PresetCodec::toJson (out), out, err, w));
+    CHECK (out.values[(size_t) pCompLevel] == doctest::Approx (8.525f).epsilon (1e-2));
+}

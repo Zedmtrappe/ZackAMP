@@ -469,3 +469,62 @@ TEST_CASE ("Every reverb type produces a tail through the engine")
         CHECK (tail > 1e-4);
     }
 }
+
+TEST_CASE ("Reverb at 100% mix is reverb only and as loud as the dry; CS-3 engages without a jump")
+{
+    // Sustained, guitar-like input.
+    auto x = guitarish (48000, 48000 * 3, 0.3f);
+    auto render = [&] (auto setup)
+    {
+        AmpForgeEngine e;
+        e.params().set (pCabOn, 0);
+        e.params().set (pAmpModel, 1);
+        setup (e);
+        e.prepare (48000, 256);
+        std::vector<float> l (x.size()), r (x.size());
+        for (size_t p = 0; p + 256 <= x.size(); p += 256)
+            e.process (x.data() + p, l.data() + p, r.data() + p, 256);
+        return l;
+    };
+    const auto dry = render ([] (AmpForgeEngine&) {});
+    const double dryDb = test::db (test::rms (dry, 48000));
+    for (int t = 0; t < dsp::Reverb::numTypes; ++t)
+    {
+        auto out = render ([t] (AmpForgeEngine& e) { e.params().set (pReverbOn, 1); e.params().set (pReverbType, (float) t); e.params().set (pReverbMix, 1.0f); });
+        // At 100 % the output is the reverb alone.
+        const double wetDb = test::db (test::rms (out, 48000));
+        MESSAGE ("reverb type " << t << ": 100% mix (reverb only) is " << wetDb - dryDb << " dB relative to dry");
+        CHECK (std::abs (wetDb - dryDb) < 2.0);
+    }
+    const auto cs3 = render ([] (AmpForgeEngine& e) { e.params().set (pCompOn, 1); });
+    const double cs3Db = test::db (test::rms (cs3, 48000)) - dryDb;
+    MESSAGE ("CS-3 default settings: " << cs3Db << " dB vs off");
+    CHECK (cs3Db > -1.0);
+    CHECK (cs3Db < 3.5);
+}
+
+TEST_CASE ("Switching the reverb on and off at 100% mix brings the dry back smoothly")
+{
+    AmpForgeEngine e;
+    e.params().set (pCabOn, 0);
+    e.params().set (pAmpModel, 1);
+    e.params().set (pReverbOn, 1);
+    e.params().set (pReverbMix, 1.0f);
+    e.prepare (48000, 128);
+    const int n = 48000 * 2;
+    auto x = test::sine (330.0, 48000, n, 0.2f);
+    std::vector<float> l ((size_t) n), r ((size_t) n);
+    for (int p = 0; p < n; p += 128)
+    {
+        if (p == 48000) e.params().set (pReverbOn, 0);
+        if (p == 72000) e.params().set (pReverbOn, 1);
+        e.process (x.data() + p, l.data() + p, r.data() + p, 128);
+    }
+    float steady = 0, around = 0;
+    for (int i = 40000; i < 47000; ++i) steady = std::max (steady, std::abs (l[(size_t) i] - l[(size_t) i - 1]));
+    for (int i = 47000; i < n; ++i) around = std::max (around, std::abs (l[(size_t) i] - l[(size_t) i - 1]));
+    MESSAGE ("max step " << around << " (steady " << steady << ")");
+    CHECK (around < steady * 3.0f + 0.01f);
+    // Off: the dry signal is back at full level.
+    CHECK (test::rms (l, 60000, 71000) > 0.5 * test::rms (std::vector<float> (x.begin() + 60000, x.begin() + 71000)));
+}

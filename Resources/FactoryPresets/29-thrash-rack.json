@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Thrash Rack",
   "category": "Modern Metal",
   "description": "Tight, scooped 80s rack-preamp rhythm.",

@@ -123,7 +123,14 @@ void Reverb::setControls (float decaySeconds, float tone, int newType, const Stu
     }
 }
 
-void Reverb::finishWet (float& l, float& r, float wetL, float wetR, float mix) noexcept
+float Reverb::wetTrimDb (int t) noexcept
+{
+    // Measured with a sustained guitar-like signal: tail level at 100 % against the dry level.
+    constexpr float kTrim[numTypes] = { 3.4f, 4.1f, 1.0f, 3.1f, -0.9f, 4.5f, 5.7f };
+    return kTrim[clampv (t, 0, (int) numTypes - 1)];
+}
+
+void Reverb::finishWet (float& l, float& r, float wetL, float wetR, float mix, float dryGain) noexcept
 {
     if (useLowCut)
     {
@@ -136,12 +143,15 @@ void Reverb::finishWet (float& l, float& r, float wetL, float wetR, float mix) n
         wetL = mid + side;
         wetR = mid - side;
     }
-    l += wetL * mix * fade;
-    r += wetR * mix * fade;
+    const float w = mix * fade * wetTrim;
+    l = l * dryGain + wetL * w;
+    r = r * dryGain + wetR * w;
 }
 
-void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noexcept
+void Reverb::process (float* l, float* r, int n, float inputGain, float mix, float onFrom, float onTo) noexcept
 {
+    wetTrim = dbToGain (wetTrimDb (type));
+    const float dryLaw = mix <= 0.5f ? 1.0f : clampv (2.0f * (1.0f - mix), 0.0f, 1.0f);
     const double modInc = 0.7 / sampleRate;
     const float modDepth = (float) (0.0008 * sampleRate) * modAmount;
     const float pre = std::max (1.0f, preDelayMs * 0.001f * (float) sampleRate);
@@ -160,7 +170,14 @@ void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noe
                 pendingType = -1;
                 applyType (t);
                 lastTone = -1.0f; // re-derive damping for the new type on the next control update
-                return;           // rest of this block stays dry
+                // Rest of this block: no tail yet, but keep the dry at its mixed level (no step).
+                for (int j = i; j < n; ++j)
+                {
+                    const float dryGain = 1.0f - (onFrom + (onTo - onFrom) * (float) (j + 1) / (float) n) * (1.0f - dryLaw);
+                    l[j] *= dryGain;
+                    r[j] *= dryGain;
+                }
+                return;
             }
         }
         else if (fade < 1.0f)
@@ -177,7 +194,7 @@ void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noe
                 lexiconEngine.tick (studioPreL.read (pd), studioPreR.read (pd), wetL, wetR);
             else
                 m7Engine.tick (studioPreL.read (pd), studioPreR.read (pd), wetL, wetR);
-            finishWet (l[i], r[i], wetL, wetR, mix);
+            finishWet (l[i], r[i], wetL, wetR, mix, 1.0f - (onFrom + (onTo - onFrom) * (float) (i + 1) / (float) n) * (1.0f - dryLaw));
             continue;
         }
 
@@ -237,7 +254,7 @@ void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noe
             outL = springLp[0].process (springHp[0].process (outL)) * 1.4f;
             outR = springLp[1].process (springHp[1].process (outR)) * 1.4f;
         }
-        finishWet (l[i], r[i], outL * 0.25f, outR * 0.25f, mix);
+        finishWet (l[i], r[i], outL * 0.25f, outR * 0.25f, mix, 1.0f - (onFrom + (onTo - onFrom) * (float) (i + 1) / (float) n) * (1.0f - dryLaw));
     }
 }
 

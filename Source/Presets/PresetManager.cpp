@@ -1,6 +1,8 @@
 #include "PresetManager.h"
 #include "../Platform/FileUtils.h"
 #include "../DSP/Amplifiers/AmpModel.h"
+#include "../DSP/Effects/Compressor.h"
+#include "../DSP/Effects/Reverb.h"
 
 #include <AmpForgeData.h>
 
@@ -151,6 +153,19 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
             for (int p : { (int) pCompOn, (int) pCompSustain, (int) pCompAttack, (int) pCompTone, (int) pCompLevel })
                 s.values[(size_t) p] = paramDef (p).def;
         }
+    }
+
+    // v3 -> v4: the reverb Mix became a true dry/wet control with each type's tail level-matched,
+    // and the CS-3 gives back less make-up. Rescale so older presets sound the same.
+    if (paramsObj != nullptr && version < 4)
+    {
+        const int type = (int) s.values[(size_t) pReverbType];
+        s.values[(size_t) pReverbMix] = sanitiseParamValue (pReverbMix, s.values[(size_t) pReverbMix] * dsp::dbToGain (-dsp::Reverb::wetTrimDb (type)));
+        const bool movedToStudio = paramsObj->hasProperty ("comp.type") && (int) paramsObj->getProperty ("comp.type") == 0;
+        const float lostMakeup = -dsp::Compressor::cs3ThresholdDb (s.values[(size_t) pCompSustain]) * (1.0f - 1.0f / 12.0f)
+                                 * (dsp::Compressor::kCs3MakeupShareV3 - dsp::Compressor::kCs3MakeupShare);
+        if (! movedToStudio) // that compressor became the Studio Comp; the CS-3 is at defaults
+            s.values[(size_t) pCompLevel] = sanitiseParamValue (pCompLevel, s.values[(size_t) pCompLevel] + lostMakeup);
     }
 
     const auto cab = root["cabinet"];

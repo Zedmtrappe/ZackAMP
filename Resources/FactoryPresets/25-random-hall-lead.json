@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Random Hall Lead",
   "category": "Studio Reverb",
   "description": "Singing British lead in the classic Random Hall: long, wide, shimmering tail behind 40 ms of pre-delay.",
@@ -20,7 +20,7 @@
     "reverb.enabled": 1,
     "reverb.type": 5,
     "reverb.lexprog": 1,
-    "reverb.mix": 0.22,
+    "reverb.mix": 0.131,
     "reverb.decay": 3.2,
     "reverb.tone": 0.5,
     "reverb.predelay": 40,

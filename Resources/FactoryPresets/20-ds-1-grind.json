@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "DS-1 Grind",
   "category": "Classic Rock",
   "description": "DS-1 into a clean amp: hard-clipped, scooped and cutting.",

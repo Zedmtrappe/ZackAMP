@@ -34,9 +34,15 @@ public:
     void setControls (float decaySeconds, float tone, int type = hall, const StudioReverbControls& studio = {},
                       float width = 1.0f, float lowCutHz = 20.0f);
 
-    /** Feeds l/r (scaled by inputGain) into the reverb and adds `mix` of the tail to l/r.
-        Switching an effect off ramps inputGain to 0, so tails ring out naturally. */
-    void process (float* l, float* r, int n, float inputGain, float mix) noexcept;
+    /** Feeds l/r (scaled by inputGain) into the reverb and mixes the tail in. Mix is a dry/wet
+        control: up to 50 % the reverb is added to the full dry signal; above that the dry fades
+        out, so 100 % is reverb only. `onFrom`..`onTo` (the block's on/off ramp) scales the dry
+        reduction, so switching the reverb off brings the dry back smoothly while the tail rings
+        out (inputGain goes to 0). Each type's tail is level-matched to the dry signal at 100 %. */
+    void process (float* l, float* r, int n, float inputGain, float mix, float onFrom = 1.0f, float onTo = 1.0f) noexcept;
+
+    /** Per-type wet trim (dB) that makes 100 % mix as loud as the dry signal. */
+    static float wetTrimDb (int type) noexcept;
 
 private:
     static constexpr int N = 8;
@@ -71,7 +77,7 @@ private:
         }
     };
     void applyType (int t);
-    void finishWet (float& l, float& r, float wetL, float wetR, float mix) noexcept;
+    void finishWet (float& l, float& r, float wetL, float wetR, float mix, float dryGain) noexcept;
     void updateDecay();
 
     double sampleRate = 48000.0;
@@ -88,7 +94,7 @@ private:
     M7Reverb m7Engine;
     StudioReverbControls studioControls;
     Biquad lowCut[2];
-    float width = 1.0f, lastLowCut = -1.0f;
+    float width = 1.0f, lastLowCut = -1.0f, wetTrim = 1.0f;
     bool useLowCut = false;
     float damping = 0.3f, lastDecay = -1.0f, lastTone = -1.0f;
     double modPhase = 0.0;

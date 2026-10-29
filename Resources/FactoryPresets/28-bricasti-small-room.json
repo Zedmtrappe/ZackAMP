@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Bricasti Small Room",
   "category": "Studio Reverb",
   "description": "Crunch in a tight, realistic room: mostly early reflections and a 0.7 s tail - sounds like a mic'd amp in a real space.",
@@ -16,7 +16,7 @@
     "reverb.enabled": 1,
     "reverb.type": 6,
     "reverb.m7prog": 1,
-    "reverb.mix": 0.22,
+    "reverb.mix": 0.1141,
     "reverb.decay": 0.7,
     "reverb.tone": 0.55,
     "reverb.predelay": 2,

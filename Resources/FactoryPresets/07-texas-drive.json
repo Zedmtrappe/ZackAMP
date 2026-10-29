@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Texas Drive",
   "category": "Blues",
   "description": "Screamer pushing a tweed on the edge.",
@@ -18,7 +18,7 @@
     "drive.tone": 0.55,
     "drive.level": 5.0,
     "reverb.enabled": 1,
-    "reverb.mix": 0.15,
+    "reverb.mix": 0.0936,
     "amp.preampValve": 2,
     "amp.powerValve": 2,
     "amp.depth": 0.0,

@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "High Gain Rhythm",
   "category": "High Gain",
   "description": "Thick, saturated modern rhythm with a huge low end.",

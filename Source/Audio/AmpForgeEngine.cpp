@@ -645,7 +645,7 @@ void AmpForgeEngine::processChunk (const float* in, float* outL, float* outR, in
                               : store.get (pDelayTime);
     delay.process (L, R, n, std::min (delayMs, (float) (StereoDelay::kMaxSeconds * 1000.0 - 10.0)),
                    delayFb.getCurrent(), delayMix.getCurrent(), delayIn.to, store.getInt (pDelayType) == 1);
-    reverb.process (L, R, n, reverbIn.to, reverbMix.getCurrent());
+    reverb.process (L, R, n, reverbIn.to, reverbMix.getCurrent(), reverbIn.from, reverbIn.to);
 
     // ---- output ----
     for (int i = 0; i < n; ++i)

@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Classic V Rhythm",
   "category": "High Gain",
   "description": "The famous V-shaped graphic EQ curve on the high-power lead amp.",

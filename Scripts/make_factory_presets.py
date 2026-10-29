@@ -149,7 +149,12 @@ def main():
         if model in (0, 1, 2, 4):  # Tweed, JC120, AC30, JCM800
             params.setdefault("amp.depth", 0.0)
         params["out.level"] = LEVELS.get(name, 0.0)
-        doc = {"format": "ampforge.preset", "schemaVersion": 3, "name": name, "category": cat,
+        # Schema 4: Mix is a true dry/wet control with each type's tail level-matched to the dry;
+        # these values were voiced with the old (quieter) tails, so convert to keep the same sound.
+        if params.get("reverb.enabled"):
+            trim = [3.4, 4.1, 1.0, 3.1, -0.9, 4.5, 5.7][int(params.get("reverb.type", 1))]
+            params["reverb.mix"] = round(params.get("reverb.mix", 0.25) * 10 ** (-trim / 20), 4)
+        doc = {"format": "ampforge.preset", "schemaVersion": 4, "name": name, "category": cat,
                "description": desc, "author": "Z.AMP Factory", "parameters": params,
                "cabinet": {"a": {"irId": ira, "irName": ir_names.get(ira, "")},
                            "b": {"irId": irb or "", "irName": ir_names.get(irb, "") if irb else ""}}}

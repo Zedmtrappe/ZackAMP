@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Fusion Lead",
   "category": "Lead",
   "description": "Articulate, slightly compressed lead with light chorus.",
@@ -22,7 +22,7 @@
     "delay.feedback": 0.25,
     "delay.mix": 0.18,
     "reverb.enabled": 1,
-    "reverb.mix": 0.16,
+    "reverb.mix": 0.0998,
     "amp.preampValve": 0,
     "amp.powerValve": 0,
     "out.level": 0.5

@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Bricasti Large Hall",
   "category": "Studio Reverb",
   "description": "Wide, natural hall around a clean chorus: 3 s, 18 ms pre-delay, distinct early reflections, no chorusing in the tail.",
@@ -18,7 +18,7 @@
     "reverb.enabled": 1,
     "reverb.type": 6,
     "reverb.m7prog": 0,
-    "reverb.mix": 0.3,
+    "reverb.mix": 0.1556,
     "reverb.decay": 3.0,
     "reverb.tone": 0.55,
     "reverb.predelay": 18,

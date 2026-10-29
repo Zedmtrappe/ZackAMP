@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Fixed (reverb mix, CS-3 level)
+- Reverb **Mix is now a true dry/wet control**: up to 50 % the reverb is added to the full dry
+  signal; above that the dry fades out, so 100 % is reverb only. Every type's tail is level-matched
+  to the dry at 100 % (it was 1-6 dB quieter, with the dry always at full level). Switching the
+  reverb off at high Mix brings the dry back smoothly.
+- **CS-3**: engaging it at default settings now lifts the level by about 2 dB (it was ~10 dB of
+  automatic make-up); Level adds more.
+- Preset schema 4: older presets get their reverb Mix and CS-3 Level rescaled on load, so they sound
+  the same; factory presets converted the same way (loudness verified unchanged).
+
 ### Changed (model order)
 - The model selector now runs clean → high gain: Tweed, JC120, AC30, **Plexi**, JCM800, Coliseum,
   MP1, **5150**, Dual, Triple. Preset schema 3: older presets are renumbered on load and open on the

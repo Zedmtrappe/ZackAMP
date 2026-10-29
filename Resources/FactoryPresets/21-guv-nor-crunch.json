@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "name": "Guv'nor Crunch",
   "category": "Classic Rock",
   "description": "Guv'nor into a clean amp: Marshall-in-a-box crunch with full lows.",
