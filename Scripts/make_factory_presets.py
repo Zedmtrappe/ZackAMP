@@ -71,6 +71,15 @@ P = [
    "gate.enabled":1,"gate.threshold":-56,"gate.release":80}),
  ("Plexi Stack", "Classic Rock", "Late-60s 100 W stack, dimed: open, chewy power-valve crunch, bright and toothy.", "factory:br-4x12-v25-cap", None,
   {"amp.model":8,"amp.gain":0.75,"amp.bass":0.45,"amp.mid":0.7,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.8,"amp.bright":1}),
+ ("SD-1 Push", "Classic Rock", "SD-1 pushing a JCM800 at the edge: smooth, sweet and amp-like lift.", "factory:br-4x12-v25-cap", None,
+  {"amp.model":3,"amp.gain":0.4,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
+   "drive.enabled":1,"drive.type":2,"drive.drive":0.35,"drive.tone":0.5,"drive.level":4.0}),
+ ("DS-1 Grind", "Classic Rock", "DS-1 into a clean amp: hard-clipped, scooped and cutting.", "factory:am-2x12-open-cap", None,
+  {"amp.model":1,"amp.gain":0.45,"amp.bass":0.5,"amp.mid":0.5,"amp.treble":0.5,"amp.master":0.6,
+   "drive.enabled":1,"drive.type":3,"drive.drive":0.6,"drive.tone":0.45,"drive.level":0.0}),
+ ("Guv'nor Crunch", "Classic Rock", "Guv'nor into a clean amp: Marshall-in-a-box crunch with full lows.", "factory:br-4x12-v25-cap", None,
+  {"amp.model":1,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.5,"amp.treble":0.5,"amp.master":0.6,
+   "drive.enabled":1,"drive.type":4,"drive.drive":0.55,"drive.tone":0.55,"drive.level":0.0}),
  ("Dual Grind", "High Gain", "Saggy, raw 100 W Rectifier-style rhythm: chunky chugs that bloom.", "factory:md-4x12-heavy-cap", None,
   {"amp.model":7,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.45,"amp.treble":0.55,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.6,
    "gate.enabled":1,"gate.threshold":-58,"gate.release":80}),
@@ -114,7 +123,7 @@ P = [
 ]
 
 # Output level per preset (dB), calibrated with `ampforge_render --calibrate`.
-LEVELS = {'Plexi Stack': -6.5, 'Lexicon Concert Hall': -1.5, 'Random Hall Lead': -4.0, 'Rich Plate Chime': -5.0, 'Bricasti Large Hall': -1.0, 'Bricasti Small Room': -2.5, 'Dual Grind': -1.0, 'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': -5.5, 'Top Boost Chime': -6.5, 'Tweed Blues': -5.5, 'Texas Drive': -11.0, 'Brit Crunch': -1.0, 'Cranked AC30': -5.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': 0.5, 'Fusion Lead': 0.5, 'Classic V Rhythm': -1.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': 1.5, 'RAT Grunge': -6.5, 'Ambient Swells': -2.5, 'Dual Cab Crunch': -5.5}
+LEVELS = {'SD-1 Push': -5.5, 'DS-1 Grind': -9.0, "Guv'nor Crunch": -9.0, 'Plexi Stack': -6.5, 'Lexicon Concert Hall': -1.5, 'Random Hall Lead': -4.0, 'Rich Plate Chime': -5.0, 'Bricasti Large Hall': -1.0, 'Bricasti Small Room': -2.5, 'Dual Grind': -1.0, 'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': -5.5, 'Top Boost Chime': -6.5, 'Tweed Blues': -5.5, 'Texas Drive': -11.0, 'Brit Crunch': -1.0, 'Cranked AC30': -5.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': 0.5, 'Fusion Lead': 0.5, 'Classic V Rhythm': -1.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': 1.5, 'RAT Grunge': -8.5, 'Ambient Swells': -2.5, 'Dual Cab Crunch': -5.5}
 LEVELS_OLD = {'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 3.0, 'Edge of Breakup': 1.5, 'Touch Sensitive': -7.5, 'Tweed Blues': -1.0, 'Texas Drive': -9.5, 'Plexi Crunch': -0.5, 'Cranked Plexi': -5.0, 'British Crunch': -1.0, 'Boosted Brit': -4.0, 'Hot Rod Lead': -4.0, 'Singing Lead': -4.0, 'Fusion Lead': -1.0, 'Classic V Rhythm': -2.5, 'High Gain Rhythm': -1.5, 'Modern Metal': -3.0, 'Tight Extended Range': -2.0, 'Ambient Swells': -1.5, 'Dual Cab Crunch': -2.5}
 
 def main():

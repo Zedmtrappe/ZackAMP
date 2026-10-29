@@ -609,3 +609,79 @@ TEST_CASE ("Studio Comp models behave measurably differently")
     CHECK (ps[M::fairchild].thd > 0.2);
     CHECK (ps[M::sslBus].thd < 0.05);
 }
+
+TEST_CASE ("Drive types SD-1, DS-1, Guv'nor: stable, level-matched, and each with its own character")
+{
+    const double fs = 48000 * 8;
+    // A plucked chord-ish signal: low E + B + high E with decay.
+    const int n = (int) fs / 2;
+    std::vector<float> in ((size_t) n);
+    for (int i = 0; i < n; ++i)
+    {
+        const double t = i / fs;
+        in[(size_t) i] = (float) (0.25 * std::exp (-t * 3) * (std::sin (dsp::kTwoPi * 82.4 * t) + 0.6 * std::sin (dsp::kTwoPi * 246.9 * t)
+                                                             + 0.4 * std::sin (dsp::kTwoPi * 329.6 * t)));
+    }
+    auto run = [&] (int type, float drive, const std::vector<float>& x)
+    {
+        dsp::Overdrive d;
+        d.prepare (fs);
+        d.setType (type);
+        d.setControls (drive, 0.5f, 0.0f);
+        std::vector<float> out (x.size());
+        for (size_t i = 0; i < x.size(); ++i)
+            out[i] = d.process (x[i]);
+        return out;
+    };
+    const char* names[] = { "Screamer", "RAT", "SD-1", "DS-1", "Guv'nor" };
+    std::vector<std::vector<float>> outs;
+    const double ref = test::db (test::rms (run (dsp::Overdrive::screamer, 0.5f, in), n / 8));
+    for (int t = 0; t < dsp::Overdrive::numTypes; ++t)
+    {
+        outs.push_back (run (t, 0.5f, in));
+        const auto& o = outs.back();
+        const double lvl = test::db (test::rms (o, n / 8));
+        const double low = test::toneAmplitude (o, 82.4, fs, n / 8), mid = test::toneAmplitude (o, 246.9, fs, n / 8);
+        // Even/odd balance of the low E: 2nd vs 3rd harmonic.
+        const double h2 = test::toneAmplitude (o, 164.8, fs, n / 8), h3 = test::toneAmplitude (o, 247.2, fs, n / 8);
+        MESSAGE (std::string (names[t]) << ": level " << lvl - ref << " dB vs Screamer, low E " << test::db (low) << " dB, H2 " << test::db (h2) << " dB");
+        INFO (names[t]);
+        CHECK (test::allFinite (o));
+        CHECK (test::peak (o) < 3.0f);
+        CHECK (std::abs (lvl - ref) < 4.0); // switching types must not jump the level much
+        (void) mid; (void) h3;
+    }
+    // SD-1's asymmetric clipping makes clearly more 2nd harmonic than the symmetric Screamer
+    // (measured on a note above the clipping path's high-pass, where both clip).
+    {
+        const auto note = test::sine (880.0, fs, n, 0.3f);
+        const auto sd = run (dsp::Overdrive::sd1, 0.6f, note), ts = run (dsp::Overdrive::screamer, 0.6f, note);
+        const double h2sd = test::toneAmplitude (sd, 1760.0, fs, n / 8) / test::toneAmplitude (sd, 880.0, fs, n / 8);
+        const double h2ts = test::toneAmplitude (ts, 1760.0, fs, n / 8) / test::toneAmplitude (ts, 880.0, fs, n / 8);
+        MESSAGE ("H2/H1: SD-1 " << test::db (h2sd) << " dB, Screamer " << test::db (h2ts) << " dB");
+        CHECK (h2sd > 4.0 * h2ts);
+    }
+    // Guv'nor keeps more low end than the DS-1 (whose booster thins the bass).
+    CHECK (test::toneAmplitude (outs[dsp::Overdrive::guvnor], 82.4, fs, n / 8) > 1.3 * test::toneAmplitude (outs[dsp::Overdrive::ds1], 82.4, fs, n / 8));
+    // All five differ from one another.
+    for (int a = 0; a < dsp::Overdrive::numTypes; ++a)
+        for (int b = a + 1; b < dsp::Overdrive::numTypes; ++b)
+        {
+            double sab = 0, saa = 0, sbb = 0;
+            for (size_t i = (size_t) n / 8; i < (size_t) n; ++i)
+            {
+                sab += outs[(size_t) a][i] * outs[(size_t) b][i];
+                saa += outs[(size_t) a][i] * outs[(size_t) a][i];
+                sbb += outs[(size_t) b][i] * outs[(size_t) b][i];
+            }
+            INFO (names[a] << " vs " << names[b]);
+            CHECK (sab / std::sqrt (saa * sbb) < 0.98);
+        }
+    // Extreme input stays bounded.
+    std::vector<float> huge (4096);
+    for (size_t i = 0; i < huge.size(); ++i)
+        huge[i] = (i / 50) % 2 ? 100.0f : -100.0f;
+    // (The SD-1, like the Screamer, adds the clean signal to the clipped one, so it is not bounded.)
+    for (int t : { (int) dsp::Overdrive::ds1, (int) dsp::Overdrive::guvnor })
+        CHECK (test::peak (run (t, 1.0f, huge)) < 6.0f);
+}

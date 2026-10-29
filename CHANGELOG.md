@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added (drives)
+- Drive types **SD-1** (asymmetric soft clipping: smoother, more even harmonics), **DS-1**
+  (booster + hard diodes, scooped blend tone) and **Guv'nor** (Marshall-in-a-box: hard clipping,
+  full lows, Marshall-style EQ; Tone = Treble). All five drive types are level-matched (the RAT was
+  ~8 dB quieter than the Screamer and is now matched). Presets "SD-1 Push", "DS-1 Grind",
+  "Guv'nor Crunch".
+
 ### Added (Plexi) / fixes
 - **Plexi** amp model (9th on the selector): late-60s 100 W British head — V1, volume with a big
   bright cap, V2, cathode follower, Marshall stack, four EL34s that do much of the crunching.

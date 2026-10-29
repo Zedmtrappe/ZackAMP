@@ -13,7 +13,7 @@ namespace
     const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger", "Script Phaser", "Phase 90" };
-    const char* const kDriveTypes[] = { "Screamer", "RAT" };
+    const char* const kDriveTypes[] = { "Screamer", "RAT", "SD-1", "DS-1", "Guv'nor" };
     const char* const kDelayTypes[] = { "Studio", "Tape" };
     const char* const kCompTypes[] = { "Pristine", "LA-2A", "1176", "SSL Bus", "Fairchild 670", "dbx 160" };
     const char* const kCompRatios[] = { "2:1", "3:1", "4:1", "6:1", "10:1", "20:1" };
@@ -57,7 +57,7 @@ namespace
         { "drive.drive", "Drive", "", 0.f, 1.f, 0.25f, LIN, 10.f, "Drive", "Pedal clipping amount. Near zero it works as a tightening mid boost." },
         { "drive.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Drive", "Pedal treble." },
         { "drive.level", "Level", "dB", -12.f, 12.f, 3.f, LIN, 1.f, "Drive", "Pedal output level: how hard it pushes the amp." },
-        { "drive.type", "Type", "", 0.f, 1.f, 0.f, CHO, 1.f, "Drive", "Screamer: mid-hump soft clipping, tight lows (great in front of a gainy amp). RAT: op-amp distortion into hard diode clipping, full lows; Tone works as its Filter.", kDriveTypes, 2 },
+        { "drive.type", "Type", "", 0.f, 4.f, 0.f, CHO, 1.f, "Drive", "Screamer: mid-hump soft clipping, tight lows. RAT: op-amp distortion into hard diodes; Tone is its Filter. SD-1: asymmetric soft clipping, smoother and more amp-like. DS-1: hard-clipping distortion with the scooped blend tone. Guv'nor: Marshall-in-a-box, hard clipping with full lows; Tone is its Treble.", kDriveTypes, 5 },
 
         { "amp.model", "Amp Model", "", 0.f, 8.f, 0.f, CHO, 1.f, "Amp", "Amplifier model.", kAmpModels, 9 },
         { "amp.gain", "Gain", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Preamp volume / gain pot." },

@@ -1,0 +1,36 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 2,
+  "name": "SD-1 Push",
+  "category": "Classic Rock",
+  "description": "SD-1 pushing a JCM800 at the edge: smooth, sweet and amp-like lift.",
+  "author": "Z.AMP Factory",
+  "parameters": {
+    "amp.model": 3,
+    "amp.gain": 0.4,
+    "amp.bass": 0.45,
+    "amp.mid": 0.6,
+    "amp.treble": 0.55,
+    "amp.presence": 0.5,
+    "amp.master": 0.6,
+    "drive.enabled": 1,
+    "drive.type": 2,
+    "drive.drive": 0.35,
+    "drive.tone": 0.5,
+    "drive.level": 4.0,
+    "amp.preampValve": 0,
+    "amp.powerValve": 1,
+    "amp.depth": 0.0,
+    "out.level": -5.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:br-4x12-v25-cap",
+      "irName": "UK 4x12 Vintage 25W \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}
