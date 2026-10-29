@@ -36,7 +36,7 @@ std::vector<float> renderHeavy (OversamplingMode mode, double f0, double fs)
 {
     AmpForgeEngine e;
     e.setOversamplingMode (mode);
-    e.params().set (pAmpModel, 6); // Triple: the highest-gain model
+    e.params().set (pAmpModel, 9); // Triple: the highest-gain model
     e.params().set (pAmpGain, 0.8f);
     e.params().set (pCabOn, 0); // no cabinet: worst case, nothing hides aliasing
     e.prepare (fs, 256);
@@ -91,7 +91,7 @@ TEST_CASE ("Output has no significant DC offset")
 
 TEST_CASE ("Fast knob changes are smoothed (no zipper steps)")
 {
-    for (int model : { 2, 3 })
+    for (int model : { 2, 4 }) // AC30, JCM800
     for (int param : { (int) pAmpGain, (int) pAmpMaster, (int) pAmpBass, (int) pOutLevel, (int) pEq750 })
     {
         AmpForgeEngine e;

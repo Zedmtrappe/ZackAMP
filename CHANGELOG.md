@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed (model order)
+- The model selector now runs clean → high gain: Tweed, JC120, AC30, **Plexi**, JCM800, Coliseum,
+  MP1, **5150**, Dual, Triple. Preset schema 3: older presets are renumbered on load and open on the
+  same amp (tested for every model); all factory presets are unchanged apart from the number.
+
 ### Added (5150)
 - **5150** amp model (10th on the selector): 90s American high-gain lead — a long cascade of cold,
   tightly coupled stages, stack after the distortion, 6L6 power. Tighter lows and more upper-mid

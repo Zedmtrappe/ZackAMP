@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "British Crunch",
   "category": "British Crunch",
   "description": "Hot-rodded British amp at a moderate gain: tight, punchy rhythm.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 3,
+    "amp.model": 4,
     "amp.gain": 0.45,
     "amp.bass": 0.45,
     "amp.mid": 0.55,

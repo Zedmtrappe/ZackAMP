@@ -299,7 +299,16 @@ namespace
 
     const std::array<AmpVoicing, kNumAmpModels>& voicings()
     {
-        static const auto v = buildVoicings();
+        // The voicings are built in the order they were added; the selector shows them from clean
+        // to high gain (presets store the selector position; see kModelOrderV2toV3).
+        static const auto v = []
+        {
+            const auto built = buildVoicings();
+            std::array<AmpVoicing, kNumAmpModels> ordered {};
+            for (int i = 0; i < kNumAmpModels; ++i)
+                ordered[(size_t) kModelOrderV2toV3[i]] = built[(size_t) i];
+            return ordered;
+        }();
         return v;
     }
 } // namespace

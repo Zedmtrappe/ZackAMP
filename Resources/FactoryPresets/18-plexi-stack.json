@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Plexi Stack",
   "category": "Classic Rock",
   "description": "Late-60s 100 W stack, dimed: open, chewy power-valve crunch, bright and toothy.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 8,
+    "amp.model": 3,
     "amp.gain": 0.75,
     "amp.bass": 0.45,
     "amp.mid": 0.7,

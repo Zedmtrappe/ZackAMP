@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Random Hall Lead",
   "category": "Studio Reverb",
   "description": "Singing British lead in the classic Random Hall: long, wide, shimmering tail behind 40 ms of pre-delay.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 3,
+    "amp.model": 4,
     "amp.gain": 0.72,
     "amp.bass": 0.45,
     "amp.mid": 0.65,

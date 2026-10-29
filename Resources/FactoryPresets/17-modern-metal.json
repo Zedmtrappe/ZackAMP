@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Modern Metal",
   "category": "Modern Metal",
   "description": "Boosted modern high gain: tight palm mutes, clear chords.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 6,
+    "amp.model": 9,
     "amp.gain": 0.6,
     "amp.bass": 0.45,
     "amp.mid": 0.45,

@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Dual Grind",
   "category": "High Gain",
   "description": "Saggy, raw 100 W Rectifier-style rhythm: chunky chugs that bloom.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 7,
+    "amp.model": 8,
     "amp.gain": 0.6,
     "amp.bass": 0.5,
     "amp.mid": 0.45,

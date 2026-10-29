@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Warm Jazz Clean",
   "category": "Clean",
   "description": "Round, dark clean for neck pickups and chord melodies.",

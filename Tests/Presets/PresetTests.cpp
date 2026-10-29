@@ -212,7 +212,7 @@ TEST_CASE ("Version 1 presets are moved to the closest model of the new line-up"
     PresetState out;
     juce::String err;
     juce::StringArray w;
-    const int expected[] = { 1, 0, 3, 3, 4, 6 }; // old clean, tweed, plexi, lead, cascade lead/heavy
+    const int expected[] = { 1, 0, 3, 4, 5, 9 }; // old clean, tweed, plexi, lead, cascade lead/heavy
     for (int old = 0; old < 6; ++old)
     {
         const auto json = juce::String (R"({"format":"ampforge.preset","schemaVersion":1,"name":"Old","parameters":{"amp.model":)")
@@ -268,4 +268,30 @@ TEST_CASE ("Studio reverb factory presets load their reverb settings into the en
         CHECK (e.params().getInt (pReverbType) >= dsp::Reverb::lexicon);
     }
     CHECK (found == 5);
+}
+
+TEST_CASE ("Version 2 presets keep their amp after the selector was reordered (schema 3)")
+{
+    // v2 numbering: Tweed, JC120, AC30, JCM800, Coliseum, MP1, Triple, Dual, Plexi, 5150.
+    const char* names[] = { "Tweed", "JC120", "AC30", "JCM800", "Coliseum", "MP1", "Triple", "Dual", "Plexi", "5150" };
+    for (int old = 0; old < 10; ++old)
+    {
+        PresetState out;
+        juce::String err;
+        juce::StringArray w;
+        const auto json = juce::String (R"({"format":"ampforge.preset","schemaVersion":2,"name":"Old","parameters":{"amp.model":)")
+                          + juce::String (old) + R"(,"amp.preampValve":0,"amp.powerValve":0}})";
+        REQUIRE (PresetCodec::fromJson (json, out, err, w));
+        INFO (names[old]);
+        CHECK (juce::String (dsp::getAmpVoicing ((int) out.values[(size_t) pAmpModel]).name) == names[old]);
+        CHECK ((int) out.values[(size_t) pAmpPowerValve] == 0); // explicit valves are kept
+    }
+    // Saved presets are written with the new schema and read back unchanged.
+    PresetState s;
+    s.values[(size_t) pAmpModel] = 3; // Plexi
+    PresetState back;
+    juce::String err;
+    juce::StringArray w;
+    REQUIRE (PresetCodec::fromJson (PresetCodec::toJson (s), back, err, w));
+    CHECK ((int) back.values[(size_t) pAmpModel] == 3);
 }

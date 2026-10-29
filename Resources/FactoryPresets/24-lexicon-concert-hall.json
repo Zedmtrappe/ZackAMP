@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Lexicon Concert Hall",
   "category": "Studio Reverb",
   "description": "Glassy clean in a lush, gently chorused concert hall: 2.6 s, 24 ms pre-delay, bass x1.3.",

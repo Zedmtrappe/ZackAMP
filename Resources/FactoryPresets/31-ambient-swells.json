@@ -1,6 +1,6 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Ambient Swells",
   "category": "Ambient",
   "description": "Clean pads: long tape echo and a big hall for volume swells.",

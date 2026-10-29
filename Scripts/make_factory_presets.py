@@ -10,7 +10,7 @@ import json, os, sys
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "Resources", "FactoryPresets")
 
-# Model indices: 0 Tweed, 1 JC120, 2 AC30, 3 JCM800, 4 Coliseum, 5 MP1, 6 Triple, 7 Dual, 8 Plexi, 9 5150
+# Model indices: 0 Tweed, 1 JC120, 2 AC30, 3 Plexi, 4 JCM800, 5 Coliseum, 6 MP1, 7 5150, 8 Dual, 9 Triple
 P = [
  ("Glass Clean", "Clean", "Crystal solid-state clean with the bright switch on and a touch of room.", "factory:am-2x12-open-cap", None,
   {"amp.model":1,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.5,"amp.treble":0.62,"amp.master":0.6,"amp.bright":1,
@@ -34,45 +34,45 @@ P = [
   {"amp.model":0,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.55,"amp.treble":0.55,"amp.master":0.65,
    "drive.enabled":1,"drive.type":0,"drive.drive":0.35,"drive.tone":0.55,"drive.level":5.0,"reverb.enabled":1,"reverb.mix":0.15}),
  ("Brit Crunch", "Classic Rock", "1980s British amp at crunch: chords ring, single notes bite.", "factory:br-4x12-v25-cap", None,
-  {"amp.model":3,"amp.gain":0.35,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.6}),
+  {"amp.model":4,"amp.gain":0.35,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.6}),
  ("Cranked AC30", "Classic Rock", "Everything up on the class-A amp: thick, compressed and singing.", "factory:am-2x12-open-room", None,
   {"amp.model":2,"amp.gain":0.88,"amp.bass":0.4,"amp.mid":0.6,"amp.treble":0.5,"amp.presence":0.45,"amp.master":0.75,
    "gate.enabled":1,"gate.threshold":-66}),
  ("British Crunch", "British Crunch", "Hot-rodded British amp at a moderate gain: tight, punchy rhythm.", "factory:br-4x12-h75-cap", None,
-  {"amp.model":3,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.55,"amp.treble":0.6,"amp.presence":0.5,"amp.master":0.6}),
+  {"amp.model":4,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.55,"amp.treble":0.6,"amp.presence":0.5,"amp.master":0.6}),
  ("Boosted Brit", "British Crunch", "Screamer as a clean boost into the British lead amp: the 80s edge.", "factory:br-4x12-v25-edge", None,
-  {"amp.model":3,"amp.gain":0.6,"amp.bass":0.4,"amp.mid":0.6,"amp.treble":0.58,"amp.presence":0.55,"amp.master":0.6,
+  {"amp.model":4,"amp.gain":0.6,"amp.bass":0.4,"amp.mid":0.6,"amp.treble":0.58,"amp.presence":0.55,"amp.master":0.6,
    "drive.enabled":1,"drive.drive":0.1,"drive.tone":0.6,"drive.level":8.0,"gate.enabled":1,"gate.threshold":-64}),
  ("Hot Rod Lead", "Lead", "Saturated British lead with tape echo and room.", "factory:br-4x12-h75-cap", None,
-  {"amp.model":3,"amp.gain":0.8,"amp.bass":0.45,"amp.mid":0.65,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
+  {"amp.model":4,"amp.gain":0.8,"amp.bass":0.45,"amp.mid":0.65,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
    "gate.enabled":1,"gate.threshold":-62,"delay.enabled":1,"delay.type":1,"delay.time":420,"delay.feedback":0.3,"delay.mix":0.22,
    "reverb.enabled":1,"reverb.type":0,"reverb.mix":0.18}),
  ("Singing Lead", "Lead", "Smooth, vocal high-gain lead with mid push from the graphic EQ.", "factory:bt-1x12-closed-cap", None,
-  {"amp.model":4,"amp.gain":0.62,"amp.bass":0.4,"amp.mid":0.6,"amp.treble":0.6,"amp.presence":0.45,"amp.depth":0.3,"amp.master":0.55,
+  {"amp.model":5,"amp.gain":0.62,"amp.bass":0.4,"amp.mid":0.6,"amp.treble":0.6,"amp.presence":0.45,"amp.depth":0.3,"amp.master":0.55,
    "eq.enabled":1,"eq.b80":0,"eq.b240":-1,"eq.b750":2,"eq.b2200":1.5,"eq.b6600":-2,
    "smooth.enabled":1,"smooth.amount":0.4,
    "gate.enabled":1,"gate.threshold":-64,"gate.release":200,
    "delay.enabled":1,"delay.sync":1,"delay.division":5,"delay.feedback":0.32,"delay.mix":0.2,"reverb.enabled":1,"reverb.mix":0.2}),
  ("Fusion Lead", "Lead", "Articulate, slightly compressed lead with light chorus.", "factory:md-2x12-closed-cap", None,
-  {"amp.model":4,"amp.gain":0.48,"amp.bass":0.45,"amp.mid":0.55,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.55,
+  {"amp.model":5,"amp.gain":0.48,"amp.bass":0.45,"amp.mid":0.55,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.55,
    "chorus.enabled":1,"chorus.rate":0.4,"chorus.depth":0.3,"chorus.mix":0.3,
    "delay.enabled":1,"delay.time":360,"delay.feedback":0.25,"delay.mix":0.18,"reverb.enabled":1,"reverb.mix":0.16}),
  ("Classic V Rhythm", "High Gain", "The famous V-shaped graphic EQ curve on the high-power lead amp.", "factory:md-4x12-heavy-cap", None,
-  {"amp.model":4,"amp.gain":0.6,"amp.bass":0.35,"amp.mid":0.55,"amp.treble":0.6,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.55,
+  {"amp.model":5,"amp.gain":0.6,"amp.bass":0.35,"amp.mid":0.55,"amp.treble":0.6,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.55,
    "eq.enabled":1,"eq.b80":3,"eq.b240":0,"eq.b750":-4,"eq.b2200":1,"eq.b6600":3,"gate.enabled":1,"gate.threshold":-60}),
  ("High Gain Rhythm", "High Gain", "Thick, saturated modern rhythm with a huge low end.", "factory:md-4x12-heavy-cap", None,
-  {"amp.model":6,"amp.gain":0.55,"amp.bass":0.5,"amp.mid":0.5,"amp.treble":0.55,"amp.presence":0.5,"amp.depth":0.45,"amp.master":0.55,
+  {"amp.model":9,"amp.gain":0.55,"amp.bass":0.5,"amp.mid":0.5,"amp.treble":0.55,"amp.presence":0.5,"amp.depth":0.45,"amp.master":0.55,
    "gate.enabled":1,"gate.threshold":-60}),
  ("Modern Metal", "Modern Metal", "Boosted modern high gain: tight palm mutes, clear chords.", "factory:md-4x12-heavy-cap", None,
-  {"amp.model":6,"amp.gain":0.6,"amp.bass":0.45,"amp.mid":0.45,"amp.treble":0.6,"amp.presence":0.55,"amp.depth":0.55,"amp.master":0.55,
+  {"amp.model":9,"amp.gain":0.6,"amp.bass":0.45,"amp.mid":0.45,"amp.treble":0.6,"amp.presence":0.55,"amp.depth":0.55,"amp.master":0.55,
    "drive.enabled":1,"drive.drive":0.0,"drive.tone":0.6,"drive.level":6.0,
    "eq.enabled":1,"eq.b80":1,"eq.b240":-2,"eq.b750":0,"eq.b2200":1,"eq.b6600":0,
    "smooth.enabled":1,"smooth.amount":0.3,
    "gate.enabled":1,"gate.threshold":-56,"gate.release":80}),
  ("Plexi Stack", "Classic Rock", "Late-60s 100 W stack, dimed: open, chewy power-valve crunch, bright and toothy.", "factory:br-4x12-v25-cap", None,
-  {"amp.model":8,"amp.gain":0.75,"amp.bass":0.45,"amp.mid":0.7,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.8,"amp.bright":1}),
+  {"amp.model":3,"amp.gain":0.75,"amp.bass":0.45,"amp.mid":0.7,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.8,"amp.bright":1}),
  ("SD-1 Push", "Classic Rock", "SD-1 pushing a JCM800 at the edge: smooth, sweet and amp-like lift.", "factory:br-4x12-v25-cap", None,
-  {"amp.model":3,"amp.gain":0.4,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
+  {"amp.model":4,"amp.gain":0.4,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
    "drive.enabled":1,"drive.type":2,"drive.drive":0.35,"drive.tone":0.5,"drive.level":4.0}),
  ("DS-1 Grind", "Classic Rock", "DS-1 into a clean amp: hard-clipped, scooped and cutting.", "factory:am-2x12-open-cap", None,
   {"amp.model":1,"amp.gain":0.45,"amp.bass":0.5,"amp.mid":0.5,"amp.treble":0.5,"amp.master":0.6,
@@ -81,17 +81,17 @@ P = [
   {"amp.model":1,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.5,"amp.treble":0.5,"amp.master":0.6,
    "drive.enabled":1,"drive.type":4,"drive.drive":0.55,"drive.tone":0.55,"drive.level":0.0}),
  ("5150 Lead Rhythm", "Modern Metal", "Tight, aggressive 90s high-gain rhythm through its 4x12: chugs that stay tight, a cutting top.", "factory:pv-4x12-5150-cap", None,
-  {"amp.model":9,"amp.gain":0.6,"amp.bass":0.55,"amp.mid":0.45,"amp.treble":0.6,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.55,
+  {"amp.model":7,"amp.gain":0.6,"amp.bass":0.55,"amp.mid":0.45,"amp.treble":0.6,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.55,
    "gate.enabled":1,"gate.threshold":-56,"gate.release":70}),
  ("Dual Grind", "High Gain", "Saggy, raw 100 W Rectifier-style rhythm: chunky chugs that bloom.", "factory:md-4x12-heavy-cap", None,
-  {"amp.model":7,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.45,"amp.treble":0.55,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.6,
+  {"amp.model":8,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.45,"amp.treble":0.55,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.6,
    "gate.enabled":1,"gate.threshold":-58,"gate.release":80}),
  ("Lexicon Concert Hall", "Studio Reverb", "Glassy clean in a lush, gently chorused concert hall: 2.6 s, 24 ms pre-delay, bass x1.3.", "factory:am-2x12-open-cap", None,
   {"amp.model":1,"amp.gain":0.45,"amp.bass":0.5,"amp.mid":0.5,"amp.treble":0.58,"amp.master":0.6,"amp.bright":1,
    "reverb.enabled":1,"reverb.type":5,"reverb.lexprog":0,"reverb.mix":0.26,"reverb.decay":2.6,"reverb.tone":0.55,"reverb.predelay":24,
    "reverb.size":0.8,"reverb.diffusion":0.8,"reverb.bassmult":1.3,"reverb.crossover":650,"reverb.spin":0.9,"reverb.wander":0.35,"reverb.lowcut":120}),
  ("Random Hall Lead", "Studio Reverb", "Singing British lead in the classic Random Hall: long, wide, shimmering tail behind 40 ms of pre-delay.", "factory:br-4x12-v25-cap", None,
-  {"amp.model":3,"amp.gain":0.72,"amp.bass":0.45,"amp.mid":0.65,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
+  {"amp.model":4,"amp.gain":0.72,"amp.bass":0.45,"amp.mid":0.65,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
    "delay.enabled":1,"delay.time":380,"delay.feedback":0.22,"delay.mix":0.14,
    "reverb.enabled":1,"reverb.type":5,"reverb.lexprog":1,"reverb.mix":0.22,"reverb.decay":3.2,"reverb.tone":0.5,"reverb.predelay":40,
    "reverb.size":0.9,"reverb.diffusion":0.75,"reverb.bassmult":1.1,"reverb.crossover":700,"reverb.spin":1.1,"reverb.wander":0.55,"reverb.lowcut":150}),
@@ -105,11 +105,11 @@ P = [
    "reverb.enabled":1,"reverb.type":6,"reverb.m7prog":0,"reverb.mix":0.3,"reverb.decay":3.0,"reverb.tone":0.55,"reverb.predelay":18,
    "reverb.size":0.9,"reverb.diffusion":0.8,"reverb.early":0.45,"reverb.bassmult":1.2,"reverb.crossover":400,"reverb.spin":0.5,"reverb.wander":0.2,"reverb.lowcut":100}),
  ("Bricasti Small Room", "Studio Reverb", "Crunch in a tight, realistic room: mostly early reflections and a 0.7 s tail - sounds like a mic'd amp in a real space.", "factory:br-4x12-v25-cap", None,
-  {"amp.model":3,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.6,
+  {"amp.model":4,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.6,
    "reverb.enabled":1,"reverb.type":6,"reverb.m7prog":1,"reverb.mix":0.22,"reverb.decay":0.7,"reverb.tone":0.55,"reverb.predelay":2,
    "reverb.size":0.3,"reverb.diffusion":0.7,"reverb.early":0.75,"reverb.bassmult":1.0,"reverb.crossover":500,"reverb.spin":0.5,"reverb.wander":0.15,"reverb.lowcut":80}),
  ("Thrash Rack", "Modern Metal", "Tight, scooped 80s rack-preamp rhythm.", "factory:md-2x12-closed-cap", None,
-  {"amp.model":5,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.4,"amp.treble":0.6,"amp.presence":0.55,"amp.depth":0.4,"amp.master":0.5,
+  {"amp.model":6,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.4,"amp.treble":0.6,"amp.presence":0.55,"amp.depth":0.4,"amp.master":0.5,
    "gate.enabled":1,"gate.threshold":-56,"gate.release":70}),
  ("RAT Grunge", "Classic Rock", "RAT pedal into a clean amp: fuzzy, raw and wide.", "factory:am-2x12-open-cap", None,
   {"amp.model":1,"amp.gain":0.5,"amp.bass":0.5,"amp.mid":0.5,"amp.treble":0.5,"amp.master":0.6,
@@ -121,7 +121,7 @@ P = [
    "delay.enabled":1,"delay.type":1,"delay.time":520,"delay.feedback":0.55,"delay.mix":0.35,"delay.tone":3000,
    "reverb.enabled":1,"reverb.type":1,"reverb.mix":0.45,"reverb.decay":6.0,"reverb.tone":0.45}),
  ("Dual Cab Crunch", "Classic Rock", "British crunch through a 4x12 and an open 2x12, panned wide.", "factory:br-4x12-v25-cap", "factory:am-2x12-open-cap",
-  {"amp.model":3,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
+  {"amp.model":4,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
    "cab.dual":1,"cab.a.pan":-0.6,"cab.b.pan":0.6,"cab.b.level":-2}),
 ]
 
@@ -139,17 +139,17 @@ def main():
     for m in manifest:
         ir_names[m["id"]] = m["name"]
     # Usual valves per model (preamp V1, power) — matches AmpVoicing defaults in AmpModel.cpp.
-    valves = {0: (2, 2), 1: (3, 4), 2: (0, 3), 3: (0, 1), 4: (0, 0), 5: (0, 0), 6: (0, 0), 7: (0, 0), 8: (0, 1), 9: (0, 0)}
+    valves = {0: (2, 2), 1: (3, 4), 2: (0, 3), 3: (0, 1), 4: (0, 1), 5: (0, 0), 6: (0, 0), 7: (0, 0), 8: (0, 0), 9: (0, 0)}
     for i, (name, cat, desc, ira, irb, params) in enumerate(P):
         params = dict(params)
         model = params["amp.model"]
         params.setdefault("amp.preampValve", valves[model][0])
         params.setdefault("amp.powerValve", valves[model][1])
         # Vintage-style models get no extra low-end resonance unless a preset asks for it.
-        if model <= 3:
+        if model in (0, 1, 2, 4):  # Tweed, JC120, AC30, JCM800
             params.setdefault("amp.depth", 0.0)
         params["out.level"] = LEVELS.get(name, 0.0)
-        doc = {"format": "ampforge.preset", "schemaVersion": 2, "name": name, "category": cat,
+        doc = {"format": "ampforge.preset", "schemaVersion": 3, "name": name, "category": cat,
                "description": desc, "author": "Z.AMP Factory", "parameters": params,
                "cabinet": {"a": {"irId": ira, "irName": ir_names.get(ira, "")},
                            "b": {"irId": irb or "", "irName": ir_names.get(irb, "") if irb else ""}}}

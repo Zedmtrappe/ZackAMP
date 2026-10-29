@@ -9,7 +9,7 @@ namespace af
 {
 namespace
 {
-    const char* const kAmpModels[] = { "Tweed", "JC120", "AC30", "JCM800", "Coliseum", "MP1", "Triple", "Dual", "Plexi", "5150" };
+    const char* const kAmpModels[] = { "Tweed", "JC120", "AC30", "Plexi", "JCM800", "Coliseum", "MP1", "5150", "Dual", "Triple" };
     const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger", "Script Phaser", "Phase 90" };

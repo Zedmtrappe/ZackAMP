@@ -84,6 +84,9 @@ struct AmpVoicing
 };
 
 constexpr int kNumAmpModels = 10;
+/** Selector order (preset schema 3): Tweed, JC120, AC30, Plexi, JCM800, Coliseum, MP1, 5150, Dual,
+    Triple. Maps the order the models were added in (schema 2 indices) to their selector position. */
+constexpr int kModelOrderV2toV3[kNumAmpModels] = { 0, 1, 2, 4, 5, 6, 9, 8, 3, 7 };
 const AmpVoicing& getAmpVoicing (int index) noexcept;
 int getNumAmpModels() noexcept;
 

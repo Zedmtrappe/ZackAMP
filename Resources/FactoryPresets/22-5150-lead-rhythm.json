@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "5150 Lead Rhythm",
   "category": "Modern Metal",
   "description": "Tight, aggressive 90s high-gain rhythm through its 4x12: chugs that stay tight, a cutting top.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 9,
+    "amp.model": 7,
     "amp.gain": 0.6,
     "amp.bass": 0.55,
     "amp.mid": 0.45,

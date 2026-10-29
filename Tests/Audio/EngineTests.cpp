@@ -209,7 +209,7 @@ TEST_CASE ("Amp model switching and preset transitions are click-free")
     float maxStep = 0, maxStepBefore = 0;
     for (size_t pos = 0; pos < x.size(); pos += 64)
     {
-        if (pos == 16000) e.params().set (pAmpModel, 5);
+        if (pos == 16000) e.params().set (pAmpModel, 6);
         e.process (x.data() + pos, l.data() + pos, r.data() + pos, 64);
     }
     for (size_t i = 1; i < l.size(); ++i)
@@ -294,7 +294,7 @@ TEST_CASE ("Invalid IR is rejected and the previous IR is kept")
 TEST_CASE ("Noise gate attenuates hiss between notes but passes notes")
 {
     AmpForgeEngine e;
-    e.params().set (pAmpModel, 5);
+    e.params().set (pAmpModel, 6);
     e.params().set (pAmpGain, 0.8f);
     e.params().set (pGateOn, 1);
     e.params().set (pGateThreshold, -50.0f);

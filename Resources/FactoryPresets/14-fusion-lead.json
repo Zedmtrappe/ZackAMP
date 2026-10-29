@@ -1,12 +1,12 @@
 {
   "format": "ampforge.preset",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "name": "Fusion Lead",
   "category": "Lead",
   "description": "Articulate, slightly compressed lead with light chorus.",
   "author": "Z.AMP Factory",
   "parameters": {
-    "amp.model": 4,
+    "amp.model": 5,
     "amp.gain": 0.48,
     "amp.bass": 0.45,
     "amp.mid": 0.55,

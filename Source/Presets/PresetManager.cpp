@@ -108,30 +108,33 @@ bool PresetCodec::fromJson (const juce::String& json, PresetState& out, juce::St
         warnings.add ("The preset contains no parameters; defaults were used.");
     }
 
-    // Presets made before the valve selectors existed: use the model's usual valves, which is
-    // exactly how they sounded.
-    if (const auto* params2 = root["parameters"].getDynamicObject())
+    // Amp model numbering: v1 had a different line-up; v2 numbered models in the order they were
+    // added; v3 numbers them in selector order (clean to high gain). Map older presets so they
+    // open on the same amp.
+    const auto* paramsObj = root["parameters"].getDynamicObject();
+    if (paramsObj != nullptr && version < 3)
     {
-        const auto& voicing = dsp::getAmpVoicing ((int) s.values[(size_t) pAmpModel]);
-        if (! params2->hasProperty (paramDef (pAmpPreampValve).id))
-            s.values[(size_t) pAmpPreampValve] = (float) voicing.defaultPreampValve;
-        if (! params2->hasProperty (paramDef (pAmpPowerValve).id))
-            s.values[(size_t) pAmpPowerValve] = (float) voicing.defaultPowerValve;
+        int model = (int) s.values[(size_t) pAmpModel];
+        if (version < 2)
+        {
+            // Old: Lacquer Clean, Lacquer Tweed, Plexi, Albion Lead, Cascade Lead, Cascade Heavy
+            constexpr int v1ToV3[] = { 1, 0, 3, 4, 5, 9 };
+            model = v1ToV3[juce::jlimit (0, 5, model)];
+        }
+        else
+            model = dsp::kModelOrderV2toV3[juce::jlimit (0, dsp::kNumAmpModels - 1, model)];
+        s.values[(size_t) pAmpModel] = (float) model;
     }
 
-    // v1 -> v2: the amp line-up changed. Map each old model to its closest new one and use the
-    // new model's usual valves (old valve settings were calibrated for the old voicings).
-    if (version < 2 && root["parameters"].getDynamicObject() != nullptr)
+    // Presets made before the valve selectors existed (or from v1, whose valve settings were
+    // calibrated for the old voicings): use the model's usual valves, exactly how they sounded.
+    if (paramsObj != nullptr)
     {
-        // Old: Lacquer Clean, Lacquer Tweed, Plexi, Albion Lead, Cascade Lead, Cascade Heavy
-        // New: Tweed 0, JC120 1, AC30 2, JCM800 3, Coliseum 4, MP1 5, Triple 6
-        constexpr int oldToNew[] = { 1, 0, 3, 3, 4, 6 };
-        const int oldModel = juce::jlimit (0, 5, (int) s.values[(size_t) pAmpModel]);
-        const int newModel = oldToNew[oldModel];
-        s.values[(size_t) pAmpModel] = (float) newModel;
-        const auto& voicing = dsp::getAmpVoicing (newModel);
-        s.values[(size_t) pAmpPreampValve] = (float) voicing.defaultPreampValve;
-        s.values[(size_t) pAmpPowerValve] = (float) voicing.defaultPowerValve;
+        const auto& voicing = dsp::getAmpVoicing ((int) s.values[(size_t) pAmpModel]);
+        if (version < 2 || ! paramsObj->hasProperty (paramDef (pAmpPreampValve).id))
+            s.values[(size_t) pAmpPreampValve] = (float) voicing.defaultPreampValve;
+        if (version < 2 || ! paramsObj->hasProperty (paramDef (pAmpPowerValve).id))
+            s.values[(size_t) pAmpPowerValve] = (float) voicing.defaultPowerValve;
     }
 
     // Presets from the short-lived single compressor with a type switch: a "Studio" compressor
@@ -167,7 +170,7 @@ juce::StringArray PresetManager::getCategories()
     return { "Clean", "Edge of Breakup", "Blues", "Classic Rock", "British Crunch", "Lead", "High Gain", "Modern Metal", "Ambient", "Studio Reverb", "User" };
 }
 
-int PresetManager::familyOfModel (int ampModel) { return ampModel <= 1 ? 0 : (ampModel <= 3 ? 1 : 2); }
+int PresetManager::familyOfModel (int ampModel) { return ampModel <= 1 ? 0 : (ampModel <= 4 ? 1 : 2); }
 
 void PresetManager::loadFactory()
 {
