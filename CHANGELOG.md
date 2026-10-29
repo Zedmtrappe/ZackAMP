@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Changed (Triple voicing)
+- Triple re-voiced along Rectifier lines: more low end reaches the gain stages (larger coupling and
+  cathode-bypass corners; only the cold clipper stays a little tight), less fizz from the later
+  stages, a post-distortion stack with a deeper mid scoop at noon, and a looser, saggier low-NFB
+  6L6 power section. Measured: +5 dB at 125 Hz and +6 dB at 250 Hz versus before, at equal loudness.
+- `ampforge_render --bands [gain]` prints each model's octave-band balance.
+
 ### Changed (interior)
 - The amp interior was re-rendered close up: the parts now sit about 9 cm behind the glass (the deck no
   longer runs far out in front of them), with real perspective, and fill the window.

@@ -13,6 +13,7 @@ namespace
     constexpr ToneStackComponents tsModernHeavy { 250e3, 1e6, 25e3, 47e3, 500e-12, 22e-9, 22e-9 };
     constexpr ToneStackComponents tsSolidState { 250e3, 250e3, 10e3, 47e3, 470e-12, 47e-9, 47e-9 };
     constexpr ToneStackComponents tsTopBoost { 1e6, 1e6, 10e3, 100e3, 56e-12, 22e-9, 22e-9 };
+    constexpr ToneStackComponents tsRecto { 250e3, 1e6, 10e3, 39e3, 500e-12, 22e-9, 22e-9 }; // deeper mid scoop at noon
     constexpr ToneStackComponents tsScooped { 250e3, 250e3, 6.8e3, 100e3, 500e-12, 100e-9, 47e-9 };
 
     constexpr BlockSpec triode (int i) { return { BlockKind::triode, i, 0.0f }; }
@@ -194,18 +195,18 @@ namespace
             a.shortDescription = "Modern American high gain: thick, saturated and heavy, huge low end.";
             a.family = AmpFamily::modern;
             a.gainLabel = "Gain";
-            a.inputHpHz = 45.0f;
-            a.triodes[0] = tri (40.0f, 35.0f, 300.0f, -6.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
-            a.triodes[1] = tri (40.0f, 110.0f, 800.0f, -10.0f, 9000.0f, -0.45f, 1.4f, 0.4f);
-            a.triodes[2] = tri (40.0f, 60.0f, 250.0f, -6.0f, 7500.0f, -0.2f, 1.5f, 0.3f);
-            a.triodes[3] = tri (30.0f, 40.0f, 0, 0, 7000.0f, 0.0f, 1.6f, 0.3f);
+            a.inputHpHz = 30.0f;
+            a.triodes[0] = tri (40.0f, 25.0f, 150.0f, -4.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
+            a.triodes[1] = tri (40.0f, 50.0f, 320.0f, -6.0f, 8500.0f, -0.45f, 1.4f, 0.25f);
+            a.triodes[2] = tri (40.0f, 35.0f, 150.0f, -4.0f, 6500.0f, -0.2f, 1.5f, 0.3f);
+            a.triodes[3] = tri (30.0f, 30.0f, 0, 0, 6000.0f, 0.0f, 1.6f, 0.3f);
             a.chain = { triode (0), gainPot(), triode (1), pad (-12.0f), triode (2), pad (-14.0f), triode (3), follower(), toneStack() };
             a.gainFloorDb = -60.0f;
-            a.toneStack = tsModernHeavy;
+            a.toneStack = tsRecto;
             a.cathodeFollower = { 0.025f, 0.9f, 2.5f, 20.0f };
-            a.power = { 0.30f, 2.8f, 0.03f, 0.25f, 140.0f, 4000.0f, 8.0f, 75.0f, 10.0f, 0.5f, 45.0f, 8500.0f, 0.50f };
+            a.power = { 0.30f, 2.6f, 0.03f, 0.35f, 160.0f, 4000.0f, 8.0f, 75.0f, 10.0f, 0.5f, 30.0f, 8000.0f, 0.90f };
             a.powerDriveDb = -4.0f;
-            a.outputTrimDb = 2.0f;
+            a.outputTrimDb = 3.0f;
             a.defaultIrId = "factory:md-4x12-heavy-cap";
         }
         // Every control works on every model (owner's request): give voicings that had no

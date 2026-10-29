@@ -119,7 +119,7 @@ the circuits are built from this engine's blocks, not copied schematics).
 | JCM800 | V1 (cathode shelf) → Pre-amp → cold V2 → V3 → CF → British TMB | EL34 | Cold-clipped cascade, tight lows, bite |
 | Coliseum | V1 → TMB (*before the gain*) → Drive → V2..V4 cascade | 6L6, stiff, lots of headroom | Singing lead, vocal mids; pairs with the graphic EQ |
 | MP1 | V1 (110 Hz input HP) → Drive → V2..V3 → scooped stack → make-up stage | Clean, stiff 6L6 (rack power amp) | Tight, scooped, saturated 80s rack rhythm |
-| Triple | V1 → Gain → cold V2..V4 → CF → stack | 6L6 with more sag | Thick, saturated, huge low end |
+| Triple | V1 → Gain → cold V2..V4 → CF → scooped stack (bass reaches the gain stages; only the cold clipper is a little tight) | 6L6, low NFB, rectifier sag | Thick, saturated, huge low end, scooped mids |
 
 Every model has every control (Presence, Resonance and Bright included); valve selectors are applied
 relative to each model's usual valves (Tweed 12AY7/6V6, JC120 12AT7/KT88, AC30 12AX7/EL84,

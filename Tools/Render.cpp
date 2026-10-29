@@ -5,6 +5,7 @@
 //   ampforge_render --all-presets <dir> [--in <di.wav>]   render every factory preset
 //   ampforge_render --calibrate                    measure preset loudness, suggest out.level
 //   ampforge_render --models [inputBoostDb]        loudness of each amp model at the same knobs
+//   ampforge_render --bands [gain]                 tone balance per octave of each model (same knobs, cab)
 //
 // The DI test set is synthesised (Karplus-Strong plucked strings with pick, pickup and
 // palm-mute models), so it is original material that can ship with the project. It is a
@@ -289,6 +290,42 @@ int main (int argc, char** argv)
             const double cur = p.state.values[(size_t) pOutLevel];
             std::printf ("%-26s %8.1f dB %8.1f dB %10.1f dB   (peak %.1f dBFS)\n", p.state.name.toRawUTF8(), l, cur,
                          cur + (target - l), 20 * std::log10 (std::max (pk, 1e-9f)));
+        }
+        return 0;
+    }
+
+    if (args.contains ("--bands"))
+    {
+        // Octave-band balance (dB relative to each model's total) of the DI set through every
+        // model, all knobs at noon except Gain, same cabinet. Shows thin / fat / fizzy at a glance.
+        const auto in = concatClips (fs);
+        const float g = argAfter ("--bands").isNotEmpty() ? argAfter ("--bands").getFloatValue() : 0.7f;
+        const double centres[] = { 63, 125, 250, 500, 1000, 2000, 4000, 8000 };
+        std::printf ("gain %.1f   ", g * 10);
+        for (double c : centres) std::printf ("%6.0f", c);
+        std::printf ("\n");
+        for (int m = 0; m < dsp::kNumAmpModels; ++m)
+        {
+            PresetState st;
+            st.irA = defaultIrForModel (3);
+            st.values[(size_t) pAmpModel] = (float) m;
+            st.values[(size_t) pAmpPreampValve] = (float) dsp::getAmpVoicing (m).defaultPreampValve;
+            st.values[(size_t) pAmpPowerValve] = (float) dsp::getAmpVoicing (m).defaultPowerValve;
+            st.values[(size_t) pAmpGain] = g;
+            const auto out = renderPreset (st, in);
+            double total = 0;
+            for (float v : out[0]) total += (double) v * v;
+            std::printf ("%-11s ", dsp::getAmpVoicing (m).name);
+            for (double c : centres)
+            {
+                dsp::Biquad b1, b2;
+                b1.setCoeffs (dsp::BiquadCoeffs::bandPass (fs, c, 1.41));
+                b2.setCoeffs (dsp::BiquadCoeffs::bandPass (fs, c, 1.41));
+                double e = 0;
+                for (float v : out[0]) { const float y = b2.process (b1.process (v)); e += (double) y * y; }
+                std::printf ("%6.1f", 10 * std::log10 (std::max (1e-20, e / std::max (1e-20, total))));
+            }
+            std::printf ("\n");
         }
         return 0;
     }
