@@ -10,7 +10,7 @@ import json, os, sys
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "Resources", "FactoryPresets")
 
-# Model indices: 0 Tweed, 1 JC120, 2 AC30, 3 JCM800, 4 Coliseum, 5 MP1, 6 Triple, 7 Dual, 8 Plexi
+# Model indices: 0 Tweed, 1 JC120, 2 AC30, 3 JCM800, 4 Coliseum, 5 MP1, 6 Triple, 7 Dual, 8 Plexi, 9 5150
 P = [
  ("Glass Clean", "Clean", "Crystal solid-state clean with the bright switch on and a touch of room.", "factory:am-2x12-open-cap", None,
   {"amp.model":1,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.5,"amp.treble":0.62,"amp.master":0.6,"amp.bright":1,
@@ -80,6 +80,9 @@ P = [
  ("Guv'nor Crunch", "Classic Rock", "Guv'nor into a clean amp: Marshall-in-a-box crunch with full lows.", "factory:br-4x12-v25-cap", None,
   {"amp.model":1,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.5,"amp.treble":0.5,"amp.master":0.6,
    "drive.enabled":1,"drive.type":4,"drive.drive":0.55,"drive.tone":0.55,"drive.level":0.0}),
+ ("5150 Lead Rhythm", "Modern Metal", "Tight, aggressive 90s high-gain rhythm through its 4x12: chugs that stay tight, a cutting top.", "factory:pv-4x12-5150-cap", None,
+  {"amp.model":9,"amp.gain":0.6,"amp.bass":0.55,"amp.mid":0.45,"amp.treble":0.6,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.55,
+   "gate.enabled":1,"gate.threshold":-56,"gate.release":70}),
  ("Dual Grind", "High Gain", "Saggy, raw 100 W Rectifier-style rhythm: chunky chugs that bloom.", "factory:md-4x12-heavy-cap", None,
   {"amp.model":7,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.45,"amp.treble":0.55,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.6,
    "gate.enabled":1,"gate.threshold":-58,"gate.release":80}),
@@ -123,7 +126,7 @@ P = [
 ]
 
 # Output level per preset (dB), calibrated with `ampforge_render --calibrate`.
-LEVELS = {'SD-1 Push': -5.5, 'DS-1 Grind': -9.0, "Guv'nor Crunch": -9.0, 'Plexi Stack': -6.5, 'Lexicon Concert Hall': -1.5, 'Random Hall Lead': -4.0, 'Rich Plate Chime': -5.0, 'Bricasti Large Hall': -1.0, 'Bricasti Small Room': -2.5, 'Dual Grind': -1.0, 'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': -5.5, 'Top Boost Chime': -6.5, 'Tweed Blues': -5.5, 'Texas Drive': -11.0, 'Brit Crunch': -1.0, 'Cranked AC30': -5.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': 0.5, 'Fusion Lead': 0.5, 'Classic V Rhythm': -1.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': 1.5, 'RAT Grunge': -8.5, 'Ambient Swells': -2.5, 'Dual Cab Crunch': -5.5}
+LEVELS = {'5150 Lead Rhythm': -3.0, 'SD-1 Push': -5.5, 'DS-1 Grind': -9.0, "Guv'nor Crunch": -9.0, 'Plexi Stack': -6.5, 'Lexicon Concert Hall': -1.5, 'Random Hall Lead': -4.0, 'Rich Plate Chime': -5.0, 'Bricasti Large Hall': -1.0, 'Bricasti Small Room': -2.5, 'Dual Grind': -1.0, 'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': -5.5, 'Top Boost Chime': -6.5, 'Tweed Blues': -5.5, 'Texas Drive': -11.0, 'Brit Crunch': -1.0, 'Cranked AC30': -5.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': 0.5, 'Fusion Lead': 0.5, 'Classic V Rhythm': -1.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': 1.5, 'RAT Grunge': -8.5, 'Ambient Swells': -2.5, 'Dual Cab Crunch': -5.5}
 LEVELS_OLD = {'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 3.0, 'Edge of Breakup': 1.5, 'Touch Sensitive': -7.5, 'Tweed Blues': -1.0, 'Texas Drive': -9.5, 'Plexi Crunch': -0.5, 'Cranked Plexi': -5.0, 'British Crunch': -1.0, 'Boosted Brit': -4.0, 'Hot Rod Lead': -4.0, 'Singing Lead': -4.0, 'Fusion Lead': -1.0, 'Classic V Rhythm': -2.5, 'High Gain Rhythm': -1.5, 'Modern Metal': -3.0, 'Tight Extended Range': -2.0, 'Ambient Swells': -1.5, 'Dual Cab Crunch': -2.5}
 
 def main():
@@ -136,7 +139,7 @@ def main():
     for m in manifest:
         ir_names[m["id"]] = m["name"]
     # Usual valves per model (preamp V1, power) — matches AmpVoicing defaults in AmpModel.cpp.
-    valves = {0: (2, 2), 1: (3, 4), 2: (0, 3), 3: (0, 1), 4: (0, 0), 5: (0, 0), 6: (0, 0), 7: (0, 0), 8: (0, 1)}
+    valves = {0: (2, 2), 1: (3, 4), 2: (0, 3), 3: (0, 1), 4: (0, 0), 5: (0, 0), 6: (0, 0), 7: (0, 0), 8: (0, 1), 9: (0, 0)}
     for i, (name, cat, desc, ira, irb, params) in enumerate(P):
         params = dict(params)
         model = params["amp.model"]

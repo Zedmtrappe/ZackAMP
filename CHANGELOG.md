@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added (5150)
+- **5150** amp model (10th on the selector): 90s American high-gain lead — a long cascade of cold,
+  tightly coupled stages, stack after the distortion, 6L6 power. Tighter lows and more upper-mid
+  bite than the Triple. New factory cab IRs **5150 4x12 — Cap / Edge** (procedurally designed, like
+  the rest of the set); preset "5150 Lead Rhythm". Model-name engravings re-aligned so ten fit.
+
 ### Added (drives)
 - Drive types **SD-1** (asymmetric soft clipping: smoother, more even harmonics), **DS-1**
   (booster + hard diodes, scooped blend tone) and **Guv'nor** (Marshall-in-a-box: hard clipping,

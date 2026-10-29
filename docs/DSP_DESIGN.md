@@ -122,6 +122,7 @@ the circuits are built from this engine's blocks, not copied schematics).
 | MP1 | V1 (110 Hz input HP) → Drive → V2..V3 → scooped stack → make-up stage | Clean, stiff 6L6 (rack power amp) | Tight, scooped, saturated 80s rack rhythm |
 | Triple | V1 → Gain → cold V2..V4 → CF → scooped stack (bass reaches the gain stages; only the cold clipper is a little tight) | 6L6, low NFB, rectifier sag | Thick, saturated, huge low end, scooped mids |
 | Dual | As Triple, with less mid scoop and a slightly tighter clipper stage | Four 6L6 (100 W): more sag, earlier phase-inverter and power breakup | Rawer, grindier, saggier than the Triple |
+| 5150 | V1 → Pre Gain → cold, tightly coupled V2..V4 → CF → stack | 6L6, moderate sag | Tight, aggressive, saturated, upper-mid bite |
 
 Every model has every control (Presence, Resonance and Bright included); valve selectors are applied
 relative to each model's usual valves (Tweed 12AY7/6V6, JC120 12AT7/KT88, AC30 12AX7/EL84,

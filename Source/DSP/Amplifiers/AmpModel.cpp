@@ -254,6 +254,32 @@ namespace
             a.volumeMakeupDb = 10.0f;
             a.defaultIrId = "factory:br-4x12-v25-cap";
         }
+        {
+            // 1990s American high-gain lead: a long cascade of cold, tightly coupled stages (tight
+            // palm mutes, aggressive upper-mid bite, lots of saturation), stack after the
+            // distortion, 6L6 power with moderate sag.
+            auto& a = v[9];
+            a.id = "5150";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 0;  // 6L6
+            a.name = "5150";
+            a.shortDescription = "1990s American high-gain lead: tight, aggressive and saturated, with a cutting upper-mid bite.";
+            a.family = AmpFamily::modern;
+            a.gainLabel = "Pre Gain";
+            a.inputHpHz = 40.0f;
+            a.triodes[0] = tri (40.0f, 40.0f, 700.0f, -8.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
+            a.triodes[1] = tri (40.0f, 130.0f, 600.0f, -6.0f, 9000.0f, -0.45f, 1.4f, 0.25f);
+            a.triodes[2] = tri (40.0f, 80.0f, 300.0f, -4.0f, 7800.0f, -0.25f, 1.5f, 0.3f);
+            a.triodes[3] = tri (30.0f, 50.0f, 0, 0, 7200.0f, 0.0f, 1.6f, 0.3f);
+            a.chain = { triode (0), gainPot(), triode (1), pad (-10.0f), triode (2), pad (-13.0f), triode (3), follower(), toneStack() };
+            a.gainFloorDb = -58.0f;
+            a.toneStack = tsModernHeavy;
+            a.cathodeFollower = { 0.025f, 0.9f, 2.5f, 20.0f };
+            a.power = { 0.30f, 2.8f, 0.03f, 0.25f, 130.0f, 4200.0f, 8.0f, 85.0f, 10.0f, 0.5f, 45.0f, 9000.0f, 0.60f };
+            a.powerDriveDb = -4.0f;
+            a.outputTrimDb = 1.5f;
+            a.defaultIrId = "factory:pv-4x12-5150-cap";
+        }
         // Every control works on every model (owner's request): give voicings that had no
         // bright cap or depth/resonance control sensible ones. Defaults (bright off) keep the
         // calibrated sound; depth now also adds low-end resonance on the vintage models.
