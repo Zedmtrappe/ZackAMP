@@ -45,7 +45,7 @@ private:
     enum Layer { baseLayer, powerGlow, preGlow, trafoLayer, ledLayer, numLayers };
     std::array<juce::Image, numLayers> layers;  // cropped and scaled to the glass, in pixels
     juce::Image composite;
-    int layersValve = -1;
+    int layersValve = -1, layersPre = -1;
     bool compositeDirty = true;
 
     AppController& app;

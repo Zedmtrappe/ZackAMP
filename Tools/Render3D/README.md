@@ -12,6 +12,16 @@ writes the JPEGs the app bundles from `Resources/Interior/`.
 | `pre.jpg` | light from the preamp-valve heaters only |
 | `trafo.jpg` | transformer winding glow only |
 | `led.jpg` | purple LED edge light only |
+| `v1_<type>.jpg` | V1 (first preamp valve) as each preamp type, room light — a small patch |
+| `v1g_<type>.jpg` | the same patch, preamp heater light only |
+
+The V1 patches cover a fixed rectangle of the frame (written to `v1_rect.txt` when rendered; the
+same values are `kV1Patch` in `AmpHead.cpp`), blended in with feathered edges. Rendering skips layers
+that already exist in the output folder (set `FORCE=1` to redo them), so an interrupted run can
+simply be started again.
+
+Scene scale is real (1 unit = 1 cm): glass at y = -7, valves ~9 cm behind it, back wall ~10 cm behind
+the valves, camera ~45 cm in front of the glass.
 
 The app (`GlassWindow` in `Source/UI/AmpHead.cpp`) crops the layers to the glass shape and adds them
 in linear light: heater layers tinted by the model's heat colour (faint orange → white hot), the

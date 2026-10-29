@@ -20,13 +20,16 @@ def blur_lin(lin, radius):
     out = np.asarray(im.filter(ImageFilter.GaussianBlur(radius))).astype(np.float32) / 255
     return out ** 2.2
 
+# Bloom radii follow the full render width (the V1 patches are small crops of the same frame).
+full_w = Image.open(os.path.join(src, "base_6L6.jpg")).size[0]
+
 for name in sorted(os.listdir(src)):
     if not name.endswith(".jpg"):
         continue
     img = np.asarray(Image.open(os.path.join(src, name)).convert("RGB")).astype(np.float32) / 255
-    if not name.startswith("base_"):
+    if not name.startswith(("base_", "v1_")):  # room-light layers have no bloom
         lin = to_lin(img)
-        w = lin.shape[1]
+        w = full_w
         lin = lin + 0.6 * blur_lin(lin, w * 0.005) + 0.45 * blur_lin(lin, w * 0.02)
         img = to_srgb(lin)
     Image.fromarray((img * 255 + 0.5).astype(np.uint8)).save(os.path.join(dst, name), quality=88, optimize=True, progressive=False)

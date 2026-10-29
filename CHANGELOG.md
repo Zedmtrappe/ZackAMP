@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Changed (interior)
+- The amp interior was re-rendered close up: the parts now sit about 9 cm behind the glass (the deck no
+  longer runs far out in front of them), with real perspective, and fill the window.
+- Every valve type looks different: 6L6, EL34 (brown base, black plates, halo getter), 6V6 (coke
+  bottle), EL84 (miniature), KT88 (big, shouldered), and V1 follows the preamp selector (12AX7,
+  5751, 12AY7, 12AT7: plates and printed name).
+- The "Z.AMP" logo is etched deeper: a V-groove with shaded and lit walls, a bright lip and a frosted
+  floor, glowing in the cut when the LEDs are on.
+
 ### Changed (feedback round)
 - Studio Comp: Amount 0 is now identical to off (threshold rises to 0 dBFS and the whole effect,
   tone and level included, fades out over the bottom of the knob). Tested bit-for-bit.

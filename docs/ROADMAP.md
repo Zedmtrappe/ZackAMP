@@ -96,25 +96,20 @@ Status: items 1–14 are implemented (see CHANGELOG); 15–17 are next.
     darkening repeats) (`delay.type`).
 14. **Compressors** — a *CS-3* style pedal before the amp and a *Studio* compressor after the
     cabinet — and an **auto-wah**.
-15. **Interior perspective: parts close behind the glass.** The rendered valves and transformers
-    read as sitting ~300 mm or more behind the glass; on a real head they would be ~100 mm at most.
-    Fix in `Tools/Render3D/amp_interior.py`: camera ~150 mm from the front row with a wider lens
-    (~24–28 mm equivalent) instead of ~900 mm with 44 mm, parts filling more of the frame,
-    shallower depth of field, the back wall closer behind the valves, and stronger near-field
-    reflections/LED spill from the glass edge; then re-render all layers and re-check the crop
-    for every window shape.
-16. **Deeper etched logo.** Make "Z.AMP" read as cut *into* the glass rather than printed on it:
-    V-groove look with a lit inner wall and a dark opposite wall (light from the LED edge catching
-    one side of each stroke), a bright rim highlight along the top edges, a faint frosted floor,
-    slight refraction/offset of what is seen through the strokes, and the glow strongest inside
-    the cut. Unlit, it should still look like a clean frosted engraving. (`GlassWindow::drawFront`
-    / `drawLit` in `Source/UI/AmpHead.cpp`; pre-rendered once per size, no runtime cost.)
-17. **Valves look like the selected type, more distinctly.** Already: the four power valves are
-    re-rendered per type (6L6, EL34, 6V6, EL84, KT88: size, base, and the printed type name).
-    To do: more characterful bottles (EL34 "fat" straight glass, KT88 shouldered "coke bottle",
-    6V6 slim, 6L6GC tall straight), plate shapes and getter styles per type, and the preamp V1
-    valve following its selector (12AX7 / 5751 / 12AY7 / 12AT7: printing, plate length and
-    colour). V1 rendered as its own overlay layer so the combinations do not multiply the renders.
+15. **Interior perspective: parts close behind the glass.** Done: the chassis deck now ends at
+    the glass, the valves stand ~9 cm behind it with the back wall ~10 cm behind them and side
+    walls, the camera is ~45 cm in front of the glass with a 33.5 mm lens (real perspective), and
+    the parts fill the window. A wide (short) window keeps the deck and valve bases and trims the
+    top; a tall window zooms in.
+16. **Deeper etched logo.** Done: "Z.AMP" is drawn as a V-groove cut into the glass — shaded upper
+    walls, lit lower walls, a bright top lip and a frosted floor; with the LEDs on the cut surfaces
+    glow.
+17. **Valves look like the selected type.** Done: each power type has its own bottle and parts
+    (6L6 tall straight; EL34 taller, brown base, black plates, halo getter with a clear dome; 6V6
+    "coke bottle"; EL84 9-pin miniature with exhaust tip; KT88 big and shouldered with bright
+    plates), and V1 follows the preamp selector (12AX7 / 5751 black plates, three micas / 12AY7
+    long plates / 12AT7 ribbed bright plates, each with its name printed) as a patch over the base
+    and glow layers, so the combinations do not multiply the renders.
 
 ## AU and VST3 plugins
 

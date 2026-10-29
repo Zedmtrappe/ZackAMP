@@ -388,6 +388,56 @@ void GlassWindow::drawParts (juce::Graphics& g) const
     g.restoreState();
 }
 
+namespace
+{
+    /** One wall of the etched groove: the band inside `logo` that is uncovered when the logo is
+        shifted by `offset` — i.e. the inner wall facing away from that direction. Built up in
+        several steps so the wall shades softly from the lip down to the floor. */
+    void drawGrooveWall (juce::Graphics& g, const juce::Path& logo, juce::Point<float> offset, juce::Colour colour, int steps)
+    {
+        for (int i = steps; i >= 1; --i)
+        {
+            const float t = (float) i / (float) steps;
+            juce::Path wall (logo);
+            wall.addPath (logo, juce::AffineTransform::translation (offset.x * t, offset.y * t));
+            wall.setUsingNonZeroWinding (false); // logo minus its shifted copy
+            g.saveState();
+            g.reduceClipRegion (logo);
+            g.setColour (colour.withMultipliedAlpha (1.0f / (float) steps * (1.6f - 0.6f * t)));
+            g.fillPath (wall);
+            g.restoreState();
+        }
+    }
+
+    /** The logo etched into the glass as a V-groove lit from above: the upper walls in shadow, the
+        lower walls catching the light, a bright lip along the top edge and a frosted floor. With
+        `lit`, the LED light trapped in the glass makes the cut surfaces glow. */
+    void drawEtchedLogo (juce::Graphics& g, const juce::Path& logo, bool lit)
+    {
+        const float d = juce::jlimit (1.5f, 5.0f, logo.getBounds().getHeight() * 0.045f); // groove depth as seen
+        const auto floorColour = lit ? kPurpleLight : juce::Colours::white;
+        // Floor: frosted (scatters light), seen slightly lower than the lip by refraction.
+        g.setColour (floorColour.withAlpha (lit ? 0.55f : 0.10f));
+        g.fillPath (logo, juce::AffineTransform::translation (0.0f, d * 0.35f));
+        // Walls: the upper ones face down, away from the light (dark); the lower ones face up (bright).
+        drawGrooveWall (g, logo, { d * 0.35f, d }, juce::Colours::black.withAlpha (lit ? 0.5f : 0.75f), 4);
+        drawGrooveWall (g, logo, { -d * 0.2f, -d * 0.8f }, juce::Colours::white.withAlpha (lit ? 0.85f : 0.42f), 4);
+        // Lips: a fine highlight where the top edges break the surface, a dark line along the bottom
+        // edges where the cut catches the shadow of the glass.
+        g.saveState();
+        juce::Path outside;
+        outside.addRectangle (logo.getBounds().expanded (d * 3.0f));
+        outside.addPath (logo);
+        outside.setUsingNonZeroWinding (false);
+        g.reduceClipRegion (outside);
+        g.setColour (juce::Colours::white.withAlpha (lit ? 0.7f : 0.30f));
+        g.strokePath (logo, juce::PathStrokeType (0.9f), juce::AffineTransform::translation (0.0f, -0.4f));
+        g.setColour (juce::Colours::black.withAlpha (lit ? 0.25f : 0.45f));
+        g.strokePath (logo, juce::PathStrokeType (0.9f), juce::AffineTransform::translation (0.0f, 0.6f));
+        g.restoreState();
+    }
+} // namespace
+
 juce::Path GlassWindow::makeLogoPath() const
 {
     juce::GlyphArrangement ga;
@@ -454,13 +504,7 @@ void GlassWindow::drawFront (juce::Graphics& g) const
     g.restoreState();
 
     // Etched (frosted) logo, as seen with the LEDs off.
-    const auto logo = makeLogoPath();
-    g.setColour (juce::Colours::black.withAlpha (0.35f));
-    g.fillPath (logo, juce::AffineTransform::translation (0.0f, 1.2f));
-    g.setColour (juce::Colours::white.withAlpha (0.16f));
-    g.fillPath (logo);
-    g.setColour (juce::Colours::white.withAlpha (0.28f));
-    g.strokePath (logo, juce::PathStrokeType (0.8f));
+    drawEtchedLogo (g, makeLogoPath(), false);
 
     // Bezel around the glass.
     const auto outer = getLocalBounds().toFloat();
@@ -506,15 +550,44 @@ void GlassWindow::drawLit (juce::Graphics& g) const
     juce::DropShadow (kPurple.withAlpha (0.75f), 38, {}).drawForPath (g, logo);
     juce::DropShadow (kPurple.withAlpha (0.9f), 14, {}).drawForPath (g, logo);
     const auto b = logo.getBounds();
-    g.setGradientFill (juce::ColourGradient (kPurpleLight.withAlpha (0.88f), 0, b.getY(), juce::Colour (0xffc58bff).withAlpha (0.8f), 0, b.getBottom(), false));
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffc58bff).withAlpha (0.55f), 0, b.getY(), kPurple.withAlpha (0.5f), 0, b.getBottom(), false));
     g.fillPath (logo);
-    g.setColour (juce::Colours::white.withAlpha (0.7f));
-    g.strokePath (logo, juce::PathStrokeType (0.8f));
+    drawEtchedLogo (g, logo, true);
 }
+
+namespace
+{
+    // Where the V1 patches (v1_<type>.jpg, v1g_<type>.jpg) sit in the full render, as fractions
+    // of its size (left, top, right, bottom). Written by Tools/Render3D/amp_interior.py.
+    constexpr float kV1Patch[4] = { 0.17f, 0.46f, 0.26f, 0.86f };
+
+    /** Blends a patch into `full` at kV1Patch, feathering its edges so the seam never shows. */
+    void pastePatch (juce::Image& full, const juce::Image& patch)
+    {
+        if (! patch.isValid())
+            return;
+        const int x0 = juce::roundToInt (kV1Patch[0] * (float) full.getWidth());
+        const int y0 = juce::roundToInt (kV1Patch[1] * (float) full.getHeight());
+        const int pw = std::min (patch.getWidth(), full.getWidth() - x0), ph = std::min (patch.getHeight(), full.getHeight() - y0);
+        const float feather = (float) std::max (4, std::min (pw, ph) / 8);
+        full = full.createCopy(); // the source may be shared with the image cache
+        juce::Image::BitmapData out (full, juce::Image::BitmapData::readWrite);
+        juce::Image::BitmapData in (patch, juce::Image::BitmapData::readOnly);
+        for (int y = 0; y < ph; ++y)
+            for (int x = 0; x < pw; ++x)
+            {
+                const float edge = (float) std::min (std::min (x, pw - 1 - x), std::min (y, ph - 1 - y));
+                const float a = juce::jlimit (0.0f, 1.0f, edge / feather);
+                const auto s = in.getPixelColour (x, y), d = out.getPixelColour (x0 + x, y0 + y);
+                out.setPixelColour (x0 + x, y0 + y, d.interpolatedWith (s, a));
+            }
+    }
+} // namespace
 
 void GlassWindow::prepareLayers (int pixelW, int pixelH)
 {
     const auto* valveName = dsp::kPowerValves[(size_t) juce::jlimit (0, dsp::kNumPowerValves - 1, shownPowValve)].name;
+    const juce::String preName = dsp::kPreampValves[(size_t) juce::jlimit (0, dsp::kNumPreampValves - 1, shownPreValve)].name;
     const juce::String files[numLayers] = { juce::String ("base_") + valveName + ".jpg", juce::String ("pow_") + valveName + ".jpg",
                                             "pre.jpg", "trafo.jpg", "led.jpg" };
     for (int i = 0; i < numLayers; ++i)
@@ -527,19 +600,31 @@ void GlassWindow::prepareLayers (int pixelW, int pixelH)
             layers[(size_t) i] = {};
             continue;
         }
-        // Cover the glass: crop the render to the glass aspect ratio (keeping the chassis deck in
-        // view), then scale to the glass size in physical pixels.
+        // V1 shows the selected preamp valve type.
+        if (i == baseLayer)
+            pastePatch (src, loadInterior ("v1_" + preName + ".jpg"));
+        else if (i == preGlow)
+            pastePatch (src, loadInterior ("v1g_" + preName + ".jpg"));
+
+        // Cover the glass: crop the render to the glass aspect ratio, then scale to the glass size
+        // in physical pixels. A wide glass keeps the chassis deck and valve bases (the bottom of
+        // the crop stays near 90 % of the render); a tall glass zooms in around the centre.
         const float aspect = (float) pixelW / (float) pixelH;
         auto crop = src.getBounds();
         if ((float) crop.getWidth() / (float) crop.getHeight() > aspect)
             crop = crop.withSizeKeepingCentre (juce::roundToInt ((float) crop.getHeight() * aspect), crop.getHeight());
-        else // the render is centred on the valves, with spare wall above and deck below
-            crop = crop.withSizeKeepingCentre (crop.getWidth(), juce::roundToInt ((float) crop.getWidth() / aspect));
+        else
+        {
+            const int h = juce::roundToInt ((float) crop.getWidth() / aspect);
+            const int top = juce::jlimit (0, src.getHeight() - h, juce::roundToInt (0.90f * (float) src.getHeight()) - h);
+            crop = { 0, top, crop.getWidth(), h };
+        }
         layers[(size_t) i] = src.getClippedImage (crop).rescaled (pixelW, pixelH, juce::Graphics::highResamplingQuality)
                                  .convertedToFormat (juce::Image::RGB);
     }
     composite = juce::Image (juce::Image::RGB, pixelW, pixelH, false);
     layersValve = shownPowValve;
+    layersPre = shownPreValve;
     compositeDirty = true;
 }
 
@@ -612,7 +697,7 @@ void GlassWindow::paint (juce::Graphics& g)
     {
         const int pw = std::max (1, juce::roundToInt (glass.getWidth() * scale));
         const int ph = std::max (1, juce::roundToInt (glass.getHeight() * scale));
-        if (composite.getWidth() != pw || composite.getHeight() != ph || layersValve != shownPowValve)
+        if (composite.getWidth() != pw || composite.getHeight() != ph || layersValve != shownPowValve || layersPre != shownPreValve)
             prepareLayers (pw, ph);
         if (compositeDirty)
             compositeLayers();
