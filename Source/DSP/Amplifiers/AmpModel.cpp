@@ -229,6 +229,31 @@ namespace
             a.triodes[1].couplingHpHz = 85.0f;
             a.triodes[1].plateLpHz = 7500.0f;
         }
+        {
+            // Late-60s British 100 W lead: V1 -> volume pot with a big bright cap -> V2 -> cathode
+            // follower -> Marshall-type stack -> four EL34s with modest feedback and no master in the
+            // original. Less preamp gain than the JCM800: much of its crunch is the power valves.
+            auto& a = v[8];
+            a.id = "plexi";
+            a.defaultPreampValve = 0; // 12AX7
+            a.defaultPowerValve = 1;  // EL34
+            a.name = "Plexi";
+            a.shortDescription = "Late-60s British 100 W: open, chewy crunch from the EL34s, bright and toothy.";
+            a.family = AmpFamily::british;
+            a.gainLabel = "Volume";
+            a.inputHpHz = 25.0f;
+            a.triodes[0] = tri (40.0f, 25.0f, 300.0f, -7.0f, 14000.0f, 0.0f, 1.6f, 0.2f);
+            a.triodes[1] = tri (36.0f, 30.0f, 250.0f, -4.0f, 11000.0f, -0.2f, 1.5f, 0.3f);
+            a.chain = { triode (0), gainPot(), triode (1), follower(), toneStack() };
+            a.toneStack = tsBritish;
+            a.bright = { true, 1800.0f, 9.0f };
+            a.cathodeFollower = { 0.025f, 0.8f, 2.5f, 20.0f };
+            a.power = { 0.40f, 2.2f, 0.05f, 0.20f, 110.0f, 3800.0f, 8.0f, 90.0f, 0.0f, 0.5f, 45.0f, 9000.0f, 0.65f };
+            a.powerDriveDb = 6.0f;
+            a.outputTrimDb = -1.0f;
+            a.volumeMakeupDb = 10.0f;
+            a.defaultIrId = "factory:br-4x12-v25-cap";
+        }
         // Every control works on every model (owner's request): give voicings that had no
         // bright cap or depth/resonance control sensible ones. Defaults (bright off) keep the
         // calibrated sound; depth now also adds low-end resonance on the vintage models.

@@ -445,3 +445,27 @@ TEST_CASE ("Changing the Studio Comp model while playing does not click")
     MESSAGE ("max sample step " << maxStep << " (steady " << normalStep << ")");
     CHECK (maxStep < normalStep * 2.0f);
 }
+
+TEST_CASE ("Every reverb type produces a tail through the engine")
+{
+    for (int type = 0; type < dsp::Reverb::numTypes; ++type)
+    {
+        AmpForgeEngine e;
+        e.params().set (pCabOn, 0);
+        e.params().set (pAmpModel, 1);
+        e.params().set (pReverbOn, 1);
+        e.params().set (pReverbMix, 0.3f);
+        e.params().set (pReverbType, (float) type);
+        e.prepare (48000, 256);
+        const int n = 48000 * 2;
+        auto in = test::sine (220.0, 48000, n, 0.2f);
+        std::fill (in.begin() + 24000, in.end(), 0.0f);
+        std::vector<float> l ((size_t) n), r ((size_t) n);
+        for (int p = 0; p < n; p += 256)
+            e.process (in.data() + p, l.data() + p, r.data() + p, 256);
+        const double tail = test::rms (l, 36000, 60000);
+        INFO ("type " << type);
+        MESSAGE ("reverb type " << type << " tail " << test::db (tail) << " dB");
+        CHECK (tail > 1e-4);
+    }
+}

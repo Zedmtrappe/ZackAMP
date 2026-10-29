@@ -2,7 +2,7 @@
 //
 // Every model shares one stereo-linked gain computer; they differ where the real units differ:
 //
-//   Studio        clean feed-forward VCA, soft knee, ratio 2-20:1, attack 1-30 ms, release 30-750 ms.
+//   Pristine      clean feed-forward VCA, soft knee, ratio 2-20:1, attack 1-30 ms, release 30-750 ms.
 //   LA-2A         optical: about 10 ms attack and the two-stage opto release (fast for the first
 //                 half, then slow, and slower the longer it has been working); very soft knee,
 //                 Compress about 3:1, Limit about 12:1; HF emphasis in the side chain; valve make-up.
@@ -158,7 +158,7 @@ public:
                 }
                 makeupDb = -thresholdDb * 0.45f;
                 satKind = 1;
-                satAmount = 0.12f;
+                satAmount = 0.30f; // the valve gain stages are part of the sound
                 break;
             }
             case dbx160:

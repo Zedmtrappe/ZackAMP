@@ -260,6 +260,52 @@ void AppController::selectAmpModel (int model)
         setParamWithUndo (pAmpModel, (float) model); // follow-ups happen in followModelChange()
 }
 
+namespace
+{
+    /** Classic starting settings of each Lexicon / Bricasti program: decay, tone (treble decay),
+        pre-delay, size, diffusion, bass multiplier, crossover, spin, wander, early reflections. */
+    struct ReverbProgram { float decay, tone, preDelay, size, diffusion, bassMult, crossover, spin, wander, early; };
+    constexpr ReverbProgram kLexiconPrograms[] = {
+        { 2.6f, 0.55f, 24.0f, 0.80f, 0.80f, 1.3f, 650.0f, 0.9f, 0.35f, 0.5f }, // Concert Hall
+        { 3.0f, 0.50f, 32.0f, 0.85f, 0.75f, 1.2f, 700.0f, 1.2f, 0.60f, 0.5f }, // Random Hall
+        { 1.6f, 0.72f, 0.0f, 0.50f, 0.90f, 1.0f, 500.0f, 1.4f, 0.45f, 0.5f },  // Rich Plate
+        { 1.4f, 0.42f, 10.0f, 0.55f, 0.85f, 1.1f, 600.0f, 0.7f, 0.30f, 0.5f }, // Chamber
+    };
+    constexpr ReverbProgram kM7Programs[] = {
+        { 3.0f, 0.55f, 18.0f, 0.90f, 0.80f, 1.2f, 400.0f, 0.5f, 0.20f, 0.45f }, // Large Hall
+        { 0.7f, 0.55f, 2.0f, 0.30f, 0.70f, 1.0f, 500.0f, 0.5f, 0.15f, 0.75f },  // Small Room
+        { 2.0f, 0.70f, 0.0f, 0.55f, 0.90f, 1.0f, 500.0f, 0.6f, 0.25f, 0.0f },   // Plate
+        { 1.5f, 0.48f, 8.0f, 0.55f, 0.80f, 1.1f, 500.0f, 0.5f, 0.20f, 0.55f },  // Chamber
+    };
+} // namespace
+
+void AppController::setChoiceFromUser (int index, int value)
+{
+    const auto& p = engine.params();
+    int type = p.getInt (pReverbType);
+    int program = -1;
+    if (index == pReverbType)
+        type = value;
+    if (index == pReverbType || index == pReverbLexProgram || index == pReverbM7Program)
+    {
+        if (type == dsp::Reverb::lexicon)
+            program = index == pReverbLexProgram ? value : p.getInt (pReverbLexProgram);
+        else if (type == dsp::Reverb::bricasti)
+            program = index == pReverbM7Program ? value : p.getInt (pReverbM7Program);
+    }
+    if (program < 0)
+    {
+        setParamWithUndo (index, (float) value);
+        return;
+    }
+    const auto& prog = (type == dsp::Reverb::lexicon ? kLexiconPrograms : kM7Programs)[juce::jlimit (0, 3, program)];
+    setParamsWithUndo ({ { index, (float) value }, { pReverbDecay, prog.decay }, { pReverbTone, prog.tone }, { pReverbPreDelay, prog.preDelay },
+                         { pReverbSize, prog.size }, { pReverbDiffusion, prog.diffusion }, { pReverbBassMult, prog.bassMult },
+                         { pReverbCrossover, prog.crossover }, { pReverbSpin, prog.spin }, { pReverbWander, prog.wander },
+                         { pReverbEarly, prog.early } },
+                       "Reverb program");
+}
+
 void AppController::followModelChange()
 {
     // A model change made by the user (knob, MIDI, undo...) resets the valves to the new

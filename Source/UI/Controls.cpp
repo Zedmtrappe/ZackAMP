@@ -261,7 +261,7 @@ ParamChoice::ParamChoice (AppController& a, int paramIndex) : app (a), index (pa
     onChange = [this]
     {
         if (! updating && getSelectedId() > 0)
-            app.setParamWithUndo (index, (float) (getSelectedId() - 1));
+            app.setChoiceFromUser (index, getSelectedId() - 1);
     };
     refresh();
 }

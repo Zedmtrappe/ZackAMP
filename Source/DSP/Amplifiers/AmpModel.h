@@ -83,7 +83,7 @@ struct AmpVoicing
     int defaultPowerValve = 0;  // index into kPowerValves
 };
 
-constexpr int kNumAmpModels = 8;
+constexpr int kNumAmpModels = 9;
 const AmpVoicing& getAmpVoicing (int index) noexcept;
 int getNumAmpModels() noexcept;
 

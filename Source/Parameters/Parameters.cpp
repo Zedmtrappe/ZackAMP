@@ -9,13 +9,13 @@ namespace af
 {
 namespace
 {
-    const char* const kAmpModels[] = { "Tweed", "JC120", "AC30", "JCM800", "Coliseum", "MP1", "Triple", "Dual" };
+    const char* const kAmpModels[] = { "Tweed", "JC120", "AC30", "JCM800", "Coliseum", "MP1", "Triple", "Dual", "Plexi" };
     const char* const kPreampValveNames[] = { "12AX7", "5751", "12AY7", "12AT7" };
     const char* const kPowerValveNames[] = { "6L6", "EL34", "6V6", "EL84", "KT88" };
     const char* const kModModes[] = { "Chorus", "Flanger", "Script Phaser", "Phase 90" };
     const char* const kDriveTypes[] = { "Screamer", "RAT" };
     const char* const kDelayTypes[] = { "Studio", "Tape" };
-    const char* const kCompTypes[] = { "Studio", "LA-2A", "1176", "SSL Bus", "Fairchild 670", "dbx 160" };
+    const char* const kCompTypes[] = { "Pristine", "LA-2A", "1176", "SSL Bus", "Fairchild 670", "dbx 160" };
     const char* const kCompRatios[] = { "2:1", "3:1", "4:1", "6:1", "10:1", "20:1" };
     const char* const kLa2aModes[] = { "Compress", "Limit" };
     const char* const k1176Ratios[] = { "4:1", "8:1", "12:1", "20:1", "All" };
@@ -59,7 +59,7 @@ namespace
         { "drive.level", "Level", "dB", -12.f, 12.f, 3.f, LIN, 1.f, "Drive", "Pedal output level: how hard it pushes the amp." },
         { "drive.type", "Type", "", 0.f, 1.f, 0.f, CHO, 1.f, "Drive", "Screamer: mid-hump soft clipping, tight lows (great in front of a gainy amp). RAT: op-amp distortion into hard diode clipping, full lows; Tone works as its Filter.", kDriveTypes, 2 },
 
-        { "amp.model", "Amp Model", "", 0.f, 7.f, 0.f, CHO, 1.f, "Amp", "Amplifier model.", kAmpModels, 8 },
+        { "amp.model", "Amp Model", "", 0.f, 8.f, 0.f, CHO, 1.f, "Amp", "Amplifier model.", kAmpModels, 9 },
         { "amp.gain", "Gain", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Preamp volume / gain pot." },
         { "amp.bass", "Bass", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Tone stack bass. Passive: interacts with mid and treble." },
         { "amp.mid", "Middle", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Amp", "Tone stack middle." },
@@ -89,14 +89,14 @@ namespace
         { "cab.b.level", "Cab B Level", "dB", -30.f, 6.f, -3.f, LIN, 1.f, "Cabinet", "Cabinet B level (dual mode)." },
         { "cab.b.pan", "Cab B Pan", "", -1.f, 1.f, 0.f, LIN, 1.f, "Cabinet", "Cabinet B pan (dual mode)." },
 
-        { "studiocomp.enabled", "Studio Comp", "", 0.f, 1.f, 0.f, TOG, 1.f, "StudioComp", "Clean studio compressor after the cabinet (4:1, soft knee, stereo-linked), like a mix compressor." },
+        { "studiocomp.enabled", "Studio Comp", "", 0.f, 1.f, 0.f, TOG, 1.f, "StudioComp", "Compressor after the cabinet (stereo-linked), like a mix compressor: choose Pristine, LA-2A, 1176, SSL Bus, Fairchild 670 or dbx 160." },
         { "studiocomp.amount", "Amount", "", 0.f, 1.f, 0.4f, LIN, 10.f, "StudioComp", "Amount of compression: lowers the threshold (make-up gain follows)." },
         { "studiocomp.attack", "Attack", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "1 ms (smooth, catches every transient) to 30 ms (punchy)." },
         { "studiocomp.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "Gentle treble tilt after the compressor (centre = flat)." },
         { "studiocomp.level", "Level", "dB", -12.f, 12.f, 0.f, LIN, 1.f, "StudioComp", "Output level." },
-        { "studiocomp.type", "Model", "", 0.f, 5.f, 0.f, CHO, 1.f, "StudioComp", "Compressor model: Studio (clean VCA), LA-2A (opto), 1176 (FET), SSL Bus (VCA bus), Fairchild 670 (vari-mu valve), dbx 160 (RMS VCA).", kCompTypes, 6 },
-        { "studiocomp.release", "Release", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "Release time (Studio 30 ms-0.75 s, 1176 50 ms-1.1 s, SSL 0.1/0.3/0.6/1.2 s). LA-2A, Fairchild and dbx set their own." },
-        { "studiocomp.ratio", "Ratio", "", 0.f, 5.f, 2.f, CHO, 1.f, "StudioComp", "Compression ratio (Studio and dbx 160).", kCompRatios, 6 },
+        { "studiocomp.type", "Model", "", 0.f, 5.f, 0.f, CHO, 1.f, "StudioComp", "Compressor model: Pristine (clean, transparent VCA), LA-2A (opto), 1176 (FET), SSL Bus (VCA bus), Fairchild 670 (vari-mu valve), dbx 160 (RMS VCA).", kCompTypes, 6 },
+        { "studiocomp.release", "Release", "", 0.f, 1.f, 0.5f, LIN, 10.f, "StudioComp", "Release time (Pristine 30 ms-0.75 s, 1176 50 ms-1.1 s, SSL 0.1/0.3/0.6/1.2 s). LA-2A, Fairchild and dbx set their own." },
+        { "studiocomp.ratio", "Ratio", "", 0.f, 5.f, 2.f, CHO, 1.f, "StudioComp", "Compression ratio (Pristine and dbx 160).", kCompRatios, 6 },
         { "studiocomp.la2a", "Mode", "", 0.f, 1.f, 0.f, CHO, 1.f, "StudioComp", "LA-2A: Compress (gentle, about 3:1) or Limit (firm).", kLa2aModes, 2 },
         { "studiocomp.1176ratio", "Ratio", "", 0.f, 4.f, 0.f, CHO, 1.f, "StudioComp", "1176 ratio buttons; All = all buttons in (aggressive, distorted, pumping).", k1176Ratios, 5 },
         { "studiocomp.sslratio", "Ratio", "", 0.f, 2.f, 1.f, CHO, 1.f, "StudioComp", "SSL bus compressor ratio.", kSslRatios, 3 },

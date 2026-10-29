@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Added (Plexi) / fixes
+- **Plexi** amp model (9th on the selector): late-60s 100 W British head — V1, volume with a big
+  bright cap, V2, cathode follower, Marshall stack, four EL34s that do much of the crunching.
+  Same valves and interior as the JCM800. Factory preset "Plexi Stack".
+- Lexicon and Bricasti **programs now load their full settings** (decay, treble decay, pre-delay,
+  size, diffusion, bass multiplier, crossover, spin, wander, early) when chosen — before, changing the
+  program barely changed the sound. Switching the type to Lexicon/Bricasti loads the current program.
+- Studio Comp: the "Studio" model is now **Pristine**. Model differences are measured and tested
+  (attack, release, knee, colour); the Fairchild has a little more valve colour.
+
 ### Added (studio reverbs)
 - Reverb types **Lexicon** (Concert Hall, Random Hall, Rich Plate, Chamber) and **Bricasti** (Large
   Hall, Small Room, Plate, Chamber), with an **ADV** window: pre-delay, size, diffusion, bass

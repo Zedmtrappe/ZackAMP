@@ -243,3 +243,29 @@ TEST_CASE ("Single-compressor presets move to the CS-3 pedal or the Studio Comp"
     CHECK (out.values[(size_t) pCompSustain] == doctest::Approx (0.7f));
     CHECK (out.values[(size_t) pStudioCompOn] == 0.0f);
 }
+
+TEST_CASE ("Studio reverb factory presets load their reverb settings into the engine")
+{
+    TempDir t;
+    PresetManager pm (t.dir);
+    pm.loadFactory();
+    IRLibrary lib (t.dir.getChildFile ("ir"));
+    lib.loadFactory();
+    int found = 0;
+    for (const auto& p : pm.getPresets())
+    {
+        if (p.state.category != "Studio Reverb")
+            continue;
+        ++found;
+        INFO (p.state.name.toStdString());
+        AmpForgeEngine e;
+        e.prepare (48000, 256);
+        juce::StringArray warnings;
+        applyState (e, lib, p.state, warnings);
+        MESSAGE (p.state.name << ": type " << e.params().getInt (pReverbType) << " on " << e.params().getBool (pReverbOn)
+                              << " mix " << e.params().get (pReverbMix) << " predelay " << e.params().get (pReverbPreDelay));
+        CHECK (e.params().getBool (pReverbOn));
+        CHECK (e.params().getInt (pReverbType) >= dsp::Reverb::lexicon);
+    }
+    CHECK (found == 5);
+}

@@ -27,8 +27,8 @@ void AmpPanel::applyStyle (int m)
     shownModel = m;
     const auto style = getFamilyStyle ((int) getAmpVoicing (m).family);
     // Knob edge lighting follows the model: cool green on the cleanest amp through to orange on
-    // the highest-gain one (order: JC120, Tweed, AC30, JCM800, Coliseum, MP1, Dual, Triple).
-    constexpr int rank[] = { 1, 0, 2, 3, 4, 5, 7, 6 };
+    // the highest-gain one (order: JC120, Tweed, AC30, Plexi, JCM800, Coliseum, MP1, Dual, Triple).
+    constexpr int rank[] = { 1, 0, 2, 4, 5, 6, 8, 7, 3 };
     static_assert (std::size (rank) == dsp::kNumAmpModels);
     const float heatPos = (float) rank[juce::jlimit (0, dsp::kNumAmpModels - 1, m)] / (float) (dsp::kNumAmpModels - 1);
     const auto light = juce::Colour::fromHSV (juce::jmap (heatPos, 0.42f, 0.075f), 0.85f, 1.0f, 1.0f);

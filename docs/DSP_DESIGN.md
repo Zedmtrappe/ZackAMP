@@ -116,6 +116,7 @@ the circuits are built from this engine's blocks, not copied schematics).
 | Tweed | V1 → Volume → V2 (slightly cold) → CF → tweed TMB | 6V6, low NFB, tube-rectifier sag | Touch-sensitive early breakup, loose and warm |
 | JC120 | Linear "V1" (5x headroom) → TMB → Volume → linear "V2" | Solid-state: very hard knee, no sag, high NFB, 15 kHz top | Huge clean headroom; clips abruptly only when cranked |
 | AC30 | V1 → CF → Top Boost stack (1M/1M, 56 pF) → Volume → V2 | EL84, no NFB (soft knee, follows the speaker), rectifier sag | Chime, early sweet power-amp breakup |
+| Plexi | V1 → Volume (bright cap) → V2 → CF → stack | Four EL34, modest NFB, driven hard (+6 dB) | Open, chewy power-valve crunch |
 | JCM800 | V1 (cathode shelf) → Pre-amp → cold V2 → V3 → CF → British TMB | EL34 | Cold-clipped cascade, tight lows, bite |
 | Coliseum | V1 → TMB (*before the gain*) → Drive → V2..V4 cascade | 6L6, stiff, lots of headroom | Singing lead, vocal mids; pairs with the graphic EQ |
 | MP1 | V1 (110 Hz input HP) → Drive → V2..V3 → scooped stack → make-up stage | Clean, stiff 6L6 (rack power amp) | Tight, scooped, saturated 80s rack rhythm |
@@ -291,7 +292,7 @@ One stereo-linked gain computer, with the behaviour that distinguishes each clas
 
 | Model | Detector / topology | Ballistics | Character |
 |---|---|---|---|
-| Studio | peak, feed-forward | attack 1–30 ms, release 30–750 ms | clean, soft knee, ratio 2–20:1 |
+| Pristine | peak, feed-forward | attack 1–30 ms, release 30–750 ms | clean, soft knee, ratio 2–20:1 |
 | LA-2A | peak, feedback (opto) | ~10 ms attack; two-stage release: half in ~60 ms, the rest over 0.5–5 s depending on how long it has worked | very soft knee; Compress / Limit; side-chain HF emphasis; even-harmonic valve make-up |
 | 1176 | peak, feedback (FET) | 20–800 µs attack, 50 ms–1.1 s release | Input drives a fixed threshold; 4/8/12/20 and All (harder grab, more distortion); odd FET distortion grows with GR |
 | SSL Bus | peak, feed-forward VCA | stepped 0.1–30 ms attack, 0.1–1.2 s release or Auto (program-dependent) | 2/4/10:1, firm knee, clean |

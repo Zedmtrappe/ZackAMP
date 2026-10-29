@@ -1,4 +1,5 @@
 #include <doctest.h>
+#include <complex>
 #include "TestSignals.h"
 #include "../../Source/DSP/Effects/Overdrive.h"
 #include "../../Source/DSP/Effects/Reverb.h"
@@ -504,4 +505,107 @@ TEST_CASE ("Lexicon and Bricasti: every program is stable, decays at the set tim
         };
         CHECK (lowTail (2.0f) > 2.0 * lowTail (1.0f));
     }
+}
+
+namespace
+{
+    struct CompProfile
+    {
+        std::array<double, 5> grAt {}; // steady gain reduction (dB) at -30, -20, -12, -6, 0 dBFS
+        double attackMs = 0, releaseMs = 0, thd = 0;
+    };
+
+    CompProfile profileOf (int model, float amount = 0.5f)
+    {
+        const double fs = 48000;
+        CompProfile p;
+        dsp::ClassicCompressor::Controls ctl;
+        ctl.model = model;
+        ctl.amount = amount;
+        auto runSteady = [&] (float db, std::vector<float>* keep = nullptr)
+        {
+            dsp::ClassicCompressor c;
+            c.prepare (fs);
+            auto l = test::sine (1000.0, fs, (int) fs * 2, std::pow (10.0f, db / 20.0f)), r = l;
+            float gr = 0;
+            for (size_t i = 0; i + 32 <= l.size(); i += 32)
+            {
+                c.setControls (ctl);
+                c.process (l.data() + i, r.data() + i, 32, 1.0f, 1.0f, 1.0f);
+                gr = c.getMeterDb();
+            }
+            if (keep != nullptr) *keep = l;
+            return (double) gr;
+        };
+        const float levels[] = { -30, -20, -12, -6, 0 };
+        for (int k = 0; k < 5; ++k)
+            p.grAt[(size_t) k] = runSteady (levels[k]);
+        // Attack / release: a -30 dBFS tone stepping up to -6 dBFS for 1 s, then back down.
+        dsp::ClassicCompressor c;
+        c.prepare (fs);
+        const int n = (int) fs * 4;
+        auto l = test::sine (1000.0, fs, n, 1.0f);
+        for (int i = 0; i < n; ++i)
+            l[(size_t) i] *= (i >= (int) fs && i < (int) fs * 2) ? 0.5f : 0.0316f;
+        auto r = l;
+        std::vector<float> gr;
+        for (int i = 0; i + 32 <= n; i += 32)
+        {
+            c.setControls (ctl);
+            c.process (l.data() + i, r.data() + i, 32, 1.0f, 1.0f, 1.0f);
+            gr.push_back (c.getMeterDb());
+        }
+        const double blockMs = 32.0 / fs * 1000.0;
+        const size_t up = (size_t) (fs / 32), down = (size_t) (fs * 2 / 32);
+        const double top = gr[down - 1], base = gr[up - 1];
+        for (size_t b = up; b < down; ++b)
+            if (gr[b] >= base + 0.63 * (top - base)) { p.attackMs = (double) (b - up + 1) * blockMs; break; }
+        for (size_t b = down; b < gr.size(); ++b)
+            if (gr[b] <= top - 0.63 * (top - base)) { p.releaseMs = (double) (b - down + 1) * blockMs; break; }
+        // Harmonic distortion at -6 dBFS, steady state.
+        std::vector<float> y;
+        runSteady (-6, &y);
+        std::vector<float> tail (y.end() - 32768, y.end());
+        double fund = 0, harm = 0;
+        for (int h = 1; h <= 7; ++h)
+        {
+            std::complex<double> acc = 0;
+            for (size_t i = 0; i < tail.size(); ++i)
+            {
+                const double w = 0.5 - 0.5 * std::cos (dsp::kTwoPi * (double) i / (double) (tail.size() - 1));
+                acc += (double) tail[i] * w * std::polar (1.0, -dsp::kTwoPi * 1000.0 * h * (double) i / fs);
+            }
+            (h == 1 ? fund : harm) += std::norm (acc);
+        }
+        p.thd = 100.0 * std::sqrt (harm / fund);
+        return p;
+    }
+} // namespace
+
+TEST_CASE ("Studio Comp models behave measurably differently")
+{
+    const char* names[] = { "Pristine", "LA-2A", "1176", "SSL Bus", "Fairchild", "dbx 160" };
+    std::vector<CompProfile> ps;
+    for (int m = 0; m < dsp::ClassicCompressor::numModels; ++m)
+    {
+        ps.push_back (profileOf (m));
+        const auto& p = ps.back();
+        MESSAGE (std::string (names[m]) << ": GR@-30/-20/-12/-6/0 = " << p.grAt[0] << " / " << p.grAt[1] << " / " << p.grAt[2] << " / " << p.grAt[3] << " / "
+                          << p.grAt[4] << " dB, attack " << p.attackMs << " ms, release " << p.releaseMs << " ms, THD " << p.thd << " %");
+    }
+    using M = dsp::ClassicCompressor;
+    // Ballistics: the FET and vari-mu grab far faster than the opto and the RMS dbx.
+    CHECK (ps[M::fet1176].attackMs * 4 < ps[M::la2a].attackMs);
+    CHECK (ps[M::fairchild].attackMs * 4 < ps[M::dbx160].attackMs);
+    // Release: dbx (120 dB/s) is fastest; opto and vari-mu are slow.
+    CHECK (ps[M::dbx160].releaseMs * 3 < ps[M::studio].releaseMs);
+    CHECK (ps[M::la2a].releaseMs > 2 * ps[M::studio].releaseMs);
+    CHECK (ps[M::fairchild].releaseMs > 2 * ps[M::studio].releaseMs);
+    // Knee: the opto and vari-mu are already working where the firm-knee SSL has not started.
+    CHECK (ps[M::la2a].grAt[1] > ps[M::sslBus].grAt[1] + 1.5);
+    CHECK (ps[M::fairchild].grAt[1] > ps[M::sslBus].grAt[1] + 1.5);
+    // Colour: the 1176 and the valve units add distortion, the VCAs stay clean.
+    CHECK (ps[M::fet1176].thd > 20 * ps[M::studio].thd + 0.2);
+    CHECK (ps[M::fairchild].thd > 0.2);
+    CHECK (ps[M::sslBus].thd < 0.05);
 }

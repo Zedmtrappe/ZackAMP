@@ -13,7 +13,7 @@ namespace
 
     // Valve heat per amp model: faint orange on the cleanest model … white hot on the heaviest.
     // Order: Tweed, JC120, AC30, JCM800, Coliseum, MP1, Triple.
-    constexpr float kModelHeat[] = { 0.32f, 0.12f, 0.45f, 0.66f, 0.80f, 0.90f, 1.0f, 0.96f };
+    constexpr float kModelHeat[] = { 0.32f, 0.12f, 0.45f, 0.66f, 0.80f, 0.90f, 1.0f, 0.96f, 0.58f };
     static_assert (std::size (kModelHeat) == dsp::kNumAmpModels);
 
     juce::Colour heatColour (float h)

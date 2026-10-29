@@ -57,6 +57,9 @@ public:
     /** Switches amp model. If cabinet A still holds the previous model's default IR, the
         cabinet follows to the new model's default (a customised cabinet is left alone). */
     void selectAmpModel (int model);
+    /** A choice made by the user in a menu. Reverb type/program choices also load the program's
+        full settings (like selecting a program on the hardware); everything else is a plain change. */
+    void setChoiceFromUser (int index, int value);
 
     // ---- presets ----
     int getCurrentPresetIndex() const noexcept { return currentPreset; }
