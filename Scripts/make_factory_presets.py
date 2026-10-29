@@ -72,6 +72,28 @@ P = [
  ("Dual Grind", "High Gain", "Saggy, raw 100 W Rectifier-style rhythm: chunky chugs that bloom.", "factory:md-4x12-heavy-cap", None,
   {"amp.model":7,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.45,"amp.treble":0.55,"amp.presence":0.5,"amp.depth":0.5,"amp.master":0.6,
    "gate.enabled":1,"gate.threshold":-58,"gate.release":80}),
+ ("Lexicon Concert Hall", "Studio Reverb", "Glassy clean in a lush, gently chorused concert hall: 2.6 s, 24 ms pre-delay, bass x1.3.", "factory:am-2x12-open-cap", None,
+  {"amp.model":1,"amp.gain":0.45,"amp.bass":0.5,"amp.mid":0.5,"amp.treble":0.58,"amp.master":0.6,"amp.bright":1,
+   "reverb.enabled":1,"reverb.type":5,"reverb.lexprog":0,"reverb.mix":0.26,"reverb.decay":2.6,"reverb.tone":0.55,"reverb.predelay":24,
+   "reverb.size":0.8,"reverb.diffusion":0.8,"reverb.bassmult":1.3,"reverb.crossover":650,"reverb.spin":0.9,"reverb.wander":0.35,"reverb.lowcut":120}),
+ ("Random Hall Lead", "Studio Reverb", "Singing British lead in the classic Random Hall: long, wide, shimmering tail behind 40 ms of pre-delay.", "factory:br-4x12-v25-cap", None,
+  {"amp.model":3,"amp.gain":0.72,"amp.bass":0.45,"amp.mid":0.65,"amp.treble":0.55,"amp.presence":0.5,"amp.master":0.6,
+   "delay.enabled":1,"delay.time":380,"delay.feedback":0.22,"delay.mix":0.14,
+   "reverb.enabled":1,"reverb.type":5,"reverb.lexprog":1,"reverb.mix":0.22,"reverb.decay":3.2,"reverb.tone":0.5,"reverb.predelay":40,
+   "reverb.size":0.9,"reverb.diffusion":0.75,"reverb.bassmult":1.1,"reverb.crossover":700,"reverb.spin":1.1,"reverb.wander":0.55,"reverb.lowcut":150}),
+ ("Rich Plate Chime", "Studio Reverb", "Class-A chime through the bright, dense Rich Plate: instant, 1.6 s, no pre-delay.", "factory:am-2x12-open-room", None,
+  {"amp.model":2,"amp.gain":0.5,"amp.bass":0.4,"amp.mid":0.5,"amp.treble":0.6,"amp.presence":0.5,"amp.master":0.65,
+   "reverb.enabled":1,"reverb.type":5,"reverb.lexprog":2,"reverb.mix":0.25,"reverb.decay":1.6,"reverb.tone":0.7,"reverb.predelay":0,
+   "reverb.size":0.55,"reverb.diffusion":0.85,"reverb.bassmult":1.0,"reverb.crossover":500,"reverb.spin":1.3,"reverb.wander":0.45,"reverb.lowcut":100}),
+ ("Bricasti Large Hall", "Studio Reverb", "Wide, natural hall around a clean chorus: 3 s, 18 ms pre-delay, distinct early reflections, no chorusing in the tail.", "factory:am-2x12-open-cap", None,
+  {"amp.model":1,"amp.gain":0.45,"amp.bass":0.5,"amp.treble":0.55,"amp.master":0.6,
+   "chorus.enabled":1,"chorus.rate":0.6,"chorus.depth":0.4,"chorus.mix":0.35,
+   "reverb.enabled":1,"reverb.type":6,"reverb.m7prog":0,"reverb.mix":0.3,"reverb.decay":3.0,"reverb.tone":0.55,"reverb.predelay":18,
+   "reverb.size":0.9,"reverb.diffusion":0.8,"reverb.early":0.45,"reverb.bassmult":1.2,"reverb.crossover":400,"reverb.spin":0.5,"reverb.wander":0.2,"reverb.lowcut":100}),
+ ("Bricasti Small Room", "Studio Reverb", "Crunch in a tight, realistic room: mostly early reflections and a 0.7 s tail - sounds like a mic'd amp in a real space.", "factory:br-4x12-v25-cap", None,
+  {"amp.model":3,"amp.gain":0.45,"amp.bass":0.45,"amp.mid":0.6,"amp.treble":0.6,"amp.presence":0.55,"amp.master":0.6,
+   "reverb.enabled":1,"reverb.type":6,"reverb.m7prog":1,"reverb.mix":0.22,"reverb.decay":0.7,"reverb.tone":0.55,"reverb.predelay":2,
+   "reverb.size":0.3,"reverb.diffusion":0.7,"reverb.early":0.75,"reverb.bassmult":1.0,"reverb.crossover":500,"reverb.spin":0.5,"reverb.wander":0.15,"reverb.lowcut":80}),
  ("Thrash Rack", "Modern Metal", "Tight, scooped 80s rack-preamp rhythm.", "factory:md-2x12-closed-cap", None,
   {"amp.model":5,"amp.gain":0.6,"amp.bass":0.5,"amp.mid":0.4,"amp.treble":0.6,"amp.presence":0.55,"amp.depth":0.4,"amp.master":0.5,
    "gate.enabled":1,"gate.threshold":-56,"gate.release":70}),
@@ -90,7 +112,7 @@ P = [
 ]
 
 # Output level per preset (dB), calibrated with `ampforge_render --calibrate`.
-LEVELS = {'Dual Grind': -1.0, 'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': -5.5, 'Top Boost Chime': -6.5, 'Tweed Blues': -5.5, 'Texas Drive': -11.0, 'Brit Crunch': -1.0, 'Cranked AC30': -5.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': 0.5, 'Fusion Lead': 0.5, 'Classic V Rhythm': -1.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': 1.5, 'RAT Grunge': -6.5, 'Ambient Swells': -2.5, 'Dual Cab Crunch': -5.5}
+LEVELS = {'Lexicon Concert Hall': -1.5, 'Random Hall Lead': -4.0, 'Rich Plate Chime': -5.0, 'Bricasti Large Hall': -1.0, 'Bricasti Small Room': -2.5, 'Dual Grind': -1.0, 'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 1.0, 'Edge of Breakup': -5.5, 'Top Boost Chime': -6.5, 'Tweed Blues': -5.5, 'Texas Drive': -11.0, 'Brit Crunch': -1.0, 'Cranked AC30': -5.0, 'British Crunch': -1.5, 'Boosted Brit': -5.0, 'Hot Rod Lead': -4.0, 'Singing Lead': 0.5, 'Fusion Lead': 0.5, 'Classic V Rhythm': -1.0, 'High Gain Rhythm': -1.0, 'Modern Metal': 0.5, 'Thrash Rack': 1.5, 'RAT Grunge': -6.5, 'Ambient Swells': -2.5, 'Dual Cab Crunch': -5.5}
 LEVELS_OLD = {'Glass Clean': -1.5, 'Studio Clean Chorus': -1.5, 'Warm Jazz Clean': 3.0, 'Edge of Breakup': 1.5, 'Touch Sensitive': -7.5, 'Tweed Blues': -1.0, 'Texas Drive': -9.5, 'Plexi Crunch': -0.5, 'Cranked Plexi': -5.0, 'British Crunch': -1.0, 'Boosted Brit': -4.0, 'Hot Rod Lead': -4.0, 'Singing Lead': -4.0, 'Fusion Lead': -1.0, 'Classic V Rhythm': -2.5, 'High Gain Rhythm': -1.5, 'Modern Metal': -3.0, 'Tight Extended Range': -2.0, 'Ambient Swells': -1.5, 'Dual Cab Crunch': -2.5}
 
 def main():

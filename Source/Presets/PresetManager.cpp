@@ -164,7 +164,7 @@ PresetManager::PresetManager (juce::File userPresetDirectory) : userDir (std::mo
 
 juce::StringArray PresetManager::getCategories()
 {
-    return { "Clean", "Edge of Breakup", "Blues", "Classic Rock", "British Crunch", "Lead", "High Gain", "Modern Metal", "Ambient", "User" };
+    return { "Clean", "Edge of Breakup", "Blues", "Classic Rock", "British Crunch", "Lead", "High Gain", "Modern Metal", "Ambient", "Studio Reverb", "User" };
 }
 
 int PresetManager::familyOfModel (int ampModel) { return ampModel <= 1 ? 0 : (ampModel <= 3 ? 1 : 2); }

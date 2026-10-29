@@ -1,0 +1,45 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 2,
+  "name": "Lexicon Concert Hall",
+  "category": "Studio Reverb",
+  "description": "Glassy clean in a lush, gently chorused concert hall: 2.6 s, 24 ms pre-delay, bass x1.3.",
+  "author": "Z.AMP Factory",
+  "parameters": {
+    "amp.model": 1,
+    "amp.gain": 0.45,
+    "amp.bass": 0.5,
+    "amp.mid": 0.5,
+    "amp.treble": 0.58,
+    "amp.master": 0.6,
+    "amp.bright": 1,
+    "reverb.enabled": 1,
+    "reverb.type": 5,
+    "reverb.lexprog": 0,
+    "reverb.mix": 0.26,
+    "reverb.decay": 2.6,
+    "reverb.tone": 0.55,
+    "reverb.predelay": 24,
+    "reverb.size": 0.8,
+    "reverb.diffusion": 0.8,
+    "reverb.bassmult": 1.3,
+    "reverb.crossover": 650,
+    "reverb.spin": 0.9,
+    "reverb.wander": 0.35,
+    "reverb.lowcut": 120,
+    "amp.preampValve": 3,
+    "amp.powerValve": 4,
+    "amp.depth": 0.0,
+    "out.level": -1.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-2x12-open-cap",
+      "irName": "US 2x12 Open \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

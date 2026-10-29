@@ -20,6 +20,11 @@ void Reverb::prepare (double fs)
         diffusers[(size_t) i].g = 0.62f;
     }
     preDelay.prepare ((int) (0.03 * fs));
+    studioPreL.prepare ((int) (0.26 * fs) + 8);
+    studioPreR.prepare ((int) (0.26 * fs) + 8);
+    lexiconEngine.prepare (fs);
+    m7Engine.prepare (fs);
+    lastLowCut = -1.0f;
     for (auto& f : springLp)
         f.setCoeffs (BiquadCoeffs::lowPass (fs, 4300.0, 0.9));
     for (auto& f : springHp)
@@ -34,7 +39,7 @@ void Reverb::prepare (double fs)
 
 void Reverb::applyType (int t)
 {
-    type = clampv (t, 0, 4);
+    type = clampv (t, 0, (int) numTypes - 1);
     switch (type)
     {
         case room:    scale = 0.40f; preDelayMs = 3.0f;  modAmount = 0.4f; break;
@@ -64,6 +69,12 @@ void Reverb::reset() noexcept
     for (auto& d : diffusers)
         d.line.reset();
     preDelay.reset();
+    studioPreL.reset();
+    studioPreR.reset();
+    lexiconEngine.reset();
+    m7Engine.reset();
+    for (auto& f : lowCut)
+        f.reset();
     lpState.fill (0.0f);
     for (auto& d : dispersion)
         d = {};
@@ -74,9 +85,24 @@ void Reverb::reset() noexcept
     modPhase = 0.0;
 }
 
-void Reverb::setControls (float decaySeconds, float tone, int newType)
+void Reverb::setControls (float decaySeconds, float tone, int newType, const StudioReverbControls& studio, float w, float lowCutHz)
 {
-    newType = clampv (newType, 0, 4);
+    newType = clampv (newType, 0, (int) numTypes - 1);
+    studioControls = studio;
+    studioControls.decay = decaySeconds;
+    studioControls.tone = tone;
+    if (type == lexicon)
+        lexiconEngine.setControls (studioControls);
+    else if (type == bricasti)
+        m7Engine.setControls (studioControls);
+    width = clampv (w, 0.0f, 1.5f);
+    if (std::abs (lowCutHz - lastLowCut) > 0.5f)
+    {
+        lastLowCut = lowCutHz;
+        for (auto& f : lowCut)
+            f.setCoeffs (BiquadCoeffs::highPass (sampleRate, clampv ((double) lowCutHz, 20.0, 1000.0), 0.7));
+        useLowCut = lowCutHz > 21.0f;
+    }
     if (newType != type && newType != pendingType)
         pendingType = newType; // switched in process() once the wet output has faded out
     if (decaySeconds != lastDecay)
@@ -95,6 +121,23 @@ void Reverb::setControls (float decaySeconds, float tone, int newType)
             cutoff *= 1.8; // bright, shimmering top
         damping = (float) std::exp (-kTwoPi * std::min (cutoff, 0.45 * sampleRate) / sampleRate);
     }
+}
+
+void Reverb::finishWet (float& l, float& r, float wetL, float wetR, float mix) noexcept
+{
+    if (useLowCut)
+    {
+        wetL = lowCut[0].process (wetL);
+        wetR = lowCut[1].process (wetR);
+    }
+    if (width != 1.0f)
+    {
+        const float mid = 0.5f * (wetL + wetR), side = 0.5f * (wetL - wetR) * width;
+        wetL = mid + side;
+        wetR = mid - side;
+    }
+    l += wetL * mix * fade;
+    r += wetR * mix * fade;
 }
 
 void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noexcept
@@ -122,6 +165,21 @@ void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noe
         }
         else if (fade < 1.0f)
             fade = std::min (1.0f, fade + fadeStep);
+
+        float wetL = 0.0f, wetR = 0.0f;
+        if (type >= lexicon)
+        {
+            // Studio engines: true stereo input through their own pre-delay.
+            studioPreL.push (l[i] * inputGain);
+            studioPreR.push (r[i] * inputGain);
+            const float pd = std::max (1.0f, studioControls.preDelayMs * 0.001f * (float) sampleRate);
+            if (type == lexicon)
+                lexiconEngine.tick (studioPreL.read (pd), studioPreR.read (pd), wetL, wetR);
+            else
+                m7Engine.tick (studioPreL.read (pd), studioPreR.read (pd), wetL, wetR);
+            finishWet (l[i], r[i], wetL, wetR, mix);
+            continue;
+        }
 
         float x = 0.5f * (l[i] + r[i]) * inputGain;
         preDelay.push (x);
@@ -179,8 +237,7 @@ void Reverb::process (float* l, float* r, int n, float inputGain, float mix) noe
             outL = springLp[0].process (springHp[0].process (outL)) * 1.4f;
             outR = springLp[1].process (springHp[1].process (outR)) * 1.4f;
         }
-        l[i] += outL * 0.25f * mix * fade;
-        r[i] += outR * 0.25f * mix * fade;
+        finishWet (l[i], r[i], outL * 0.25f, outR * 0.25f, mix);
     }
 }
 

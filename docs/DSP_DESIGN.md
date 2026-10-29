@@ -301,3 +301,22 @@ One stereo-linked gain computer, with the behaviour that distinguishes each clas
 Amount 0 is bit-identical to bypass on every model; default-setting output levels are matched within
 ±1.5 dB; model changes fade out, switch while silent and fade back in. These are behavioural models
 built from the units' published characteristics, not circuit simulations.
+
+## Studio reverbs (`Effects/StudioReverbs.*`)
+
+**Lexicon** — the figure-eight tank published by Lexicon's designer (Griesinger's structure as
+documented by Dattorro): input band-limit and four diffusers, two cross-coupled branches of modulated
+all-pass → delay → damping → decay → all-pass → delay, seven output taps per side. Spin/Wander
+modulate the branch all-passes (sine, or smoothed random for Random Hall); Bass Mult/Crossover set
+a separate low-frequency decay; Size scales every delay. Programs: Concert Hall, Random Hall, Rich
+Plate, Chamber.
+
+**Bricasti** — true stereo: a size-scaled 12-tap early-reflection pattern per channel feeds a
+16-line late network (Householder feedback) with three-band decay (bass multiplier below the
+crossover, treble decay as a fraction of Decay above 4 kHz) and only subtle modulation. Programs:
+Large Hall, Small Room, Plate, Chamber.
+
+Both are original implementations of well-documented structures voiced after the published
+character of those units, not copies of their proprietary algorithms. Tests check stability, RT60
+against the Decay setting (Schroeder decay curve), level against the Hall, and that Bass Mult
+lengthens the low-frequency tail.

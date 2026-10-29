@@ -158,7 +158,7 @@ private:
     float shown = 0.0f;
 };
 
-class CompHeader;
+class TypeHeader;
 class VuMeter;
 class AdvancedWindow;
 
@@ -175,13 +175,14 @@ private:
     AppController& app;
     EffectModule gate, comp, wah, drive, studioComp, smooth, pitch, chorus, delay, reverb, output;
     ParamToggle delaySync;
-    ParamChoice delayDivision, chorusMode, driveType, delayType, reverbType;
+    ParamChoice delayDivision, chorusMode, driveType, delayType;
     ProcessLight smoothLight;
-    std::unique_ptr<CompHeader> compHeader;
+    std::unique_ptr<TypeHeader> compHeader, reverbHeader;
     std::unique_ptr<VuMeter> studioCompVu;
-    std::unique_ptr<AdvancedWindow> compWindow;
+    std::unique_ptr<AdvancedWindow> compWindow, reverbWindow;
     int shownCompModel = -1;
     void showCompAdvanced();
+    void showReverbAdvanced();
     juce::TextButton tapTempo { "TAP" };
     std::vector<double> taps;
     juce::Rectangle<int> flowArea;

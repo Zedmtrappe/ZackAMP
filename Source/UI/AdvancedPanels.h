@@ -25,11 +25,11 @@ public:
     void closeButtonPressed() override { setVisible (false); }
 };
 
-/** Header control for the Studio Comp module: model menu and the ADV button. */
-class CompHeader final : public juce::Component
+/** Module header control: a type/model menu and the ADV button. */
+class TypeHeader final : public juce::Component
 {
 public:
-    explicit CompHeader (AppController& app);
+    TypeHeader (AppController& app, int typeParam);
     void resized() override;
     void refresh() { type.refresh(); }
     std::function<void()> onAdvanced;
@@ -64,5 +64,28 @@ private:
     int shownModel = -1;
     std::vector<juce::Component*> visibleKnobs, visibleSwitches;
     std::vector<std::pair<juce::Rectangle<int>, juce::String>> switchLabels;
+};
+
+class ReverbAdvanced final : public juce::Component, public ResettableBlock
+{
+public:
+    explicit ReverbAdvanced (AppController& app);
+    void refresh();
+    void paint (juce::Graphics&) override;
+    void resized() override;
+    void mouseDown (const juce::MouseEvent&) override;
+    juce::String getBlockName() const override { return "Reverb"; }
+    void resetBlockControls() override;
+    static std::vector<int> resetParams();
+
+private:
+    void applyType (int type, int program);
+    AppController& app;
+    ParamToggle enable;
+    ParamChoice type, lexProgram, m7Program;
+    ParamKnob mix, decay, tone, preDelay, size, diffusion, bassMult, crossover, spin, wander, early, width, lowCut;
+    juce::Label description;
+    int shownType = -1, shownProgram = -1;
+    std::vector<juce::Component*> visibleKnobs;
 };
 } // namespace af::ui

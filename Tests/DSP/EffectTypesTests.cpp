@@ -95,7 +95,7 @@ TEST_CASE ("Drive types: Screamer and RAT are stable, distinct, and the RAT keep
 TEST_CASE ("Reverb types are stable and a type change does not click")
 {
     const double fs = 48000;
-    for (int type = 0; type < 5; ++type)
+    for (int type = 0; type < dsp::Reverb::numTypes; ++type)
     {
         dsp::Reverb rv;
         rv.prepare (fs);
@@ -424,5 +424,84 @@ TEST_CASE ("Classic compressor models stay close to the dry level at default set
         const double wet = test::db (test::rms (l, 0));
         MESSAGE ("model " << m << ": " << wet - dry << " dB vs dry");
         CHECK (std::abs (wet - dry) < 3.0); // switching models must not jump the level
+    }
+}
+
+
+TEST_CASE ("Lexicon and Bricasti: every program is stable, decays at the set time and matches the Hall level")
+{
+    const double fs = 48000;
+    // Impulse response of one type/program, wet only, with the type forced in first.
+    auto ir = [&] (int type, int program, float decay, float bassMult = 1.0f)
+    {
+        dsp::Reverb rv;
+        rv.prepare (fs);
+        dsp::StudioReverbControls c;
+        c.program = program;
+        c.preDelayMs = 0.0f;
+        c.bassMult = bassMult;
+        std::vector<float> l (32), r (32), out;
+        for (int k = 0; k < 40; ++k)
+        {
+            rv.setControls (decay, 0.5f, type, c);
+            rv.process (l.data(), r.data(), 32, 0.0f, 1.0f);
+        }
+        for (int b = 0; b < (int) fs * 6 / 32; ++b)
+        {
+            std::fill (l.begin(), l.end(), 0.0f);
+            std::fill (r.begin(), r.end(), 0.0f);
+            if (b == 0)
+                l[0] = r[0] = 1.0f;
+            rv.setControls (decay, 0.5f, type, c);
+            rv.process (l.data(), r.data(), 32, 1.0f, 1.0f);
+            if (b == 0)
+                l[0] -= 1.0f;
+            out.insert (out.end(), l.begin(), l.end());
+        }
+        return out;
+    };
+    // RT60 from the energy decay curve (Schroeder integration), fitted between -5 and -25 dB.
+    auto rt60 = [&] (const std::vector<float>& h)
+    {
+        std::vector<double> edc (h.size());
+        double acc = 0;
+        for (size_t i = h.size(); i-- > 0;) { acc += (double) h[i] * h[i]; edc[i] = acc; }
+        const double total = edc[0];
+        double t5 = -1, t25 = -1;
+        for (size_t i = 0; i < edc.size(); ++i)
+        {
+            const double db = 10 * std::log10 (edc[i] / total + 1e-30);
+            if (t5 < 0 && db <= -5) t5 = (double) i / fs;
+            if (t25 < 0 && db <= -25) { t25 = (double) i / fs; break; }
+        }
+        return (t25 - t5) * 3.0;
+    };
+    const auto hall = ir (dsp::Reverb::hall, 0, 2.0f);
+    const double hallLevel = test::db (test::rms (hall, 0, (int) fs));
+    for (int type : { (int) dsp::Reverb::lexicon, (int) dsp::Reverb::bricasti })
+        for (int prog = 0; prog < 4; ++prog)
+        {
+            INFO ("type " << type << " program " << prog);
+            const auto h = ir (type, prog, 2.0f);
+            CHECK (test::allFinite (h));
+            CHECK (test::peak (h) < 1.0f);
+            const double t = rt60 (h);
+            MESSAGE ("type " << type << " program " << prog << ": RT60 " << t << " s, level " << test::db (test::rms (h, 0, (int) fs)) - hallLevel << " dB vs Hall");
+            CHECK (t > 1.3);
+            CHECK (t < 3.0);
+            CHECK (std::abs (test::db (test::rms (h, 0, (int) fs)) - hallLevel) < 5.0);
+        }
+    // Bass Multiply lengthens the low-frequency decay.
+    for (int type : { (int) dsp::Reverb::lexicon, (int) dsp::Reverb::bricasti })
+    {
+        auto lowTail = [&] (float bm)
+        {
+            auto h = ir (type, 0, 2.0f, bm);
+            dsp::Biquad lp;
+            lp.setCoeffs (dsp::BiquadCoeffs::lowPass (fs, 200.0, 0.7));
+            for (auto& v : h) v = lp.process (v);
+            return test::rms (h, (int) (fs * 1.5), (int) (fs * 2.5));
+        };
+        CHECK (lowTail (2.0f) > 2.0 * lowTail (1.0f));
     }
 }

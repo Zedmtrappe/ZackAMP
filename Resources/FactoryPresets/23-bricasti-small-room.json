@@ -1,0 +1,46 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 2,
+  "name": "Bricasti Small Room",
+  "category": "Studio Reverb",
+  "description": "Crunch in a tight, realistic room: mostly early reflections and a 0.7 s tail - sounds like a mic'd amp in a real space.",
+  "author": "Z.AMP Factory",
+  "parameters": {
+    "amp.model": 3,
+    "amp.gain": 0.45,
+    "amp.bass": 0.45,
+    "amp.mid": 0.6,
+    "amp.treble": 0.6,
+    "amp.presence": 0.55,
+    "amp.master": 0.6,
+    "reverb.enabled": 1,
+    "reverb.type": 6,
+    "reverb.m7prog": 1,
+    "reverb.mix": 0.22,
+    "reverb.decay": 0.7,
+    "reverb.tone": 0.55,
+    "reverb.predelay": 2,
+    "reverb.size": 0.3,
+    "reverb.diffusion": 0.7,
+    "reverb.early": 0.75,
+    "reverb.bassmult": 1.0,
+    "reverb.crossover": 500,
+    "reverb.spin": 0.5,
+    "reverb.wander": 0.15,
+    "reverb.lowcut": 80,
+    "amp.preampValve": 0,
+    "amp.powerValve": 1,
+    "amp.depth": 0.0,
+    "out.level": -2.5
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:br-4x12-v25-cap",
+      "irName": "UK 4x12 Vintage 25W \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

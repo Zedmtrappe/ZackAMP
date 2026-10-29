@@ -541,7 +541,7 @@ void EffectModule::resized()
     auto r = getLocalBounds().reduced (8);
     auto header = r.removeFromTop (24);
     if (headerExtra != nullptr)
-        headerExtra->setBounds (header.removeFromRight (std::min (headerExtraWidth, header.getWidth() / 2)).reduced (0, 1));
+        headerExtra->setBounds (header.removeFromRight (std::min (headerExtraWidth, header.getWidth() * 62 / 100)).reduced (0, 1));
     if (enable != nullptr)
         enable->setBounds (header);
     if (! extras.empty())
@@ -591,14 +591,17 @@ EffectsPanel::EffectsPanel (AppController& a)
       reverb (a, "Reverb", pReverbOn, { pReverbMix, pReverbDecay, pReverbTone }),
       output (a, "Global", -1, { pOutLevel, pInTrim, pTempo }),
       delaySync (a, pDelaySync, "SYNC"), delayDivision (a, pDelayDivision), chorusMode (a, pChorusMode),
-      driveType (a, pDriveType), delayType (a, pDelayType), reverbType (a, pReverbType), smoothLight (a),
-      compHeader (std::make_unique<CompHeader> (a)), studioCompVu (std::make_unique<VuMeter>())
+      driveType (a, pDriveType), delayType (a, pDelayType), smoothLight (a),
+      compHeader (std::make_unique<TypeHeader> (a, pStudioCompType)), reverbHeader (std::make_unique<TypeHeader> (a, pReverbType)),
+      studioCompVu (std::make_unique<VuMeter>())
 {
     for (auto* m : { &gate, &comp, &wah, &drive, &studioComp, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         addAndMakeVisible (m);
     drive.setHeaderExtra (&driveType, 96);
     delay.setHeaderExtra (&delayType, 84);
-    reverb.setHeaderExtra (&reverbType, 96);
+    reverb.setHeaderExtra (reverbHeader.get(), 146);
+    reverb.setResetParams (ReverbAdvanced::resetParams());
+    reverbHeader->onAdvanced = [this] { showReverbAdvanced(); };
     smooth.setHeaderExtra (&smoothLight, 22);
     studioComp.setHeaderExtra (compHeader.get(), 150);
     studioComp.setSideExtra (studioCompVu.get(), 0.42f);
@@ -606,6 +609,7 @@ EffectsPanel::EffectsPanel (AppController& a)
     studioCompVu->readGainReduction = [this] { return app.engine.getStudioCompReductionDb(); };
     studioCompVu->isActive = [this] { return app.params().getBool (pStudioCompOn); };
     compHeader->onAdvanced = [this] { showCompAdvanced(); };
+    output.knob (1)->setLabel ("Trim");
     chorus.addExtra (&chorusMode);
     delay.addExtra (&delaySync);
     delay.addExtra (&delayDivision);
@@ -630,6 +634,14 @@ EffectsPanel::EffectsPanel (AppController& a)
 }
 
 EffectsPanel::~EffectsPanel() = default;
+
+void EffectsPanel::showReverbAdvanced()
+{
+    if (reverbWindow == nullptr)
+        reverbWindow = std::make_unique<AdvancedWindow> ("Reverb", new ReverbAdvanced (app));
+    reverbWindow->setVisible (true);
+    reverbWindow->toFront (true);
+}
 
 void EffectsPanel::showCompAdvanced()
 {
@@ -673,8 +685,12 @@ void EffectsPanel::refresh()
 {
     for (auto* m : { &gate, &comp, &wah, &drive, &studioComp, &smooth, &pitch, &chorus, &delay, &reverb, &output })
         m->refresh();
-    for (auto* c : { &driveType, &delayType, &reverbType })
+    for (auto* c : { &driveType, &delayType })
         c->refresh();
+    reverbHeader->refresh();
+    if (reverbWindow != nullptr && reverbWindow->isVisible())
+        if (auto* adv = dynamic_cast<ReverbAdvanced*> (reverbWindow->getContentComponent()))
+            adv->refresh();
     smoothLight.refresh();
     compHeader->refresh();
     studioCompVu->refresh();
@@ -726,7 +742,7 @@ void EffectsPanel::resized()
     auto top = r.removeFromTop ((r.getHeight() - gap) / 2);
     r.removeFromTop (gap);
     layoutRow (top, { { &gate, 1.0f }, { &comp, 1.6f }, { &wah, 1.6f }, { &drive, 1.4f } });
-    layoutRow (r, { { &studioComp, 2.45f }, { &smooth, 0.78f }, { &pitch, 0.58f }, { &chorus, 1.25f }, { &delay, 1.5f }, { &reverb, 1.3f }, { &output, 1.15f } });
+    layoutRow (r, { { &studioComp, 2.35f }, { &smooth, 0.74f }, { &pitch, 0.56f }, { &chorus, 1.12f }, { &delay, 1.58f }, { &reverb, 1.62f }, { &output, 1.05f } });
 }
 
 void EffectsPanel::paint (juce::Graphics& g)

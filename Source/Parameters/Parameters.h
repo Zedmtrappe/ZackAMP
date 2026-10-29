@@ -56,6 +56,8 @@ enum ParamIndex : int
     pChorusOn, pChorusMode, pChorusRate, pChorusDepth, pChorusMix,
     pDelayOn, pDelayTime, pDelaySync, pDelayDivision, pDelayFeedback, pDelayMix, pDelayTone, pDelayType,
     pReverbOn, pReverbMix, pReverbDecay, pReverbTone, pReverbType,
+    pReverbPreDelay, pReverbSize, pReverbDiffusion, pReverbBassMult, pReverbCrossover, pReverbSpin, pReverbWander,
+    pReverbEarly, pReverbWidth, pReverbLowCut, pReverbLexProgram, pReverbM7Program,
     pOutLevel,
     pTempo,
     kNumParams

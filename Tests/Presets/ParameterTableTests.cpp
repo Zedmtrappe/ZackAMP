@@ -36,6 +36,10 @@ TEST_CASE ("Parameter table rows line up with the ParamIndex enum")
         { pDelayDivision, "delay.division" }, { pDelayFeedback, "delay.feedback" }, { pDelayMix, "delay.mix" },
         { pDelayTone, "delay.tone" }, { pDelayType, "delay.type" },
         { pReverbOn, "reverb.enabled" }, { pReverbMix, "reverb.mix" }, { pReverbDecay, "reverb.decay" }, { pReverbTone, "reverb.tone" }, { pReverbType, "reverb.type" },
+        { pReverbPreDelay, "reverb.predelay" }, { pReverbSize, "reverb.size" }, { pReverbDiffusion, "reverb.diffusion" },
+        { pReverbBassMult, "reverb.bassmult" }, { pReverbCrossover, "reverb.crossover" }, { pReverbSpin, "reverb.spin" },
+        { pReverbWander, "reverb.wander" }, { pReverbEarly, "reverb.early" }, { pReverbWidth, "reverb.width" },
+        { pReverbLowCut, "reverb.lowcut" }, { pReverbLexProgram, "reverb.lexprog" }, { pReverbM7Program, "reverb.m7prog" },
         { pOutLevel, "out.level" }, { pTempo, "global.tempo" },
     };
     CHECK ((int) std::size (expected) == kNumParams);

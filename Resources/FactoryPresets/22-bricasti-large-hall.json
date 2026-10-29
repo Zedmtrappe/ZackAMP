@@ -1,0 +1,48 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 2,
+  "name": "Bricasti Large Hall",
+  "category": "Studio Reverb",
+  "description": "Wide, natural hall around a clean chorus: 3 s, 18 ms pre-delay, distinct early reflections, no chorusing in the tail.",
+  "author": "Z.AMP Factory",
+  "parameters": {
+    "amp.model": 1,
+    "amp.gain": 0.45,
+    "amp.bass": 0.5,
+    "amp.treble": 0.55,
+    "amp.master": 0.6,
+    "chorus.enabled": 1,
+    "chorus.rate": 0.6,
+    "chorus.depth": 0.4,
+    "chorus.mix": 0.35,
+    "reverb.enabled": 1,
+    "reverb.type": 6,
+    "reverb.m7prog": 0,
+    "reverb.mix": 0.3,
+    "reverb.decay": 3.0,
+    "reverb.tone": 0.55,
+    "reverb.predelay": 18,
+    "reverb.size": 0.9,
+    "reverb.diffusion": 0.8,
+    "reverb.early": 0.45,
+    "reverb.bassmult": 1.2,
+    "reverb.crossover": 400,
+    "reverb.spin": 0.5,
+    "reverb.wander": 0.2,
+    "reverb.lowcut": 100,
+    "amp.preampValve": 3,
+    "amp.powerValve": 4,
+    "amp.depth": 0.0,
+    "out.level": -1.0
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:am-2x12-open-cap",
+      "irName": "US 2x12 Open \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added (studio reverbs)
+- Reverb types **Lexicon** (Concert Hall, Random Hall, Rich Plate, Chamber) and **Bricasti** (Large
+  Hall, Small Room, Plate, Chamber), with an **ADV** window: pre-delay, size, diffusion, bass
+  multiplier and crossover, spin and wander, early reflections (Bricasti), and for every type width
+  and low cut.
+- Factory presets in a new "Studio Reverb" category: Lexicon Concert Hall, Random Hall Lead, Rich
+  Plate Chime, Bricasti Large Hall, Bricasti Small Room.
+
 ### Added (Studio Comp models)
 - Studio Comp model menu: **Studio**, **LA-2A**, **1176**, **SSL Bus**, **Fairchild 670**, **dbx 160**,
   each with its characteristic detector, ballistics, knee and colour; front-panel knob names follow the

@@ -21,7 +21,9 @@ namespace
     const char* const k1176Ratios[] = { "4:1", "8:1", "12:1", "20:1", "All" };
     const char* const kSslRatios[] = { "2:1", "4:1", "10:1" };
     const char* const kFairchildTcs[] = { "TC 1", "TC 2", "TC 3", "TC 4", "TC 5", "TC 6" };
-    const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber", "Plate" };
+    const char* const kReverbTypes[] = { "Room", "Hall", "Spring", "Chamber", "Plate", "Lexicon", "Bricasti" };
+    const char* const kLexPrograms[] = { "Concert Hall", "Random Hall", "Rich Plate", "Chamber" };
+    const char* const kM7Programs[] = { "Large Hall", "Small Room", "Plate", "Chamber" };
     const char* const kEqPositions[] = { "Pre Power Amp", "Post Amp" };
     const char* const kDivisions[] = { "1/2", "1/4", "1/4 D", "1/4 T", "1/8", "1/8 D", "1/8 T", "1/16" }; // D = dotted, T = triplet
     constexpr float kDivisionBeats[] = { 2.0f, 1.0f, 1.5f, 2.0f / 3.0f, 0.5f, 0.75f, 1.0f / 3.0f, 0.25f };
@@ -130,7 +132,19 @@ namespace
         { "reverb.mix", "Mix", "%", 0.f, 1.f, 0.25f, LIN, 100.f, "Reverb", "Reverb level." },
         { "reverb.decay", "Decay", "s", 0.3f, 10.f, 1.8f, LOG, 1.f, "Reverb", "Reverb time (RT60)." },
         { "reverb.tone", "Tone", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Reverb", "Dark to bright." },
-        { "reverb.type", "Type", "", 0.f, 4.f, 1.f, CHO, 1.f, "Reverb", "Room: small and close. Hall: big and smooth. Spring: the classic amp tank, with its drip. Chamber: dense, bright and even. Plate: instant, dense and bright, the classic studio plate.", kReverbTypes, 5 },
+        { "reverb.type", "Type", "", 0.f, 6.f, 1.f, CHO, 1.f, "Reverb", "Room: small and close. Hall: big and smooth. Spring: the classic amp tank, with its drip. Chamber: dense, bright and even. Plate: instant, dense and bright, the classic studio plate. Lexicon: lush, modulated studio reverb (ADV for its programs and controls). Bricasti: dense, natural, true-stereo studio reverb (ADV).", kReverbTypes, 7 },
+        { "reverb.predelay", "Pre-Delay", "ms", 0.f, 250.f, 20.f, LIN, 1.f, "Reverb", "Lexicon / Bricasti: gap before the reverb starts." },
+        { "reverb.size", "Size", "", 0.f, 1.f, 0.7f, LIN, 10.f, "Reverb", "Lexicon / Bricasti: size of the space (also spaces out the early reflections)." },
+        { "reverb.diffusion", "Diffusion", "", 0.f, 1.f, 0.75f, LIN, 10.f, "Reverb", "Lexicon / Bricasti: low = grainy, distinct echoes; high = smooth, dense wash." },
+        { "reverb.bassmult", "Bass Mult", "x", 0.5f, 2.5f, 1.2f, LIN, 1.f, "Reverb", "Lexicon / Bricasti: decay time below the crossover relative to Decay (1.0 = same)." },
+        { "reverb.crossover", "Crossover", "Hz", 100.f, 2000.f, 500.f, LOG, 1.f, "Reverb", "Lexicon / Bricasti: frequency below which Bass Mult applies." },
+        { "reverb.spin", "Spin", "Hz", 0.1f, 3.f, 0.8f, LOG, 1.f, "Reverb", "Lexicon / Bricasti: modulation rate of the tail." },
+        { "reverb.wander", "Wander", "", 0.f, 1.f, 0.4f, LIN, 10.f, "Reverb", "Lexicon: depth of the tail's chorus-like modulation. Bricasti: very subtle movement." },
+        { "reverb.early", "Early", "", 0.f, 1.f, 0.5f, LIN, 10.f, "Reverb", "Bricasti: level of the early reflections against the late reverb." },
+        { "reverb.width", "Width", "%", 0.f, 1.5f, 1.f, LIN, 100.f, "Reverb", "Stereo width of the reverb (all types)." },
+        { "reverb.lowcut", "Low Cut", "Hz", 20.f, 600.f, 20.f, LOG, 1.f, "Reverb", "High-pass on the reverb (all types): keeps the low end of the guitar clear (20 Hz = off)." },
+        { "reverb.lexprog", "Program", "", 0.f, 3.f, 0.f, CHO, 1.f, "Reverb", "Lexicon program: Concert Hall, Random Hall (randomised modulation), Rich Plate, Chamber.", kLexPrograms, 4 },
+        { "reverb.m7prog", "Program", "", 0.f, 3.f, 0.f, CHO, 1.f, "Reverb", "Bricasti program: Large Hall, Small Room, Plate, Chamber.", kM7Programs, 4 },
 
         { "out.level", "Output", "dB", -60.f, 12.f, 0.f, LIN, 1.f, "Output", "Final output level. A safety limiter at -1 dBFS protects your monitors." },
         { "global.tempo", "Tempo", "bpm", 40.f, 240.f, 120.f, LIN, 1.f, "Global", "Tempo for synced delay." },
@@ -214,6 +228,8 @@ std::string formatParamValue (int index, float v)
         std::snprintf (buf, sizeof (buf), "%.1f kHz", v / 1000.0f);
     else if (std::strcmp (d.unit, "ms") == 0 && v >= 1000.0f)
         std::snprintf (buf, sizeof (buf), "%.2f s", v / 1000.0f);
+    else if (std::strcmp (d.unit, "x") == 0)
+        std::snprintf (buf, sizeof (buf), "%.2fx", v);
     else if (d.unit[0] == 0)
     {
         if (d.min < 0.0f && d.max <= 1.0f) // pan

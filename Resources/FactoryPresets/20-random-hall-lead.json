@@ -1,0 +1,49 @@
+{
+  "format": "ampforge.preset",
+  "schemaVersion": 2,
+  "name": "Random Hall Lead",
+  "category": "Studio Reverb",
+  "description": "Singing British lead in the classic Random Hall: long, wide, shimmering tail behind 40 ms of pre-delay.",
+  "author": "Z.AMP Factory",
+  "parameters": {
+    "amp.model": 3,
+    "amp.gain": 0.72,
+    "amp.bass": 0.45,
+    "amp.mid": 0.65,
+    "amp.treble": 0.55,
+    "amp.presence": 0.5,
+    "amp.master": 0.6,
+    "delay.enabled": 1,
+    "delay.time": 380,
+    "delay.feedback": 0.22,
+    "delay.mix": 0.14,
+    "reverb.enabled": 1,
+    "reverb.type": 5,
+    "reverb.lexprog": 1,
+    "reverb.mix": 0.22,
+    "reverb.decay": 3.2,
+    "reverb.tone": 0.5,
+    "reverb.predelay": 40,
+    "reverb.size": 0.9,
+    "reverb.diffusion": 0.75,
+    "reverb.bassmult": 1.1,
+    "reverb.crossover": 700,
+    "reverb.spin": 1.1,
+    "reverb.wander": 0.55,
+    "reverb.lowcut": 150,
+    "amp.preampValve": 0,
+    "amp.powerValve": 1,
+    "amp.depth": 0.0,
+    "out.level": -4.0
+  },
+  "cabinet": {
+    "a": {
+      "irId": "factory:br-4x12-v25-cap",
+      "irName": "UK 4x12 Vintage 25W \u2014 Cap"
+    },
+    "b": {
+      "irId": "",
+      "irName": ""
+    }
+  }
+}

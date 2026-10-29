@@ -9,10 +9,13 @@
 // Types scale the same network: Room (small, short pre-delay), Hall (the original large space),
 // Chamber (mid-size, denser and brighter), Plate (instant, very dense and bright), Spring (a short network fed through a dispersive
 // all-pass chain — the "drip" and chirp of a spring tank — with the tank's band-limited output).
+// Lexicon and Bricasti are separate studio engines (StudioReverbs.h) with their own Advanced
+// controls. Width and Low Cut apply to every type.
 // A type change fades the wet output out, clears the tank and fades back in (no clicks).
 #pragma once
 
 #include "ModulationEffects.h"
+#include "StudioReverbs.h"
 
 #include <array>
 
@@ -24,10 +27,12 @@ public:
     void prepare (double fs);
     void reset() noexcept;
 
-    enum Type { room = 0, hall = 1, spring = 2, chamber = 3, plate = 4 };
+    enum Type { room = 0, hall = 1, spring = 2, chamber = 3, plate = 4, lexicon = 5, bricasti = 6, numTypes = 7 };
 
-    /** decay seconds (RT60), tone 0..1 (dark..bright), type. Call at control rate. */
-    void setControls (float decaySeconds, float tone, int type = hall);
+    /** decay seconds (RT60), tone 0..1 (dark..bright), type; `studio` holds the Lexicon/Bricasti
+        controls; width 0..1.5 (1 = as is), lowCutHz (20 = off). Call at control rate. */
+    void setControls (float decaySeconds, float tone, int type = hall, const StudioReverbControls& studio = {},
+                      float width = 1.0f, float lowCutHz = 20.0f);
 
     /** Feeds l/r (scaled by inputGain) into the reverb and adds `mix` of the tail to l/r.
         Switching an effect off ramps inputGain to 0, so tails ring out naturally. */
@@ -66,6 +71,7 @@ private:
         }
     };
     void applyType (int t);
+    void finishWet (float& l, float& r, float wetL, float wetR, float mix) noexcept;
     void updateDecay();
 
     double sampleRate = 48000.0;
@@ -77,7 +83,13 @@ private:
     std::array<DelayLine, N> lines;
     std::array<float, N> baseDelay {}, decayGain {}, lpState {};
     std::array<AllPass, 4> diffusers;
-    DelayLine preDelay;
+    DelayLine preDelay, studioPreL, studioPreR;
+    LexiconReverb lexiconEngine;
+    M7Reverb m7Engine;
+    StudioReverbControls studioControls;
+    Biquad lowCut[2];
+    float width = 1.0f, lastLowCut = -1.0f;
+    bool useLowCut = false;
     float damping = 0.3f, lastDecay = -1.0f, lastTone = -1.0f;
     double modPhase = 0.0;
 };

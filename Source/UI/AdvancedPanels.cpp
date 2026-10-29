@@ -31,15 +31,15 @@ AdvancedWindow::AdvancedWindow (const juce::String& title, juce::Component* cont
 }
 
 //==============================================================================
-CompHeader::CompHeader (AppController& app) : type (app, pStudioCompType)
+TypeHeader::TypeHeader (AppController& app, int typeParam) : type (app, typeParam)
 {
     addAndMakeVisible (type);
     addAndMakeVisible (advanced);
-    advanced.setTooltip ("Open the full set of controls for the selected compressor model.");
+    advanced.setTooltip ("Open the full set of controls for this effect.");
     advanced.onClick = [this] { if (onAdvanced) onAdvanced(); };
 }
 
-void CompHeader::resized()
+void TypeHeader::resized()
 {
     auto r = getLocalBounds();
     advanced.setBounds (r.removeFromRight (40));
@@ -188,5 +188,141 @@ void StudioCompAdvanced::resized()
         c->setBounds (switchRow.removeFromLeft (140).reduced (0, 2));
         switchRow.removeFromLeft (16);
     }
+}
+
+//==============================================================================
+namespace
+{
+    const char* reverbDescription (int type, int program)
+    {
+        static const char* lex[] = {
+            "Lexicon Concert Hall: big, smooth and gently chorused - the classic lush studio hall.",
+            "Lexicon Random Hall: randomised modulation keeps the tail wide and shimmering, never metallic - the classic lead and vocal hall.",
+            "Lexicon Rich Plate: bright, dense and instant, with a rich chorused tail.",
+            "Lexicon Chamber: darker, mid-sized and dense, like a studio echo chamber.",
+        };
+        static const char* m7[] = {
+            "Bricasti Large Hall: natural, uncoloured concert hall with distinct early reflections and a smooth, dense tail.",
+            "Bricasti Small Room: tight and realistic - mostly early reflections, short tail.",
+            "Bricasti Plate: dense, smooth plate with no early reflections.",
+            "Bricasti Chamber: even, natural chamber with a warm decay.",
+        };
+        static const char* basic[] = { "Room: small and close.", "Hall: big and smooth.", "Spring: the classic amp tank, with its drip.",
+                                       "Chamber: dense, bright and even.", "Plate: instant, dense and bright." };
+        if (type == dsp::Reverb::lexicon) return lex[juce::jlimit (0, 3, program)];
+        if (type == dsp::Reverb::bricasti) return m7[juce::jlimit (0, 3, program)];
+        return basic[juce::jlimit (0, 4, type)];
+    }
+} // namespace
+
+ReverbAdvanced::ReverbAdvanced (AppController& a)
+    : app (a), enable (a, pReverbOn, "REVERB"), type (a, pReverbType), lexProgram (a, pReverbLexProgram), m7Program (a, pReverbM7Program),
+      mix (a, pReverbMix), decay (a, pReverbDecay), tone (a, pReverbTone), preDelay (a, pReverbPreDelay), size (a, pReverbSize),
+      diffusion (a, pReverbDiffusion), bassMult (a, pReverbBassMult), crossover (a, pReverbCrossover), spin (a, pReverbSpin),
+      wander (a, pReverbWander), early (a, pReverbEarly), width (a, pReverbWidth), lowCut (a, pReverbLowCut)
+{
+    for (auto* c : std::initializer_list<juce::Component*> { &enable, &type, &lexProgram, &m7Program, &mix, &decay, &tone, &preDelay, &size,
+                                                             &diffusion, &bassMult, &crossover, &spin, &wander, &early, &width, &lowCut,
+                                                             &description })
+        addChildComponent (c);
+    for (auto* c : std::initializer_list<juce::Component*> { &enable, &type, &description })
+        c->setVisible (true);
+    description.setFont (ForgeLookAndFeel::labelFont (12.0f, false));
+    description.setColour (juce::Label::textColourId, Colours::textDim);
+    description.setJustificationType (juce::Justification::topLeft);
+    setSize (860, 380);
+    refresh();
+}
+
+std::vector<int> ReverbAdvanced::resetParams()
+{
+    return { pReverbMix, pReverbDecay, pReverbTone, pReverbPreDelay, pReverbSize, pReverbDiffusion, pReverbBassMult, pReverbCrossover,
+             pReverbSpin, pReverbWander, pReverbEarly, pReverbWidth, pReverbLowCut };
+}
+
+void ReverbAdvanced::resetBlockControls()
+{
+    std::vector<std::pair<int, float>> d;
+    for (int p : resetParams())
+        d.emplace_back (p, paramDef (p).def);
+    resetBlock (app, d, getBlockName());
+}
+
+void ReverbAdvanced::mouseDown (const juce::MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+        resetBlockControls();
+}
+
+void ReverbAdvanced::applyType (int t, int program)
+{
+    shownType = t;
+    shownProgram = program;
+    const bool studio = t == dsp::Reverb::lexicon || t == dsp::Reverb::bricasti;
+    description.setText (reverbDescription (t, program), juce::dontSendNotification);
+    tone.setLabel (studio ? "Treble Decay" : "Tone");
+    visibleKnobs = { &mix, &decay, &tone };
+    if (studio)
+        for (auto* k : { &preDelay, &size, &diffusion, &bassMult, &crossover, &spin, &wander })
+            visibleKnobs.push_back (k);
+    if (t == dsp::Reverb::bricasti)
+        visibleKnobs.push_back (&early);
+    visibleKnobs.push_back (&width);
+    visibleKnobs.push_back (&lowCut);
+    for (auto* k : std::initializer_list<juce::Component*> { &mix, &decay, &tone, &preDelay, &size, &diffusion, &bassMult, &crossover, &spin,
+                                                             &wander, &early, &width, &lowCut })
+        k->setVisible (std::find (visibleKnobs.begin(), visibleKnobs.end(), k) != visibleKnobs.end());
+    lexProgram.setVisible (t == dsp::Reverb::lexicon);
+    m7Program.setVisible (t == dsp::Reverb::bricasti);
+    resized();
+    repaint();
+}
+
+void ReverbAdvanced::refresh()
+{
+    const int t = app.params().getInt (pReverbType);
+    const int prog = t == dsp::Reverb::bricasti ? app.params().getInt (pReverbM7Program) : app.params().getInt (pReverbLexProgram);
+    if (t != shownType || prog != shownProgram)
+        applyType (t, prog);
+    enable.refresh();
+    for (auto* c : { &type, &lexProgram, &m7Program })
+        c->refresh();
+    for (auto* k : { &mix, &decay, &tone, &preDelay, &size, &diffusion, &bassMult, &crossover, &spin, &wander, &early, &width, &lowCut })
+        k->refresh();
+}
+
+void ReverbAdvanced::paint (juce::Graphics& g)
+{
+    g.fillAll (juce::Colour (0xff17181c));
+    drawPanel (g, getLocalBounds().toFloat().reduced (8.0f), {}, app.params().getBool (pReverbOn));
+    g.setColour (Colours::text);
+    g.setFont (ForgeLookAndFeel::labelFont (11.0f));
+    if (lexProgram.isVisible() || m7Program.isVisible())
+        g.drawText ("PROGRAM", lexProgram.getBounds().translated (0, -18).withHeight (16), juce::Justification::centredLeft);
+    g.setColour (Colours::textDim);
+    g.drawText ("RIGHT-CLICK THE PANEL TO RESET", getLocalBounds().reduced (20, 16).removeFromBottom (14), juce::Justification::bottomLeft);
+}
+
+void ReverbAdvanced::resized()
+{
+    auto r = getLocalBounds().reduced (20);
+    auto header = r.removeFromTop (26);
+    type.setBounds (header.removeFromRight (180));
+    enable.setBounds (header);
+    r.removeFromTop (12);
+    auto left = r.removeFromLeft (230);
+    left.removeFromTop (18);
+    const auto prog = left.removeFromTop (28);
+    lexProgram.setBounds (prog);
+    m7Program.setBounds (prog);
+    left.removeFromTop (14);
+    description.setBounds (left.removeFromTop (110));
+    r.removeFromLeft (16);
+    r.removeFromBottom (10);
+    const int perRow = 5;
+    const int rows = ((int) visibleKnobs.size() + perRow - 1) / perRow;
+    const int w = r.getWidth() / perRow, h = std::min (110, r.getHeight() / std::max (1, rows));
+    for (size_t i = 0; i < visibleKnobs.size(); ++i)
+        visibleKnobs[i]->setBounds (r.getX() + (int) (i % perRow) * w, r.getY() + (int) (i / perRow) * h, w, h);
 }
 } // namespace af::ui

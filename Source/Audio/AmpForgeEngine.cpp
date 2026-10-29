@@ -437,7 +437,20 @@ void AmpForgeEngine::updateControls (int n) noexcept
 
     reverbMix.setTarget (p.get (pReverbMix));
     reverbMix.skip (n);
-    reverb.setControls (p.get (pReverbDecay), p.get (pReverbTone), p.getInt (pReverbType));
+    {
+        dsp::StudioReverbControls rc;
+        const int rType = p.getInt (pReverbType);
+        rc.program = rType == dsp::Reverb::bricasti ? p.getInt (pReverbM7Program) : p.getInt (pReverbLexProgram);
+        rc.preDelayMs = p.get (pReverbPreDelay);
+        rc.size = p.get (pReverbSize);
+        rc.diffusion = p.get (pReverbDiffusion);
+        rc.bassMult = p.get (pReverbBassMult);
+        rc.crossoverHz = p.get (pReverbCrossover);
+        rc.spinHz = p.get (pReverbSpin);
+        rc.wander = p.get (pReverbWander);
+        rc.early = p.get (pReverbEarly);
+        reverb.setControls (p.get (pReverbDecay), p.get (pReverbTone), rType, rc, p.get (pReverbWidth), p.get (pReverbLowCut));
+    }
 }
 
 void AmpForgeEngine::process (const float* in, float* outL, float* outR, int numSamples) noexcept
