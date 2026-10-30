@@ -681,6 +681,11 @@ void AppController::saveSession()
     settings->setValue ("sessionModified", isModified());
 }
 
+namespace
+{
+    constexpr const char* kDefaultPresetName = "High Gain Rhythm";
+} // namespace
+
 void AppController::restoreSession()
 {
     PresetState s;
@@ -690,13 +695,14 @@ void AppController::restoreSession()
                              && PresetCodec::fromJson (settings->getValue ("sessionState"), s, err, warnings);
     if (! haveSession)
     {
-        // First launch: start on the first factory preset (a clean, moderate-level sound).
+        // First launch: start on the owner's chosen default preset (else the first factory one).
         if (! presets.getPresets().empty())
         {
             juce::StringArray w;
-            const auto& p = presets.getPresets()[0];
+            const int index = std::max (0, presets.findIndex (kDefaultPresetName, true));
+            const auto& p = presets.getPresets()[(size_t) index];
             applyState (engine, irLibrary, p.state, w);
-            markLoaded (0, p.state);
+            markLoaded (index, p.state);
         }
         return;
     }

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed (default preset)
+- A fresh install starts on the **High Gain Rhythm** preset (later launches reopen the last session).
+
 ### Fixed (reverb mix, CS-3 level)
 - Reverb **Mix is now a true dry/wet control**: up to 50 % the reverb is added to the full dry
   signal; above that the dry fades out, so 100 % is reverb only. Every type's tail is level-matched
